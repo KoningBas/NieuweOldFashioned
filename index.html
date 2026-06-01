@@ -166,8 +166,8 @@
     <!-- CENTER: mobile logo + desktop nav links -->
     <nav class="flex items-center justify-center">
       <!-- Mobile logo -->
-      <a href="/" class="xl:hidden flex items-center h-9">
-        <span class="font-heading text-lg text-white" style="letter-spacing:-0.01em;">The Old Fashioned</span>
+      <a href="/" class="xl:hidden flex items-center h-9 overflow-hidden">
+        <span class="font-heading text-base sm:text-lg text-white whitespace-nowrap" style="letter-spacing:-0.01em;">The Old Fashioned</span>
       </a>
       <!-- Desktop nav links -->
       <ul class="hidden xl:flex items-center gap-1 list-none p-0 m-0">
@@ -181,7 +181,7 @@
 
     <!-- RIGHT: Boek Workshop CTA -->
     <div class="flex items-center justify-end">
-      <a href="#workshops" class="btn-primary rounded-full px-5 py-2.5 text-base font-body font-semibold no-underline whitespace-nowrap">
+      <a href="#workshops" class="btn-primary rounded-full px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-body font-semibold no-underline whitespace-nowrap">
         Boek Workshop
       </a>
     </div>
@@ -209,7 +209,7 @@
 <main class="flex w-full flex-col items-center">
 
   <!-- SECTION 1: HERO -->
-  <section id="hero" class="relative flex w-full justify-center max-w-none" style="height:min(66.67vw,100svh);min-height:480px;">
+  <section id="hero" class="relative flex w-full justify-center max-w-none" style="height:min(66.67vw,100svh);min-height:760px;">
     <div class="relative flex w-full items-center justify-center overflow-hidden" style="height:100%;">
       <!-- Background image -->
       <img
@@ -225,7 +225,7 @@
       <div class="absolute inset-0" style="background: radial-gradient(ellipse at 50% 100%, rgba(200,146,42,0.18) 0%, transparent 60%);"></div>
     </div>
     <!-- Text overlay -->
-    <div class="pointer-events-none absolute inset-0 flex max-w-4xl mx-auto flex-col gap-4 px-6 sm:px-8 items-center text-center justify-center z-30">
+    <div class="pointer-events-none absolute inset-0 flex max-w-4xl mx-auto flex-col gap-4 px-6 sm:px-8 items-center text-center justify-end lg:justify-center pt-32 lg:pt-0 pb-16 lg:pb-0 z-30">
       <p class="font-body text-sm sm:text-base text-gold-light uppercase tracking-[0.28em]" style="text-shadow: 0 1px 12px rgba(0,0,0,0.95), 0 4px 24px rgba(0,0,0,0.7);">Cocktailbar Rijssen</p>
       <h1 class="font-heading text-5xl sm:text-6xl lg:text-7xl leading-tight text-white text-balance" style="letter-spacing: -0.02em; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 8px 48px rgba(0,0,0,0.85), 0 20px 80px rgba(0,0,0,0.6);">
         The Old Fashioned
@@ -234,10 +234,10 @@
         Premium cocktails, bijzondere workshops en bartending op locatie — in het hart van Rijssen.
       </p>
       <div class="flex flex-wrap gap-3 pt-4 justify-center pointer-events-auto">
-        <a href="#workshops" class="btn-primary rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline whitespace-nowrap">
+        <a href="#workshops" class="btn-primary rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center">
           Boek een workshop
         </a>
-        <a href="#bar" class="btn-ghost rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline whitespace-nowrap">
+        <a href="#bar" class="btn-ghost rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center">
           Ontdek de bar
         </a>
       </div>
@@ -417,7 +417,7 @@
   </section>
 
   <!-- SECTION 5: WORKSHOP OP LOCATIE -->
-  <section id="op-locatie" class="relative flex w-full justify-center max-w-none" style="height:clamp(400px,45vw,650px);">
+  <section id="op-locatie" class="relative flex w-full justify-center max-w-none max-lg:min-h-[580px]" style="height:clamp(400px,45vw,650px);">
     <div class="relative flex w-full items-center justify-center overflow-hidden" style="height:100%;">
       <!-- FOTO POSITIE: pas x (links/rechts) en y (boven/onder) aan — 50% = midden, hoger % = verder rechts/onder -->
       <img src="OldImages/AbgarLocatie.jpg" alt="Cocktailworkshop op locatie" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center center; transform: scaleX(-1);" onerror="this.src='OldImages/Workshop.png'">
@@ -441,66 +441,64 @@
           <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Voorrij binnen 15 km: €50
         </li>
       </ul>
-      <a href="mailto:info@theoldfashioned.nl" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline mt-1">Vraag een offerte aan</a>
+      <a href="mailto:info@theoldfashioned.nl" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline mt-1 w-full sm:w-auto text-center">Vraag een offerte aan</a>
     </div>
   </section>
 
   <!-- SECTION 6: BARTENDING OP LOCATIE -->
   <section id="bartending" class="flex w-full flex-col items-center py-16 sm:py-24 px-4 gap-10" style="background:#1A1410;">
-    <div class="max-w-[1200px] w-full flex flex-col lg:flex-row gap-10 items-center">
+    <div class="max-w-[1200px] w-full flex flex-col gap-10">
 
-      <!-- Afbeelding -->
-      <div class="w-full lg:w-1/2 relative overflow-hidden rounded-sm aspect-[4/3]">
-        <img src="OldImages/686185813_18323187394269765_443102986254546554_n..jpg" alt="Bartending op locatie The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+      <!-- Header -->
+      <div class="text-center flex flex-col items-center gap-3">
+        <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Voor feesten &amp; evenementen</p>
+        <h2 class="font-heading text-3xl sm:text-4xl text-white" style="letter-spacing:-0.02em;">Bartending Op Locatie</h2>
+        <p class="font-body text-base max-w-lg leading-relaxed" style="color:rgba(255,255,255,0.68);">
+          Professionele bartenders voor jouw feest of evenement. Maatwerk cocktailmenu of vaste kaart — wij regelen alles.
+        </p>
       </div>
 
-      <!-- Tekst + tarieven -->
-      <div class="w-full lg:w-1/2 flex flex-col gap-6">
-        <div>
-          <p class="font-body text-sm text-gold uppercase tracking-[0.22em] mb-3">Voor feesten &amp; evenementen</p>
-          <h2 class="font-heading text-3xl sm:text-4xl text-white leading-tight" style="letter-spacing:-0.02em;">Bartending<br>Op Locatie</h2>
-          <p class="font-body text-base leading-relaxed mt-3 max-w-md" style="color:rgba(255,255,255,0.68);">
-            Onze professionele bartenders komen naar jouw feest of evenement. Van een maatwerk cocktailmenu tot onze vaste kaart — wij zorgen voor alles.
-          </p>
-        </div>
-
-        <!-- Mogelijkheden -->
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2">
-            <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>
-            <span class="font-body text-sm" style="color:rgba(255,255,255,0.72);">Keuze uit onze cocktailkaart of maatwerk menu</span>
+      <!-- Één grote kaart -->
+      <div class="flex justify-center">
+        <div class="workshop-card rounded-sm flex flex-col lg:flex-row overflow-hidden w-full max-w-4xl" style="background:#0D0D0D;">
+          <div class="relative lg:w-2/5 min-h-[280px] lg:min-h-0 lg:h-auto overflow-hidden">
+            <img src="OldImages/686185813_18323187394269765_443102986254546554_n..jpg" alt="Bartending op locatie The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           </div>
-          <div class="flex items-center gap-2">
-            <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>
-            <span class="font-body text-sm" style="color:rgba(255,255,255,0.72);">Alle ingrediënten en materialen worden verzorgd</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>
-            <span class="font-body text-sm" style="color:rgba(255,255,255,0.72);">Ook mocktails beschikbaar</span>
-          </div>
-        </div>
-
-        <!-- Tarieven -->
-        <div class="rounded-sm p-5 flex flex-col gap-4" style="background:#0D0D0D;">
-          <h3 class="font-heading text-lg text-white">Tarieven</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="flex flex-col gap-1">
-              <span class="font-heading text-2xl text-white">€8</span>
-              <span class="font-body text-sm" style="color:#8A7A6A;">per cocktail of mocktail</span>
+          <div class="flex flex-col gap-4 p-6 lg:w-3/5">
+            <div>
+              <h3 class="font-heading text-2xl text-white">Bartending Op Locatie</h3>
+              <p class="font-body text-sm mt-1" style="color:#8A7A6A;">Flexibel · Vanaf 50 cocktails</p>
             </div>
-            <div class="flex flex-col gap-1">
-              <span class="font-heading text-2xl text-white">50</span>
-              <span class="font-body text-sm" style="color:#8A7A6A;">minimum aantal cocktails</span>
+            <p class="font-body text-base leading-relaxed" style="color:rgba(255,255,255,0.72);">
+              Onze bartenders komen naar jouw feest of evenement. Van bruiloft tot bedrijfsborrel — wij zorgen voor een onvergetelijke cocktailervaring.
+            </p>
+            <ul class="flex flex-col gap-1.5">
+              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
+                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Keuze uit cocktailkaart of maatwerk menu
+              </li>
+              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
+                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Alle ingrediënten en materialen verzorgd
+              </li>
+              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
+                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Ook mocktails beschikbaar
+              </li>
+              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
+                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>€8 per cocktail of mocktail
+              </li>
+              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
+                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Voorrij binnen 10 km: €50 · 10–30 km: €75
+              </li>
+            </ul>
+            <div class="flex items-end justify-between mt-2">
+              <div>
+                <span class="font-heading text-3xl text-white">€8</span>
+                <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
+              </div>
+              <a href="mailto:info@theoldfashioned.nl" class="btn-primary rounded-md px-6 py-3 text-base font-body no-underline">Plan jouw event →</a>
             </div>
           </div>
-          <div class="flex flex-col gap-1" style="border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">
-            <span class="font-body text-sm" style="color:#8A7A6A;">Voorrij-/voorbereidingskosten:</span>
-            <span class="font-body text-sm" style="color:rgba(255,255,255,0.68);">Binnen 10 km: €50 · 10–30 km: €75</span>
-          </div>
         </div>
-
-        <a href="mailto:info@theoldfashioned.nl" class="btn-primary self-start rounded-md px-8 py-4 text-base font-body no-underline">Plan jouw event</a>
       </div>
 
     </div>

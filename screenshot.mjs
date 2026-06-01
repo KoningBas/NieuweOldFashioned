@@ -26,7 +26,7 @@ const browser = await puppeteer.launch({
 });
 
 const page = await browser.newPage();
-await page.setViewport({ width, height: 900, deviceScaleFactor: 1 });
+await page.setViewport({ width, height: 844, deviceScaleFactor: 1 });
 await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 await new Promise(r => setTimeout(r, 2000));
 // Scroll slowly to trigger all intersection observers + image loads

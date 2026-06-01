@@ -1,2 +1,5 @@
 temporary screenshots/
 node_modules/
+docs/
+screenshot-section.mjs
+memory/
