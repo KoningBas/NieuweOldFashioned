@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Old Fashioned | Cocktailbar Rijssen</title>
   <meta name="description" content="Premium cocktailbar in het centrum van Rijssen. Signature cocktails, workshops en bartending op locatie. Grotestraat 12, Rijssen.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥃</text></svg>">
+  <meta property="og:title" content="The Old Fashioned | Cocktailbar Rijssen">
+  <meta property="og:description" content="Premium cocktailbar in het centrum van Rijssen. Signature cocktails, workshops en bartending op locatie.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="OldImages/Oldmuur.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
@@ -92,6 +98,7 @@
     }
     .btn-ghost:hover { background: #fff; color: #000; }
     .btn-ghost:active { opacity: 0.85; }
+    .btn-ghost:focus-visible { outline: 2px solid rgba(255,255,255,0.7); outline-offset: 2px; }
 
     /* Text link arrow */
     .link-arrow {
@@ -164,7 +171,7 @@
     .bm-time-btn {
       padding: 8px 4px; border: 1px solid rgba(255,255,255,0.12); background: transparent;
       color: rgba(255,255,255,0.78); font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 0.95rem; cursor: pointer; border-radius: 2px;
+      font-size: 0.95rem; cursor: pointer;
       transition: background 0.12s, color 0.12s, border-color 0.12s; border-radius:6px;
     }
     .bm-time-btn:not(.selected):hover { background: #1A1410; color: #C8922A; border-color: #C8922A; }
@@ -181,6 +188,12 @@
     #bm-close:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
     #bm-prev:hover, #bm-next:hover { color: #E8B86D; }
     #bm-prev:focus-visible, #bm-next:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
+    .bm-day-cell:focus-visible { outline: 2px solid #E8B86D; outline-offset: -2px; border-radius: 4px; }
+    .bm-time-btn:focus-visible { outline: 2px solid #E8B86D; outline-offset: -2px; }
+    .bm-type-btn:focus-visible { outline: 2px solid #E8B86D; outline-offset: -2px; }
+    .nav-btn:focus-visible { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 2px; }
+    #mobile-menu a:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; }
+    footer a:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; border-radius: 2px; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .bm-time-panel { max-height: 12rem; overflow-y: auto; }
@@ -225,7 +238,7 @@
       display:block; width:100%; background:#1A1410;
       border:1px solid rgba(200,146,42,0.3);
       color:#fff; font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:1rem; padding:7px 12px; border-radius:2px;
+      font-size:1rem; padding:7px 12px;
       outline:none; box-sizing:border-box; transition:border-color 0.15s; border-radius:6px;
     }
     .bm-form-input:focus { outline:2px solid #E8B86D; outline-offset:0; }
@@ -241,8 +254,8 @@
 <!-- ================================================================
   HEADER / NAV
 ================================================================ -->
-<header id="site-header" class="sticky top-0 z-50 flex h-[80px] w-full justify-center transition-all ease-out -mb-[80px] sm:-mb-[88px]">
-  <div class="nav-inner max-w-[1600px] w-full grid items-center px-3 sm:px-6 transition-all ease-out duration-300" style="grid-template-columns: auto 1fr auto;">
+<header id="site-header" class="sticky top-0 z-50 flex h-[80px] w-full justify-center ease-out -mb-[80px] sm:-mb-[88px]">
+  <div class="nav-inner max-w-[1600px] w-full grid items-center px-3 sm:px-6" style="grid-template-columns: auto 1fr auto; transition: background 300ms ease-out, backdrop-filter 300ms ease-out, border-radius 300ms ease-out, border-color 300ms ease-out;">
 
     <!-- LEFT: hamburger (mobile) + logo (desktop) -->
     <div class="flex items-center gap-3">
@@ -385,7 +398,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- Grote foto links -->
         <div class="relative overflow-hidden rounded-sm aspect-[4/3] sm:aspect-auto sm:min-h-[400px]">
-          <img src="OldImages/Vuurcock.png" alt="Cocktail bij The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover">
+          <img src="OldImages/Vuurcock.png" alt="Cocktail bij The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
           <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
           <div class="absolute bottom-0 left-0 right-0" style="height:12.5%; background:linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);"></div>
           <div class="absolute bottom-0 left-0 p-4">
@@ -398,7 +411,7 @@
         <!-- Rechts: sushi foto + aanbod -->
         <div class="flex flex-col gap-4">
           <div class="relative overflow-hidden rounded-sm aspect-[4/3]">
-            <img src="SushiFood&Bites.png" alt="Bites bij The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover">
+            <img src="SushiFood&amp;Bites.png" alt="Bites bij The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             <div class="absolute bottom-0 left-0 p-4">
               <span class="font-body text-sm text-gold-light uppercase tracking-widest">Food & Bites</span>
@@ -406,7 +419,7 @@
           </div>
           <!-- High Cocktail kaart -->
           <div class="relative overflow-hidden rounded-sm aspect-[4/3] flex-1">
-            <img src="OldImages/Waarom de Cocktails bij The Old Fashioned zo lekker zijn▪️Huisgemaakte ingrediënten ▪️Verse Ingr (1).jpg" alt="High Cocktail" class="card-img absolute inset-0 h-full w-full object-cover">
+            <img src="OldImages/HighCocktail.jpg" alt="High Cocktail" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <div class="absolute bottom-0 left-0 right-0" style="height:12.5%; background:linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);"></div>
             <div class="absolute bottom-0 left-0 p-4">
@@ -436,7 +449,7 @@
         <!-- Cocktails & Bites -->
         <div class="workshop-card rounded-sm flex flex-col overflow-hidden" style="background:#1A1410;">
           <div class="relative aspect-[16/9] overflow-hidden">
-            <img src="OldImages/686449277_18324155140269765_6087244181663442445_n..jpg" alt="Cocktailworkshop The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center 30%;">
+            <img src="OldImages/686449277_18324155140269765_6087244181663442445_n..jpg" alt="Cocktailworkshop The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center 30%;" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div class="absolute top-4 left-4">
               <span class="font-body text-sm text-black px-2 py-1 rounded-sm uppercase tracking-widest" style="background:#C8922A;">Populair</span>
@@ -474,7 +487,7 @@
         <!-- Cocktails & Streetfood -->
         <div class="workshop-card rounded-sm flex flex-col overflow-hidden" style="background:#1A1410;">
           <div class="relative aspect-[16/9] overflow-hidden">
-            <img src="OldImages/658359118_18319648537269765_8115539474338810376_n..jpg" alt="Streetfood The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center 40%;">
+            <img src="OldImages/658359118_18319648537269765_8115539474338810376_n..jpg" alt="Streetfood The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center 40%;" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           </div>
           <div class="flex flex-col gap-4 p-6">
@@ -514,13 +527,13 @@
   <section id="op-locatie" class="flex w-full flex-col lg:block lg:relative lg:justify-center" style="background:#1A1410;">
 
     <!-- FOTO — bovenin op mobiel, fullscreen background op desktop -->
-    <div class="relative w-full overflow-hidden lg:absolute lg:inset-0" style="height: 280px; height: clamp(280px, 35vw, 280px);">
+    <div class="relative w-full overflow-hidden h-[280px] lg:h-auto lg:absolute lg:inset-0">
       <!-- op desktop vult dit de hele sectie -->
       <div class="lg:absolute lg:inset-0 w-full h-full">
         <img src="OldImages/AbgarLocatie.jpg" alt="Cocktailworkshop op locatie"
           class="card-img absolute inset-0 h-full w-full object-cover"
           style="object-position: center center; transform: scaleX(-1);"
-          onerror="this.src='OldImages/Workshop.png'">
+          loading="lazy" onerror="this.src='OldImages/Workshop.png'">
         <!-- gradient alleen zichtbaar op desktop -->
         <div class="hidden lg:block absolute inset-0" style="background: linear-gradient(to right, rgba(13,13,13,0.92) 0%, rgba(13,13,13,0.5) 60%, rgba(13,13,13,0.2) 100%);"></div>
         <div class="hidden lg:block absolute inset-0" style="background: radial-gradient(ellipse at 0% 100%, rgba(200,146,42,0.14) 0%, transparent 50%);"></div>
@@ -528,8 +541,8 @@
     </div>
 
     <!-- TEKST — eronder op mobiel, absolute overlay op desktop -->
-    <div class="lg:pointer-events-none lg:absolute lg:inset-0 lg:flex lg:max-w-5xl lg:mx-auto lg:flex-col lg:gap-4 lg:px-12 lg:items-start lg:justify-center lg:z-10
-                flex flex-col gap-4 px-6 py-10 pointer-events-auto" style="background:#1A1410;">
+    <div class="lg:pointer-events-none lg:absolute lg:inset-0 lg:flex lg:max-w-5xl lg:mx-auto lg:flex-col lg:gap-4 lg:px-12 lg:items-start lg:justify-center lg:z-10 lg:bg-transparent
+                flex flex-col gap-4 px-6 py-10 pointer-events-auto bg-[#1A1410]">
       <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Cocktail Experience</p>
       <h2 class="font-heading text-4xl sm:text-5xl lg:text-6xl text-white leading-tight" style="letter-spacing:-0.02em;">Workshop<br>Op Locatie</h2>
       <p class="font-body text-base sm:text-lg max-w-md leading-relaxed" style="color:rgba(255,255,255,0.78);">
@@ -571,7 +584,7 @@
       <div class="flex justify-center">
         <div class="workshop-card rounded-sm flex flex-col lg:flex-row overflow-hidden w-full max-w-4xl" style="background:#0D0D0D;">
           <div class="relative lg:w-2/5 min-h-[280px] lg:min-h-0 lg:h-auto overflow-hidden">
-            <img src="OldImages/686185813_18323187394269765_443102986254546554_n..jpg" alt="Bartending op locatie The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover">
+            <img src="OldImages/686185813_18323187394269765_443102986254546554_n..jpg" alt="Bartending op locatie The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           </div>
           <div class="flex flex-col gap-4 p-6 lg:w-3/5">
@@ -658,7 +671,7 @@
 
       <!-- Kaart -->
       <div class="w-full lg:w-1/2 relative overflow-hidden rounded-sm aspect-[4/3] lg:aspect-auto lg:min-h-[400px]">
-        <img src="OldImages/Kaart.png" alt="Locatie The Old Fashioned Rijssen" class="absolute inset-0 h-full w-full object-cover">
+        <img src="OldImages/Kaart.png" alt="Locatie The Old Fashioned Rijssen" class="absolute inset-0 h-full w-full object-cover" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
       </div>
 
@@ -729,7 +742,7 @@
 <!-- ================================================================
   BOOKING MODAL
 ================================================================ -->
-<div id="booking-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:16px;" aria-modal="true" role="dialog" aria-label="Workshop reservering">
+<div id="booking-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:16px;" aria-modal="true" role="dialog" aria-labelledby="bm-modal-title">
   <div id="bm-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);"></div>
   <div id="bm-card" style="position:relative;z-index:10000;width:100%;max-width:680px;background:#1A1410;border:1px solid rgba(200,146,42,0.22);overflow:hidden;max-height:92svh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,0.85),0 0 0 1px rgba(200,146,42,0.08);border-radius:16px;">
 
@@ -737,7 +750,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">
       <div>
         <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;color:#C8922A;letter-spacing:0.22em;text-transform:uppercase;margin:0 0 4px;">Workshop reservering</p>
-        <h2 style="font-family:'Bodoni Moda',Georgia,serif;font-size:1.4rem;color:#fff;margin:0;letter-spacing:-0.02em;">Kies een datum &amp; tijdstip</h2>
+        <h2 id="bm-modal-title" style="font-family:'Bodoni Moda',Georgia,serif;font-size:1.4rem;color:#fff;margin:0;letter-spacing:-0.02em;">Kies een datum &amp; tijdstip</h2>
       </div>
       <button id="bm-close" type="button" style="width:36px;height:36px;border:none;background:transparent;color:#8A7A6A;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:color 0.15s;" aria-label="Sluiten">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -788,8 +801,8 @@
         <div class="bm-form-full">
           <label class="bm-form-label">Workshop</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <button type="button" id="bm-type-bites" class="bm-type-btn">Cocktails &amp; Bites</button>
-            <button type="button" id="bm-type-streetfood" class="bm-type-btn">Cocktails &amp; Streetfood</button>
+            <button type="button" id="bm-type-bites" class="bm-type-btn" aria-pressed="false">Cocktails &amp; Bites</button>
+            <button type="button" id="bm-type-streetfood" class="bm-type-btn" aria-pressed="false">Cocktails &amp; Streetfood</button>
           </div>
           <span id="bm-type-err" class="bm-form-error"></span>
         </div>
@@ -876,7 +889,7 @@
     });
   }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
 
-  document.querySelectorAll('section').forEach(el => {
+  document.querySelectorAll('section:not(#hero)').forEach(el => {
     el.classList.add('fade-section');
     observer.observe(el);
   });
@@ -916,8 +929,14 @@
   function selectType(name) {
     _selectedType = name;
     _workshopName = name;
-    if (_fTypeBites) _fTypeBites.classList.toggle('selected', name === 'Cocktails & Bites');
-    if (_fTypeStreetfood) _fTypeStreetfood.classList.toggle('selected', name === 'Cocktails & Streetfood');
+    if (_fTypeBites) {
+      _fTypeBites.classList.toggle('selected', name === 'Cocktails & Bites');
+      _fTypeBites.setAttribute('aria-pressed', String(name === 'Cocktails & Bites'));
+    }
+    if (_fTypeStreetfood) {
+      _fTypeStreetfood.classList.toggle('selected', name === 'Cocktails & Streetfood');
+      _fTypeStreetfood.setAttribute('aria-pressed', String(name === 'Cocktails & Streetfood'));
+    }
     if (_fTypeErr) _fTypeErr.textContent = '';
   }
 
@@ -968,8 +987,8 @@
 
   function resetForm() {
     _selectedType = null;
-    if (_fTypeBites) _fTypeBites.classList.remove('selected');
-    if (_fTypeStreetfood) _fTypeStreetfood.classList.remove('selected');
+    if (_fTypeBites) { _fTypeBites.classList.remove('selected'); _fTypeBites.setAttribute('aria-pressed', 'false'); }
+    if (_fTypeStreetfood) { _fTypeStreetfood.classList.remove('selected'); _fTypeStreetfood.setAttribute('aria-pressed', 'false'); }
     if (_fTypeErr) _fTypeErr.textContent = '';
     [_fNaam, _fPersonen, _fEmail, _fTelefoon].forEach(function (el) {
       if (el) { el.value = ''; el.classList.remove('bm-input-error'); }
@@ -1016,6 +1035,7 @@
     resetForm();
     if (_workshopName === 'Cocktails & Bites') selectType('Cocktails & Bites');
     else if (_workshopName === 'Cocktails & Streetfood') selectType('Cocktails & Streetfood');
+    else if (_workshopName) _selectedType = _workshopName;
     updateFooter();
     var modal = document.getElementById('booking-modal');
     var card = document.getElementById('bm-card');
@@ -1151,12 +1171,17 @@
     var subject = 'Workshopaanvraag ' + _workshopName + ' – ' + dn + ' ' + day + ' ' + mn + ' ' + yr + ' om ' + _selectedTime;
     var naam = _fNaam.value.trim();
     var personen = _fPersonen.value.trim();
+    var email = _fEmail.value.trim();
     var telefoon = _fTelefoon.value.trim();
     var opmerking = _fOpmerking.value.trim();
-    var body = 'Workshop: ' + _workshopName + '\nNaam: ' + naam + '\nAantal personen: ' + personen + '\nTelefoon: ' + telefoon;
+    var body = 'Workshop: ' + _workshopName + '\nNaam: ' + naam + '\nAantal personen: ' + personen + '\nE-mail: ' + email + '\nTelefoon: ' + telefoon;
     if (opmerking) body += '\nOpmerking: ' + opmerking;
     closeBookingModal();
-    window.location.href = 'mailto:info@theoldfashioned.nl?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    var a = document.createElement('a');
+    a.href = 'mailto:info@theoldfashioned.nl?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   document.addEventListener('keydown', function (e) {
