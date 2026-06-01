@@ -150,6 +150,90 @@
 
     /* Workshop card image zoom on hover */
     .workshop-card:hover .card-img { transform: scale(1.04); }
+
+    /* Booking Modal */
+    .bm-day-cell {
+      width: 100%; height: 30px; display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem;
+      border: none; background: transparent; color: rgba(255,255,255,0.85);
+      cursor: pointer; border-radius: 0; transition: background 0.12s, color 0.12s;
+    }
+    .bm-day-cell:not(:disabled):not(.selected):hover { background: #1A1410; color: #C8922A; border-radius:4px; }
+    .bm-day-cell.selected { background: #C8922A !important; color: #fff !important; border-radius:4px; }
+    .bm-day-cell:disabled { opacity: 0.28; cursor: not-allowed; text-decoration: line-through; }
+    .bm-time-btn {
+      padding: 8px 4px; border: 1px solid rgba(255,255,255,0.12); background: transparent;
+      color: rgba(255,255,255,0.78); font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 0.95rem; cursor: pointer; border-radius: 2px;
+      transition: background 0.12s, color 0.12s, border-color 0.12s; border-radius:6px;
+    }
+    .bm-time-btn:not(.selected):hover { background: #1A1410; color: #C8922A; border-color: #C8922A; }
+    .bm-time-btn.selected { background: #C8922A; color: #fff; border-color: #C8922A; }
+    .bm-type-btn {
+      padding:10px 8px; border:1px solid rgba(200,146,42,0.3); background:transparent;
+      color:rgba(255,255,255,0.78); font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:0.95rem; cursor:pointer; border-radius:6px; width:100%;
+      transition:background 0.12s, color 0.12s, border-color 0.12s;
+    }
+    .bm-type-btn:not(.selected):hover { background:#1A1410; color:#C8922A; border-color:#C8922A; }
+    .bm-type-btn.selected { background:#C8922A; color:#fff; border-color:#C8922A; }
+    #bm-close:hover { color: #E8B86D; }
+    #bm-close:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
+    #bm-prev:hover, #bm-next:hover { color: #E8B86D; }
+    #bm-prev:focus-visible, #bm-next:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .bm-time-panel { max-height: 12rem; overflow-y: auto; }
+    @media (max-width: 639px) {
+      .bm-body { flex: 0 0 auto !important; overflow: visible !important; height: auto !important; }
+      .bm-body > div:first-child { overflow: visible !important; }
+      #bm-scroll-region { -ms-overflow-style: none; scrollbar-width: none; }
+      #bm-scroll-region::-webkit-scrollbar { display: none; }
+    }
+    @media (min-width: 640px) {
+      .bm-body { flex-direction: row !important; height: 300px; flex: none !important; }
+      .bm-time-panel {
+        border-top: none !important;
+        border-left: 1px solid rgba(255,255,255,0.07) !important;
+        width: 180px !important; flex-shrink: 0; overflow-y: auto;
+        max-height: none !important; align-self: stretch;
+      }
+      #bm-time-slots { grid-template-columns: 1fr !important; }
+    }
+    .bm-time-panel::-webkit-scrollbar { width: 3px; }
+    .bm-time-panel::-webkit-scrollbar-track { background: transparent; }
+    .bm-time-panel::-webkit-scrollbar-thumb { background: rgba(200,146,42,0.4); border-radius: 2px; }
+    @keyframes bm-enter { from { opacity:0; transform:scale(0.93) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    @keyframes bm-exit  { from { opacity:1; transform:scale(1) translateY(0); } to { opacity:0; transform:scale(0.93) translateY(6px); } }
+    @keyframes bm-fade-in  { from { opacity:0; } to { opacity:1; } }
+    @keyframes bm-fade-out { from { opacity:1; } to { opacity:0; } }
+    .bm-card-enter { animation: bm-enter  280ms cubic-bezier(0.34,1.56,0.64,1) both; }
+    .bm-card-exit  { animation: bm-exit   170ms cubic-bezier(0.4,0,1,1)         both; }
+    .bm-bd-enter   { animation: bm-fade-in  220ms ease both; }
+    .bm-bd-exit    { animation: bm-fade-out 170ms ease both; }
+    /* Booking modal contact form */
+    .bm-form-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+    @media (min-width:640px) { .bm-form-grid { grid-template-columns:1fr 1fr; } }
+    .bm-form-full { grid-column:1 / -1; }
+    .bm-form-label {
+      display:block;
+      font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:0.68rem; color:rgba(255,255,255,0.88); letter-spacing:0.2em;
+      text-transform:uppercase; margin-bottom:5px;
+    }
+    .bm-form-input {
+      display:block; width:100%; background:#1A1410;
+      border:1px solid rgba(200,146,42,0.3);
+      color:#fff; font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:1rem; padding:7px 12px; border-radius:2px;
+      outline:none; box-sizing:border-box; transition:border-color 0.15s; border-radius:6px;
+    }
+    .bm-form-input:focus { outline:2px solid #E8B86D; outline-offset:0; }
+    .bm-form-input.bm-input-error { border-color:#ef4444; }
+    .bm-form-error {
+      display:block; font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:0.78rem; color:#ef4444; margin-top:3px;
+    }
   </style>
 </head>
 <body>
@@ -382,7 +466,7 @@
                 <span class="font-heading text-3xl text-white">€32</span>
                 <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
               </div>
-              <a href="mailto:info@theoldfashioned.nl" class="btn-primary rounded-md px-6 py-3 text-base font-body no-underline">Boek nu</a>
+              <button onclick="openBookingModal(event,'Cocktails &amp; Bites')" class="btn-primary rounded-md px-6 py-3 text-base font-body">Boek nu</button>
             </div>
           </div>
         </div>
@@ -417,7 +501,7 @@
                 <span class="font-heading text-3xl text-white">€42</span>
                 <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
               </div>
-              <a href="mailto:info@theoldfashioned.nl" class="btn-primary rounded-md px-6 py-3 text-base font-body no-underline">Boek nu</a>
+              <button onclick="openBookingModal(event,'Cocktails &amp; Streetfood')" class="btn-primary rounded-md px-6 py-3 text-base font-body">Boek nu</button>
             </div>
           </div>
         </div>
@@ -462,7 +546,7 @@
           <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Voorrij binnen 15 km: €50
         </li>
       </ul>
-      <a href="mailto:info@theoldfashioned.nl" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline mt-1 w-full sm:w-auto text-center">Vraag een offerte aan</a>
+      <button onclick="openBookingModal(event,'Workshop op Locatie')" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body mt-1 w-full sm:w-auto text-center">Vraag een offerte aan</button>
     </div>
 
     <!-- Desktop hoogte spacer -->
@@ -520,7 +604,7 @@
                 <span class="font-heading text-3xl text-white">€8</span>
                 <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
               </div>
-              <a href="mailto:info@theoldfashioned.nl" class="btn-primary rounded-md px-6 py-3 text-base font-body no-underline">Plan jouw event →</a>
+              <button onclick="openBookingModal(event,'Bartending op Locatie')" class="btn-primary rounded-md px-6 py-3 text-base font-body">Plan jouw event →</button>
             </div>
           </div>
         </div>
@@ -642,6 +726,110 @@
 
 </footer>
 
+<!-- ================================================================
+  BOOKING MODAL
+================================================================ -->
+<div id="booking-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:16px;" aria-modal="true" role="dialog" aria-label="Workshop reservering">
+  <div id="bm-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);"></div>
+  <div id="bm-card" style="position:relative;z-index:10000;width:100%;max-width:680px;background:#1A1410;border:1px solid rgba(200,146,42,0.22);overflow:hidden;max-height:92svh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,0.85),0 0 0 1px rgba(200,146,42,0.08);border-radius:16px;">
+
+    <!-- Modal header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">
+      <div>
+        <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;color:#C8922A;letter-spacing:0.22em;text-transform:uppercase;margin:0 0 4px;">Workshop reservering</p>
+        <h2 style="font-family:'Bodoni Moda',Georgia,serif;font-size:1.4rem;color:#fff;margin:0;letter-spacing:-0.02em;">Kies een datum &amp; tijdstip</h2>
+      </div>
+      <button id="bm-close" type="button" style="width:36px;height:36px;border:none;background:transparent;color:#8A7A6A;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:color 0.15s;" aria-label="Sluiten">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Shared scroll region: bm-body + contact form. On mobile this scrolls; on desktop it holds fixed heights. -->
+    <div id="bm-scroll-region" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
+    <!-- Modal body: calendar + time slots -->
+    <div class="bm-body" style="display:flex;flex-direction:column;overflow:hidden;flex:1;">
+
+      <!-- Calendar panel -->
+      <div style="padding:20px 24px;flex:1;min-width:0;overflow:hidden;">
+        <!-- Month navigation -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <button id="bm-prev" type="button" style="width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8A7A6A;border-radius:4px;transition:color 0.15s;" aria-label="Vorige maand">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span id="bm-month-label" style="font-family:'Bodoni Moda',Georgia,serif;font-size:1rem;color:#fff;"></span>
+          <button id="bm-next" type="button" style="width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8A7A6A;border-radius:4px;transition:color 0.15s;" aria-label="Volgende maand">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <!-- Day-of-week headers (Mon-first) -->
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;opacity:0.45;">Ma</div>
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Di</div>
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Wo</div>
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Do</div>
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Vr</div>
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Za</div>
+          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;opacity:0.45;">Zo</div>
+        </div>
+        <!-- Calendar grid (filled by JS) -->
+        <div id="bm-calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+      </div>
+
+      <!-- Time slots panel -->
+      <div class="bm-time-panel" style="border-top:1px solid rgba(255,255,255,0.07);padding:20px 24px;flex-shrink:0;">
+        <div id="bm-time-slots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+      </div>
+    </div>
+
+    <!-- Contact form section -->
+    <div id="bm-contact-section" style="border-top:1px solid rgba(255,255,255,0.07);padding:14px 24px;flex-shrink:0;">
+      <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;color:#fff;letter-spacing:0.18em;text-transform:uppercase;margin:0 0 16px;">Jouw gegevens</p>
+      <div class="bm-form-grid">
+        <div class="bm-form-full">
+          <label class="bm-form-label">Workshop</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button type="button" id="bm-type-bites" class="bm-type-btn">Cocktails &amp; Bites</button>
+            <button type="button" id="bm-type-streetfood" class="bm-type-btn">Cocktails &amp; Streetfood</button>
+          </div>
+          <span id="bm-type-err" class="bm-form-error"></span>
+        </div>
+        <div>
+          <label for="bm-naam" class="bm-form-label">Naam</label>
+          <input id="bm-naam" type="text" class="bm-form-input" autocomplete="name">
+          <span id="bm-naam-err" class="bm-form-error"></span>
+        </div>
+        <div>
+          <label for="bm-personen" class="bm-form-label">Aantal personen</label>
+          <input id="bm-personen" type="number" step="1" class="bm-form-input" autocomplete="off">
+          <span id="bm-personen-err" class="bm-form-error"></span>
+        </div>
+        <div>
+          <label for="bm-email" class="bm-form-label">E-mailadres</label>
+          <input id="bm-email" type="email" class="bm-form-input" autocomplete="email">
+          <span id="bm-email-err" class="bm-form-error"></span>
+        </div>
+        <div>
+          <label for="bm-telefoon" class="bm-form-label">Telefoonnummer</label>
+          <input id="bm-telefoon" type="tel" class="bm-form-input" autocomplete="tel">
+          <span id="bm-telefoon-err" class="bm-form-error"></span>
+        </div>
+        <div class="bm-form-full">
+          <label for="bm-opmerking" class="bm-form-label">Opmerking <span style="opacity:0.55;">(optioneel)</span></label>
+          <textarea id="bm-opmerking" rows="3" class="bm-form-input" style="resize:vertical;"></textarea>
+        </div>
+      </div>
+    </div>
+    </div><!-- /#bm-scroll-region -->
+
+    <!-- Modal footer -->
+    <div style="border-top:1px solid rgba(255,255,255,0.07);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#0D0D0D;flex-shrink:0;">
+      <span id="bm-selection-label" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;flex:1;min-width:0;"></span>
+      <button id="bm-confirm" type="button" class="btn-primary" style="padding:10px 24px;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;white-space:nowrap;flex-shrink:0;border-radius:4px;">Bevestig reservering</button>
+    </div>
+
+  </div>
+</div>
+
 <script>
   // Mobile menu toggle
   const hamburger = document.getElementById('hamburger');
@@ -692,6 +880,315 @@
     el.classList.add('fade-section');
     observer.observe(el);
   });
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  var _workshopName = '';
+  var _selectedDate = null;
+  var _selectedTime = null;
+  var _viewYear, _viewMonth;
+
+  // Contact form element refs (set in initFormFields)
+  var _fNaam, _fNaamErr, _fPersonen, _fPersonenErr, _fEmail, _fEmailErr, _fTelefoon, _fTelefoonErr, _fOpmerking;
+  var _fTypeBites, _fTypeStreetfood, _fTypeErr;
+  var _selectedType = null;
+  var _closeTimer = null;
+
+  var TODAY = new Date();
+  TODAY.setHours(0, 0, 0, 0);
+
+  var NL_DAYS = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+  var NL_MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  var TIME_SLOTS = [];
+  for (var h = 14; h <= 20; h++) {
+    TIME_SLOTS.push(pad(h) + ':00');
+    if (h < 20) TIME_SLOTS.push(pad(h) + ':30');
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function selectType(name) {
+    _selectedType = name;
+    _workshopName = name;
+    if (_fTypeBites) _fTypeBites.classList.toggle('selected', name === 'Cocktails & Bites');
+    if (_fTypeStreetfood) _fTypeStreetfood.classList.toggle('selected', name === 'Cocktails & Streetfood');
+    if (_fTypeErr) _fTypeErr.textContent = '';
+  }
+
+  function setFieldError(input, errEl, msg) {
+    errEl.textContent = msg;
+    if (msg) input.classList.add('bm-input-error');
+    else input.classList.remove('bm-input-error');
+  }
+
+  function validateNaam() {
+    var ok = _fNaam.value.trim().length > 0;
+    if (!ok) setFieldError(_fNaam, _fNaamErr, 'Naam is verplicht');
+    else setFieldError(_fNaam, _fNaamErr, '');
+    return ok;
+  }
+
+  function validatePersonen() {
+    var raw = _fPersonen.value;
+    var val = parseInt(raw, 10);
+    if (!raw || isNaN(val)) { setFieldError(_fPersonen, _fPersonenErr, 'Voer een geldig aantal in'); return false; }
+    if (val < 4) { setFieldError(_fPersonen, _fPersonenErr, 'Minimaal 4 personen vereist'); return false; }
+    setFieldError(_fPersonen, _fPersonenErr, '');
+    return true;
+  }
+
+  function validateEmail() {
+    var v = _fEmail.value.trim();
+    if (!v) { setFieldError(_fEmail, _fEmailErr, 'E-mailadres is verplicht'); return false; }
+    if (!EMAIL_RE.test(v)) { setFieldError(_fEmail, _fEmailErr, 'Voer een geldig e-mailadres in'); return false; }
+    setFieldError(_fEmail, _fEmailErr, '');
+    return true;
+  }
+
+  function validateTelefoon() {
+    var ok = _fTelefoon.value.trim().length > 0;
+    if (!ok) setFieldError(_fTelefoon, _fTelefoonErr, 'Telefoonnummer is verplicht');
+    else setFieldError(_fTelefoon, _fTelefoonErr, '');
+    return ok;
+  }
+
+  function validateForm() {
+    var naam = _fNaam && _fNaam.value.trim().length > 0;
+    var p = _fPersonen && parseInt(_fPersonen.value, 10) >= 4;
+    var email = _fEmail && EMAIL_RE.test(_fEmail.value.trim());
+    var tel = _fTelefoon && _fTelefoon.value.trim().length > 0;
+    return !!(_selectedType && naam && p && email && tel);
+  }
+
+  function resetForm() {
+    _selectedType = null;
+    if (_fTypeBites) _fTypeBites.classList.remove('selected');
+    if (_fTypeStreetfood) _fTypeStreetfood.classList.remove('selected');
+    if (_fTypeErr) _fTypeErr.textContent = '';
+    [_fNaam, _fPersonen, _fEmail, _fTelefoon].forEach(function (el) {
+      if (el) { el.value = ''; el.classList.remove('bm-input-error'); }
+    });
+    [_fNaamErr, _fPersonenErr, _fEmailErr, _fTelefoonErr].forEach(function (el) {
+      if (el) el.textContent = '';
+    });
+    if (_fOpmerking) _fOpmerking.value = '';
+  }
+
+  function initFormFields() {
+    _fTypeBites = document.getElementById('bm-type-bites');
+    _fTypeStreetfood = document.getElementById('bm-type-streetfood');
+    _fTypeErr = document.getElementById('bm-type-err');
+    _fTypeBites.addEventListener('click', function () { selectType('Cocktails & Bites'); updateFooter(); });
+    _fTypeStreetfood.addEventListener('click', function () { selectType('Cocktails & Streetfood'); updateFooter(); });
+
+    _fNaam = document.getElementById('bm-naam');
+    _fNaamErr = document.getElementById('bm-naam-err');
+    _fPersonen = document.getElementById('bm-personen');
+    _fPersonenErr = document.getElementById('bm-personen-err');
+    _fEmail = document.getElementById('bm-email');
+    _fEmailErr = document.getElementById('bm-email-err');
+    _fTelefoon = document.getElementById('bm-telefoon');
+    _fTelefoonErr = document.getElementById('bm-telefoon-err');
+    _fOpmerking = document.getElementById('bm-opmerking');
+
+    _fNaam.addEventListener('blur', function () { validateNaam(); updateFooter(); });
+    _fPersonen.addEventListener('blur', function () { validatePersonen(); updateFooter(); });
+    _fEmail.addEventListener('blur', function () { validateEmail(); updateFooter(); });
+    _fTelefoon.addEventListener('blur', function () { validateTelefoon(); updateFooter(); });
+  }
+
+  function openBookingModal(e, workshopName) {
+    e.preventDefault();
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
+    _workshopName = workshopName || '';
+    _selectedDate = null;
+    _selectedTime = null;
+    _viewYear = TODAY.getFullYear();
+    _viewMonth = TODAY.getMonth();
+    renderCalendar();
+    renderTimeSlots();
+    resetForm();
+    if (_workshopName === 'Cocktails & Bites') selectType('Cocktails & Bites');
+    else if (_workshopName === 'Cocktails & Streetfood') selectType('Cocktails & Streetfood');
+    updateFooter();
+    var modal = document.getElementById('booking-modal');
+    var card = document.getElementById('bm-card');
+    var bd = document.getElementById('bm-backdrop');
+    modal.style.display = 'flex';
+    card.classList.remove('bm-card-exit', 'bm-card-enter');
+    bd.classList.remove('bm-bd-exit', 'bm-bd-enter');
+    void card.offsetWidth;
+    card.classList.add('bm-card-enter');
+    bd.classList.add('bm-bd-enter');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () {
+      var closeBtn = document.getElementById('bm-close');
+      if (closeBtn) closeBtn.focus();
+    }, 50);
+  }
+
+  function closeBookingModal() {
+    var modal = document.getElementById('booking-modal');
+    var card = document.getElementById('bm-card');
+    var bd = document.getElementById('bm-backdrop');
+    card.classList.remove('bm-card-enter');
+    bd.classList.remove('bm-bd-enter');
+    card.classList.add('bm-card-exit');
+    bd.classList.add('bm-bd-exit');
+    _closeTimer = setTimeout(function () {
+      modal.style.display = 'none';
+      card.classList.remove('bm-card-exit');
+      bd.classList.remove('bm-bd-exit');
+      document.body.style.overflow = '';
+      _closeTimer = null;
+    }, 175);
+  }
+
+  function renderCalendar() {
+    var monthName = NL_MONTHS[_viewMonth];
+    document.getElementById('bm-month-label').textContent =
+      monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' ' + _viewYear;
+
+    var prevBtn = document.getElementById('bm-prev');
+    var isCurrentMonth = (_viewYear === TODAY.getFullYear() && _viewMonth === TODAY.getMonth());
+    prevBtn.disabled = isCurrentMonth;
+    prevBtn.style.opacity = isCurrentMonth ? '0.25' : '1';
+    prevBtn.style.cursor = isCurrentMonth ? 'not-allowed' : 'pointer';
+
+    var grid = document.getElementById('bm-calendar-grid');
+    grid.innerHTML = '';
+
+    var firstDay = new Date(_viewYear, _viewMonth, 1);
+    var daysInMonth = new Date(_viewYear, _viewMonth + 1, 0).getDate();
+
+    // Monday-first offset (Mon=0 … Sun=6)
+    var dow = firstDay.getDay();
+    var offset = dow === 0 ? 6 : dow - 1;
+
+    for (var i = 0; i < offset; i++) {
+      grid.appendChild(document.createElement('div'));
+    }
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var date = new Date(_viewYear, _viewMonth, d);
+      var dayOfWeek = date.getDay();
+      var isPast = date < TODAY;
+      var isDisabled = isPast || dayOfWeek === 0 || dayOfWeek === 1;
+      var isSelected = _selectedDate !== null
+        && _selectedDate.getFullYear() === _viewYear
+        && _selectedDate.getMonth() === _viewMonth
+        && _selectedDate.getDate() === d;
+
+      var cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'bm-day-cell' + (isSelected ? ' selected' : '');
+      cell.textContent = d;
+      if (isDisabled) {
+        cell.disabled = true;
+      } else {
+        (function (day) {
+          cell.addEventListener('click', function () {
+            _selectedDate = new Date(_viewYear, _viewMonth, day);
+            renderCalendar();
+            updateFooter();
+          });
+        })(d);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderTimeSlots() {
+    var container = document.getElementById('bm-time-slots');
+    container.innerHTML = '';
+    TIME_SLOTS.forEach(function (time) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bm-time-btn' + (_selectedTime === time ? ' selected' : '');
+      btn.textContent = time;
+      btn.addEventListener('click', function () {
+        _selectedTime = time;
+        renderTimeSlots();
+        updateFooter();
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function updateFooter() {
+    var label = document.getElementById('bm-selection-label');
+    var confirmBtn = document.getElementById('bm-confirm');
+    var formOk = validateForm();
+    if (_selectedDate && _selectedTime) {
+      var dn = NL_DAYS[_selectedDate.getDay()];
+      var day = _selectedDate.getDate();
+      var mn = NL_MONTHS[_selectedDate.getMonth()];
+      var yr = _selectedDate.getFullYear();
+      label.textContent = dn + ' ' + day + ' ' + mn + ' ' + yr + ' om ' + _selectedTime;
+      label.style.color = '#E8B86D';
+    } else {
+      label.textContent = 'Kies een datum en tijdstip';
+      label.style.color = '#8A7A6A';
+    }
+    var canConfirm = !!(_selectedDate && _selectedTime && formOk);
+    confirmBtn.disabled = !canConfirm;
+    confirmBtn.style.opacity = canConfirm ? '1' : '0.4';
+    confirmBtn.style.cursor = canConfirm ? 'pointer' : 'not-allowed';
+  }
+
+  function confirmBooking() {
+    if (!_selectedDate || !_selectedTime || !validateForm()) return;
+    var dn = NL_DAYS[_selectedDate.getDay()];
+    var day = _selectedDate.getDate();
+    var mn = NL_MONTHS[_selectedDate.getMonth()];
+    var yr = _selectedDate.getFullYear();
+    var subject = 'Workshopaanvraag ' + _workshopName + ' – ' + dn + ' ' + day + ' ' + mn + ' ' + yr + ' om ' + _selectedTime;
+    var naam = _fNaam.value.trim();
+    var personen = _fPersonen.value.trim();
+    var telefoon = _fTelefoon.value.trim();
+    var opmerking = _fOpmerking.value.trim();
+    var body = 'Workshop: ' + _workshopName + '\nNaam: ' + naam + '\nAantal personen: ' + personen + '\nTelefoon: ' + telefoon;
+    if (opmerking) body += '\nOpmerking: ' + opmerking;
+    closeBookingModal();
+    window.location.href = 'mailto:info@theoldfashioned.nl?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var modal = document.getElementById('booking-modal');
+      if (modal.style.display === 'flex') closeBookingModal();
+    }
+  });
+
+  document.getElementById('bm-prev').addEventListener('click', function () {
+    var prev = new Date(_viewYear, _viewMonth - 1, 1);
+    var min = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    if (prev >= min) {
+      _viewMonth--;
+      if (_viewMonth < 0) { _viewMonth = 11; _viewYear--; }
+      renderCalendar();
+    }
+  });
+  document.getElementById('bm-next').addEventListener('click', function () {
+    _viewMonth++;
+    if (_viewMonth > 11) { _viewMonth = 0; _viewYear++; }
+    renderCalendar();
+  });
+  document.getElementById('bm-close').addEventListener('click', closeBookingModal);
+  document.getElementById('bm-backdrop').addEventListener('click', closeBookingModal);
+  document.getElementById('bm-confirm').addEventListener('click', confirmBooking);
+
+  initFormFields();
+
+  window.openBookingModal = openBookingModal;
+  window.closeBookingModal = closeBookingModal;
+})();
 </script>
 </body>
 </html>
