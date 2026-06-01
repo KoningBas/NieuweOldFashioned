@@ -112,8 +112,18 @@
     }
 
     /* Mobile menu */
-    #mobile-menu { transform: translateX(-100%); transition: transform 0.3s ease; }
+    #mobile-menu { transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
     #mobile-menu.open { transform: translateX(0); }
+
+    /* Backdrop */
+    #mobile-backdrop { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    #mobile-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    /* Hamburger bars */
+    .hb-bar { display: block; width: 22px; height: 2.2px; background: #fff; border-radius: 1px; transform-origin: center; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease; }
+    #hamburger.open .hb-top { transform: translateY(7px) rotate(45deg); }
+    #hamburger.open .hb-mid { opacity: 0; transform: scaleX(0); }
+    #hamburger.open .hb-bot { transform: translateY(-7px) rotate(-45deg); }
 
     /* Occasion card hover */
     .occasion-card { transition: filter 0.3s ease; }
@@ -152,10 +162,10 @@
 
     <!-- LEFT: hamburger (mobile) + logo (desktop) -->
     <div class="flex items-center gap-3">
-      <button id="hamburger" class="nav-btn xl:hidden rounded-md p-1.5 text-white" aria-label="Menu openen">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/>
-        </svg>
+      <button id="hamburger" class="nav-btn xl:hidden rounded-md p-1.5 text-white flex flex-col justify-center items-center gap-[5px] w-[34px] h-[34px]" aria-label="Menu openen">
+        <span class="hb-bar hb-top"></span>
+        <span class="hb-bar hb-mid"></span>
+        <span class="hb-bar hb-bot"></span>
       </button>
       <!-- Desktop logo -->
       <a href="/" class="hidden xl:flex items-center h-10">
@@ -188,11 +198,11 @@
   </div>
 </header>
 
+<!-- Mobile backdrop -->
+<div id="mobile-backdrop" class="fixed inset-0 z-30 bg-black/50 xl:hidden"></div>
+
 <!-- Mobile menu overlay -->
 <div id="mobile-menu" class="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm flex flex-col pt-20 px-6 xl:hidden">
-  <button id="close-menu" class="absolute top-5 right-5 text-white p-2" aria-label="Menu sluiten">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-  </button>
   <ul class="list-none p-0 m-0 flex flex-col gap-1">
     <li><a href="#bar" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">De Bar</a></li>
     <li><a href="#workshops" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Workshops</a></li>
@@ -417,14 +427,25 @@
   </section>
 
   <!-- SECTION 5: WORKSHOP OP LOCATIE -->
-  <section id="op-locatie" class="relative flex w-full justify-center max-w-none max-lg:min-h-[580px]" style="height:clamp(400px,45vw,650px);">
-    <div class="relative flex w-full items-center justify-center overflow-hidden" style="height:100%;">
-      <!-- FOTO POSITIE: pas x (links/rechts) en y (boven/onder) aan — 50% = midden, hoger % = verder rechts/onder -->
-      <img src="OldImages/AbgarLocatie.jpg" alt="Cocktailworkshop op locatie" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center center; transform: scaleX(-1);" onerror="this.src='OldImages/Workshop.png'">
-      <div class="absolute inset-0" style="background: linear-gradient(to right, rgba(13,13,13,0.92) 0%, rgba(13,13,13,0.5) 60%, rgba(13,13,13,0.2) 100%);"></div>
-      <div class="absolute inset-0" style="background: radial-gradient(ellipse at 0% 100%, rgba(200,146,42,0.14) 0%, transparent 50%);"></div>
+  <section id="op-locatie" class="flex w-full flex-col lg:block lg:relative lg:justify-center" style="background:#1A1410;">
+
+    <!-- FOTO — bovenin op mobiel, fullscreen background op desktop -->
+    <div class="relative w-full overflow-hidden lg:absolute lg:inset-0" style="height: 280px; height: clamp(280px, 35vw, 280px);">
+      <!-- op desktop vult dit de hele sectie -->
+      <div class="lg:absolute lg:inset-0 w-full h-full">
+        <img src="OldImages/AbgarLocatie.jpg" alt="Cocktailworkshop op locatie"
+          class="card-img absolute inset-0 h-full w-full object-cover"
+          style="object-position: center center; transform: scaleX(-1);"
+          onerror="this.src='OldImages/Workshop.png'">
+        <!-- gradient alleen zichtbaar op desktop -->
+        <div class="hidden lg:block absolute inset-0" style="background: linear-gradient(to right, rgba(13,13,13,0.92) 0%, rgba(13,13,13,0.5) 60%, rgba(13,13,13,0.2) 100%);"></div>
+        <div class="hidden lg:block absolute inset-0" style="background: radial-gradient(ellipse at 0% 100%, rgba(200,146,42,0.14) 0%, transparent 50%);"></div>
+      </div>
     </div>
-    <div class="pointer-events-none absolute inset-0 flex max-w-5xl mx-auto flex-col gap-4 px-6 sm:px-12 items-start justify-center z-10">
+
+    <!-- TEKST — eronder op mobiel, absolute overlay op desktop -->
+    <div class="lg:pointer-events-none lg:absolute lg:inset-0 lg:flex lg:max-w-5xl lg:mx-auto lg:flex-col lg:gap-4 lg:px-12 lg:items-start lg:justify-center lg:z-10
+                flex flex-col gap-4 px-6 py-10 pointer-events-auto" style="background:#1A1410;">
       <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Cocktail Experience</p>
       <h2 class="font-heading text-4xl sm:text-5xl lg:text-6xl text-white leading-tight" style="letter-spacing:-0.02em;">Workshop<br>Op Locatie</h2>
       <p class="font-body text-base sm:text-lg max-w-md leading-relaxed" style="color:rgba(255,255,255,0.78);">
@@ -443,6 +464,10 @@
       </ul>
       <a href="mailto:info@theoldfashioned.nl" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline mt-1 w-full sm:w-auto text-center">Vraag een offerte aan</a>
     </div>
+
+    <!-- Desktop hoogte spacer -->
+    <div class="hidden lg:block" style="height:clamp(400px,45vw,650px);"></div>
+
   </section>
 
   <!-- SECTION 6: BARTENDING OP LOCATIE -->
@@ -621,11 +646,30 @@
   // Mobile menu toggle
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobile-menu');
-  const closeMenu = document.getElementById('close-menu');
-  hamburger.addEventListener('click', () => mobileMenu.classList.add('open'));
-  closeMenu.addEventListener('click', () => mobileMenu.classList.remove('open'));
-  mobileMenu.addEventListener('click', (e) => {
-    if (e.target === mobileMenu) mobileMenu.classList.remove('open');
+  const mobileBackdrop = document.getElementById('mobile-backdrop');
+
+  function openMenu() {
+    mobileMenu.classList.add('open');
+    mobileBackdrop.classList.add('open');
+    hamburger.classList.add('open');
+    hamburger.setAttribute('aria-label', 'Menu sluiten');
+  }
+
+  function closeMenu() {
+    mobileMenu.classList.remove('open');
+    mobileBackdrop.classList.remove('open');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-label', 'Menu openen');
+  }
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.contains('open') ? closeMenu() : openMenu();
+  });
+
+  mobileBackdrop.addEventListener('click', closeMenu);
+
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMenu);
   });
 
   // Nav scroll effect
