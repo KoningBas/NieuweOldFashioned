@@ -7,7 +7,7 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/admin", "dest": "/admin.html" },
     { "src": "/admin.html", "dest": "/admin.html" },
-    { "src": "^/(?!(api|admin\\.html|index\\.html|OldImages|brand_assets|booking-service|node_modules)).*\\.(jpg|jpeg|png|gif|svg|ico|css|js|mjs|woff|woff2|ttf)$", "dest": "/$0" },
+    { "src": "^/(?!(api|admin\\.html|index\\.html|brand_assets|booking-service|node_modules)).*\\.(jpg|jpeg|png|gif|svg|ico|css|js|mjs|woff|woff2|ttf)$", "dest": "/$0" },
     { "src": "^/((?!api|admin\\.html).*)", "dest": "/index.html" }
   ]
 }
