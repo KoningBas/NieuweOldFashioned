@@ -33,8 +33,8 @@ export async function createCalendarEvent(auth, parsed) {
   const event = {
     summary: `${workshopName} – ${customerName} (${personCount} pers.)`,
     description,
-    start: { dateTime: toRfc3339Local(start), timeZone: process.env.TZ_CALENDAR || 'Europe/Amsterdam' },
-    end: { dateTime: toRfc3339Local(end), timeZone: process.env.TZ_CALENDAR || 'Europe/Amsterdam' },
+    start: { dateTime: toRfc3339Local(start), timeZone: 'Europe/Amsterdam' },
+    end: { dateTime: toRfc3339Local(end), timeZone: 'Europe/Amsterdam' },
     colorId: getColorId(workshopName),
   };
 
@@ -62,7 +62,7 @@ export async function getCalendarEvent(auth, eventId) {
 
 export async function listMonthEvents(auth, year, month) {
   const calendar = google.calendar({ version: 'v3', auth });
-  const tz = process.env.TZ_CALENDAR || 'Europe/Amsterdam';
+  const tz = 'Europe/Amsterdam';
   const timeMin = new Date(year, month - 1, 1).toISOString();
   const timeMax = new Date(year, month, 1).toISOString();
 
@@ -80,7 +80,7 @@ export async function listMonthEvents(auth, year, month) {
 
 export async function updateCalendarEvent(auth, eventId, updates) {
   const calendar = google.calendar({ version: 'v3', auth });
-  const tz = process.env.TZ_CALENDAR || 'Europe/Amsterdam';
+  const tz = 'Europe/Amsterdam';
 
   const existing = await calendar.events.get({
     calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
