@@ -50,12 +50,18 @@ export async function fetchMessageDetails(auth, messageId) {
 export async function markAsProcessed(auth, messageId) {
   const gmail = google.gmail({ version: 'v1', auth });
   const processedLabelName = process.env.PROCESSED_LABEL_NAME || 'Workshop/Verwerkt';
+  const errorLabelName = process.env.ERROR_LABEL_NAME || 'Workshop/Fout';
   const processedLabelId = await ensureLabel(gmail, processedLabelName);
+
+  const list = await gmail.users.labels.list({ userId: 'me' });
+  const errorLabel = list.data.labels.find(l => l.name === errorLabelName);
+  const removeIds = ['INBOX'];
+  if (errorLabel) removeIds.push(errorLabel.id);
 
   await gmail.users.messages.modify({
     userId: 'me',
     id: messageId,
-    requestBody: { addLabelIds: [processedLabelId], removeLabelIds: ['INBOX'] },
+    requestBody: { addLabelIds: [processedLabelId], removeLabelIds: removeIds },
   });
 }
 

@@ -75,13 +75,17 @@ export async function run() {
 
     // Mark as processed and update state
     await markAsProcessed(auth, msg.id).catch(err => logger.warn('Fout bij labelen', { error: err.message }));
-    saveState({
-      lastProcessedMessageId: msg.id,
-      lastCalendarEventId: calendarEvent.id,
-      lastProcessedAt: new Date().toISOString(),
-      lastCustomerName: parsed.customerName,
-      lastWorkshopName: parsed.workshopName,
-    });
+    try {
+      saveState({
+        lastProcessedMessageId: msg.id,
+        lastCalendarEventId: calendarEvent.id,
+        lastProcessedAt: new Date().toISOString(),
+        lastCustomerName: parsed.customerName,
+        lastWorkshopName: parsed.workshopName,
+      });
+    } catch (err) {
+      logger.warn('Fout bij opslaan state (read-only filesystem?)', { error: err.message });
+    }
 
     results.processed.push({
       customer: parsed.customerName,

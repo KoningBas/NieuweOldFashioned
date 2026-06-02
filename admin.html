@@ -321,8 +321,13 @@
       try {
         const r = await fetch('/api/check', { method:'POST', headers: apiHeaders() });
         const data = await r.json();
+        const errors = data.errors || [];
         if (data.error) showToast('Fout: '+data.error, 'error');
-        else if (data.processed.length === 0) showToast('Geen nieuwe boekingen', 'success');
+        else if (errors.length > 0 && (data.processed||[]).length === 0) {
+          showToast('Fout bij verwerken: '+errors[0].error, 'error');
+        } else if (errors.length > 0) {
+          showToast((data.processed.length)+' verwerkt, '+errors.length+' mislukt: '+errors[0].error, 'error');
+        } else if ((data.processed||[]).length === 0) showToast('Geen nieuwe boekingen', 'success');
         else showToast(data.processed.length+' boeking(en) verwerkt', 'success');
         loadBookings();
       } catch(e) { showToast('Fout: '+e.message, 'error'); }
