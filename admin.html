@@ -106,9 +106,9 @@
     </header>
     <div class="main">
       <div class="month-nav">
-        <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
+        <button class="nav-btn" onclick="changeWeek(-1)">&#8592;</button>
         <h2 id="month-label">—</h2>
-        <button class="nav-btn" onclick="changeMonth(1)">&#8594;</button>
+        <button class="nav-btn" onclick="changeWeek(1)">&#8594;</button>
         <button class="check-btn" id="check-btn" onclick="checkBookings()">&#8635; Nieuwe boekingen ophalen</button>
       </div>
       <div class="bookings-grid" id="grid">
@@ -173,8 +173,21 @@
     const NL_DAYS = ['zo','ma','di','wo','do','vr','za'];
     const COLOR_MAP = {'5':'#F6BF26','9':'#4A548D','6':'#F4511E','10':'#0B8043','11':'#D50000','3':'#8E24AA','4':'#E67C73'};
 
-    let currentYear = new Date().getFullYear();
-    let currentMonth = new Date().getMonth() + 1;
+    function getMonday(d) {
+      const day = d.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const m = new Date(d);
+      m.setDate(d.getDate() + diff);
+      m.setHours(0, 0, 0, 0);
+      return m;
+    }
+
+    function toISODate(d) {
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+    }
+
+    let currentWeekStart = getMonday(new Date());
     let bookings = [];
     let password = '';
 
@@ -221,13 +234,23 @@
     }
 
     function updateLabel() {
-      document.getElementById('month-label').textContent = NL_MONTHS[currentMonth-1] + ' ' + currentYear;
+      const end = new Date(currentWeekStart);
+      end.setDate(end.getDate() + 6);
+      const s = currentWeekStart, e = end;
+      let label;
+      if (s.getFullYear() !== e.getFullYear()) {
+        label = s.getDate() + ' ' + NL_MONTHS[s.getMonth()] + ' ' + s.getFullYear() + ' – ' + e.getDate() + ' ' + NL_MONTHS[e.getMonth()] + ' ' + e.getFullYear();
+      } else if (s.getMonth() !== e.getMonth()) {
+        label = s.getDate() + ' ' + NL_MONTHS[s.getMonth()] + ' – ' + e.getDate() + ' ' + NL_MONTHS[e.getMonth()] + ' ' + e.getFullYear();
+      } else {
+        label = s.getDate() + '–' + e.getDate() + ' ' + NL_MONTHS[e.getMonth()] + ' ' + e.getFullYear();
+      }
+      document.getElementById('month-label').textContent = label;
     }
 
-    function changeMonth(dir) {
-      currentMonth += dir;
-      if (currentMonth > 12) { currentMonth = 1; currentYear++; }
-      if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+    function changeWeek(dir) {
+      currentWeekStart = new Date(currentWeekStart);
+      currentWeekStart.setDate(currentWeekStart.getDate() + dir * 7);
       loadBookings();
     }
 
@@ -235,8 +258,10 @@
       updateLabel();
       const grid = document.getElementById('grid');
       if (grid) grid.innerHTML = '<div class="empty-state"><span class="spinner"></span>Laden...</div>';
+      const weekEnd = new Date(currentWeekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
       try {
-        const r = await fetch('/api/bookings?year='+currentYear+'&month='+currentMonth, { headers: apiHeaders() });
+        const r = await fetch('/api/bookings?startDate='+toISODate(currentWeekStart)+'&endDate='+toISODate(weekEnd), { headers: apiHeaders() });
         if (r.status === 401) return false;
         bookings = await r.json();
         if (bookings.error) throw new Error(bookings.error);
@@ -250,7 +275,7 @@
 
     function renderGrid() {
       const grid = document.getElementById('grid');
-      if (!bookings.length) { grid.innerHTML = '<div class="empty-state">Geen workshops deze maand.</div>'; return; }
+      if (!bookings.length) { grid.innerHTML = '<div class="empty-state">Geen workshops deze week.</div>'; return; }
       grid.innerHTML = bookings.map((b,i) => {
         const color = COLOR_MAP[b.colorId] || '#4A548D';
         return '<div class="booking-card" onclick="openEdit('+i+')">' +

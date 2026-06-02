@@ -1,5 +1,5 @@
 import { getOAuthClient } from '../booking-service/auth.mjs';
-import { listMonthEvents, parseEventSummary, parseEventDescription } from '../booking-service/calendar.mjs';
+import { listMonthEvents, listWeekEvents, parseEventSummary, parseEventDescription } from '../booking-service/calendar.mjs';
 
 function checkAuth(req, res) {
   const pw = req.headers['x-admin-password'];
@@ -14,12 +14,15 @@ export default async function handler(req, res) {
   if (!checkAuth(req, res)) return;
   if (req.method !== 'GET') { res.status(405).end(); return; }
 
+  const { startDate, endDate } = req.query;
   const year = parseInt(req.query.year || new Date().getFullYear(), 10);
   const month = parseInt(req.query.month || (new Date().getMonth() + 1), 10);
 
   try {
     const auth = getOAuthClient();
-    const events = await listMonthEvents(auth, year, month);
+    const events = startDate && endDate
+      ? await listWeekEvents(auth, startDate, endDate)
+      : await listMonthEvents(auth, year, month);
     const bookings = events.map(e => {
       const { workshopName, customerName, personCount } = parseEventSummary(e.summary);
       const { customerPhone, notes } = parseEventDescription(e.description);

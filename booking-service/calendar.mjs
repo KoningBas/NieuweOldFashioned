@@ -60,6 +60,26 @@ export async function getCalendarEvent(auth, eventId) {
   }
 }
 
+export async function listWeekEvents(auth, startDate, endDate) {
+  const calendar = google.calendar({ version: 'v3', auth });
+  const tz = 'Europe/Amsterdam';
+  const timeMin = new Date(startDate + 'T00:00:00').toISOString();
+  const dayAfter = new Date(endDate);
+  dayAfter.setDate(dayAfter.getDate() + 1);
+  const timeMax = dayAfter.toISOString();
+
+  const res = await calendar.events.list({
+    calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
+    timeMin,
+    timeMax,
+    singleEvents: true,
+    orderBy: 'startTime',
+    timeZone: tz,
+  });
+
+  return (res.data.items || []).filter(e => e.summary && e.summary.includes(' – '));
+}
+
 export async function listMonthEvents(auth, year, month) {
   const calendar = google.calendar({ version: 'v3', auth });
   const tz = 'Europe/Amsterdam';
