@@ -24,6 +24,12 @@ export function getOAuthClient() {
     GOOGLE_CLIENT_SECRET,
     'urn:ietf:wg:oauth:2.0:oob'
   );
+  // Vercel: read token from env var
+  if (process.env.GOOGLE_REFRESH_TOKEN) {
+    client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
+    return client;
+  }
+  // Local: read token from file
   if (fs.existsSync(TOKEN_FILE)) {
     client.setCredentials(JSON.parse(fs.readFileSync(TOKEN_FILE, 'utf-8')));
   }
