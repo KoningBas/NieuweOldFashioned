@@ -3,3 +3,7 @@ node_modules/
 docs/
 screenshot-section.mjs
 memory/
+.env
+booking-service/token.json
+booking-service/state.json
+booking-service/logs/
