@@ -69,4 +69,46 @@ describe('computeQuote', () => {
       computeQuote(workshopPkg, settings, { cocktailCount: 0, guestCount: 2, distanceKm: 5 })
     ).toThrow(QuoteValidationError);
   });
+
+  it('uses near travel fee exactly at the near limit boundary', () => {
+    const result = computeQuote(bartendingPkg, settings, { cocktailCount: 50, guestCount: 0, distanceKm: 10 });
+    expect(result.travelFee).toBe(50);
+    expect(result.total).toBe(450);
+  });
+
+  it('accepts cocktail count exactly at the minimum', () => {
+    const result = computeQuote(bartendingPkg, settings, { cocktailCount: 50, guestCount: 0, distanceKm: 5 });
+    expect(result).toEqual({ subtotal: 400, travelFee: 50, total: 450 });
+  });
+
+  it('rejects cocktail count one below the minimum', () => {
+    expect(() =>
+      computeQuote(bartendingPkg, settings, { cocktailCount: 49, guestCount: 0, distanceKm: 5 })
+    ).toThrow(QuoteValidationError);
+  });
+
+  it('accepts workshop guest count exactly at the minimum', () => {
+    const result = computeQuote(workshopPkg, settings, { cocktailCount: 0, guestCount: 4, distanceKm: 5 });
+    expect(result).toEqual({ subtotal: 128, travelFee: 50, total: 178 });
+  });
+
+  it('rejects workshop guest count one below the minimum', () => {
+    expect(() =>
+      computeQuote(workshopPkg, settings, { cocktailCount: 0, guestCount: 3, distanceKm: 5 })
+    ).toThrow(QuoteValidationError);
+  });
+
+  it('uses the higher settings minimum even when the package allows a lower one', () => {
+    const lowMinPkg = { ...bartendingPkg, min_quantity: 30 };
+    expect(() =>
+      computeQuote(lowMinPkg, settings, { cocktailCount: 40, guestCount: 0, distanceKm: 5 })
+    ).toThrow(QuoteValidationError);
+  });
+
+  it('uses the higher package minimum even when settings allows a lower one', () => {
+    const lowMinSettings = { ...settings, min_cocktails: 20 };
+    expect(() =>
+      computeQuote(bartendingPkg, lowMinSettings, { cocktailCount: 30, guestCount: 0, distanceKm: 5 })
+    ).toThrow(QuoteValidationError);
+  });
 });
