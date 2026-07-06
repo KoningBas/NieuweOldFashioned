@@ -12,6 +12,7 @@ interface Props {
 
 export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange, onCocktailCountChange, onNext, onBack }: Props) {
   const isPerCocktail = pkg.price_unit === 'per_cocktail';
+  const canProceed = guestCount >= 1 && (!isPerCocktail || cocktailCount >= pkg.min_quantity);
 
   return (
     <div>
@@ -45,7 +46,7 @@ export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange
         <button type="button" onClick={onBack} className="rounded-full px-8 py-4 border border-white/20 text-white hover:border-gold-light hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
           Terug
         </button>
-        <button type="button" onClick={onNext} className="rounded-full px-8 py-4 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+        <button type="button" disabled={!canProceed} onClick={onNext} className="rounded-full px-8 py-4 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
           Volgende stap
         </button>
       </div>

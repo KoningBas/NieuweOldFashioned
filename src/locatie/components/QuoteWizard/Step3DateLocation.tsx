@@ -20,6 +20,8 @@ export function Step3DateLocation({
   eventDate, eventCity, eventPostcode, distanceKm, availabilityCtx,
   onDateChange, onCityChange, onPostcodeChange, onDistanceChange, onNext, onBack,
 }: Props) {
+  // Append a time to force local-time parsing (bare "YYYY-MM-DD" parses as UTC,
+  // which caused the local/UTC mismatch bug fixed in availability.ts's isDateSelectable).
   const selectedDateInvalid =
     eventDate !== '' && availabilityCtx !== null && !isDateSelectable(new Date(`${eventDate}T12:00:00`), availabilityCtx);
 
@@ -35,11 +37,13 @@ export function Step3DateLocation({
           type="date"
           value={eventDate}
           onChange={(e) => onDateChange(e.target.value)}
+          aria-invalid={selectedDateInvalid}
+          aria-describedby={selectedDateInvalid ? 'event-date-error' : undefined}
           className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
         />
       </label>
       {selectedDateInvalid && (
-        <p className="text-sm text-red-300/90 mb-6">Deze datum is niet beschikbaar. Kies een andere datum.</p>
+        <p id="event-date-error" role="alert" className="text-sm text-red-300/90 mb-6">Deze datum is niet beschikbaar. Kies een andere datum.</p>
       )}
       {!selectedDateInvalid && <div className="mb-6" />}
 
