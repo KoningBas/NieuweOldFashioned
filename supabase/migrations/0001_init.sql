@@ -3,7 +3,7 @@ create table service_packages (
   id uuid primary key default gen_random_uuid(),
   package_name text not null,
   description text not null default '',
-  price numeric not null,
+  price numeric(10,2) not null,
   price_unit text not null check (price_unit in ('per_cocktail', 'per_person')),
   min_quantity integer not null default 1,
   category text not null default '',
@@ -28,14 +28,14 @@ create table quote_requests (
   email text not null,
   phone text not null,
   event_type text not null,
-  guest_count integer not null,
-  cocktail_count integer not null,
-  package_id uuid references service_packages(id),
+  guest_count integer not null check (guest_count >= 0),
+  cocktail_count integer not null check (cocktail_count >= 0),
+  package_id uuid not null references service_packages(id),
   event_date date not null,
   event_city text not null,
   event_postcode text not null,
-  distance_km numeric not null,
-  estimated_total numeric not null,
+  distance_km numeric not null check (distance_km >= 0),
+  estimated_total numeric(10,2) not null check (estimated_total >= 0),
   status text not null default 'new' check (status in ('new','reviewed','quoted','confirmed','declined')),
   special_requests text,
   created_at timestamptz not null default now()
@@ -62,11 +62,11 @@ create table service_settings (
   business_email text not null,
   business_phone text not null,
   business_address text not null,
-  cocktail_price numeric not null,
+  cocktail_price numeric(10,2) not null,
   min_cocktails integer not null,
-  workshop_price_per_person numeric not null,
-  travel_fee_near numeric not null,
-  travel_fee_far numeric not null,
+  workshop_price_per_person numeric(10,2) not null,
+  travel_fee_near numeric(10,2) not null,
+  travel_fee_far numeric(10,2) not null,
   travel_near_km_limit numeric not null,
   booking_notice_hours integer not null,
   max_guests integer not null,
@@ -79,6 +79,10 @@ create table admin_users (
   created_at timestamptz not null default now()
 );
 
+-- Indexes
+create index quote_requests_event_date_idx on quote_requests(event_date);
+create index quote_requests_status_idx on quote_requests(status);
+
 -- RLS
 alter table service_packages enable row level security;
 alter table cocktail_menu enable row level security;
@@ -90,17 +94,17 @@ alter table admin_users enable row level security;
 
 create or replace function is_admin() returns boolean as $$
   select exists (select 1 from admin_users where user_id = auth.uid());
-$$ language sql stable security definer;
+$$ language sql stable security definer set search_path = public;
 
 -- public read policies
-create policy "public read active packages" on service_packages for select using (true);
-create policy "public read active cocktails" on cocktail_menu for select using (true);
+create policy "public read active packages" on service_packages for select using (is_active = true);
+create policy "public read active cocktails" on cocktail_menu for select using (is_active = true);
 create policy "public read availability" on availability for select using (true);
 create policy "public read blocked dates" on blocked_dates for select using (true);
 create policy "public read service settings" on service_settings for select using (true);
 
 -- public insert quote requests only
-create policy "public insert quote requests" on quote_requests for insert with check (true);
+create policy "public insert quote requests" on quote_requests for insert with check (status = 'new');
 
 -- admin_users: users can read their own row (used by the login gate)
 create policy "self read admin_users" on admin_users for select using (auth.uid() = user_id);
