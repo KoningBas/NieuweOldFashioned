@@ -1,5 +1,18 @@
 import { useState } from 'react';
 
+const NAV_LINKS = [
+  { href: '/#bar', label: 'De Bar', active: false },
+  { href: '/#workshops', label: 'Workshops', active: false },
+  { href: '/locatie/', label: 'Op Locatie', active: true },
+] as const;
+
+const navLinkClassName = (active?: boolean) =>
+  [
+    active ? 'text-gold-light' : 'hover:text-gold-light',
+    'transition-colors duration-300',
+    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 rounded',
+  ].join(' ');
+
 export function Nav() {
   const [open, setOpen] = useState(false);
 
@@ -11,9 +24,11 @@ export function Nav() {
         </a>
 
         <nav className="hidden md:flex items-center gap-8 text-sm uppercase tracking-widest text-muted">
-          <a href="/#bar" className="hover:text-gold-light transition-colors duration-300">De Bar</a>
-          <a href="/#workshops" className="hover:text-gold-light transition-colors duration-300">Workshops</a>
-          <a href="/locatie/" className="text-gold-light">Op Locatie</a>
+          {NAV_LINKS.map((link) => (
+            <a key={link.href} href={link.href} className={navLinkClassName(link.active)}>
+              {link.label}
+            </a>
+          ))}
           <a
             href="#offerte"
             className="ml-2 rounded-full px-6 py-2.5 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium shadow-[0_4px_20px_-4px_rgba(200,146,42,0.5)] hover:shadow-[0_6px_28px_-4px_rgba(200,146,42,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
@@ -23,7 +38,7 @@ export function Nav() {
         </nav>
 
         <button
-          className="md:hidden text-white p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light rounded"
+          className="md:hidden text-white p-2 hover:opacity-70 transition-opacity duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light rounded"
           onClick={() => setOpen((v) => !v)}
           aria-label="Menu openen"
           aria-expanded={open}
@@ -36,10 +51,17 @@ export function Nav() {
 
       {open && (
         <div className="md:hidden bg-surface-elevated border-t border-white/5 px-6 py-6 flex flex-col gap-5 text-muted uppercase tracking-widest text-sm">
-          <a href="/#bar" className="hover:text-gold-light">De Bar</a>
-          <a href="/#workshops" className="hover:text-gold-light">Workshops</a>
-          <a href="/locatie/" className="text-gold-light">Op Locatie</a>
-          <a href="#offerte" className="text-surface bg-gold rounded-full px-6 py-3 text-center font-medium">Vraag een offerte aan</a>
+          {NAV_LINKS.map((link) => (
+            <a key={link.href} href={link.href} className={navLinkClassName(link.active)}>
+              {link.label}
+            </a>
+          ))}
+          <a
+            href="#offerte"
+            className="rounded-full px-6 py-3 text-center font-medium bg-gradient-to-b from-gold-light to-primary-dark text-surface shadow-[0_4px_20px_-4px_rgba(200,146,42,0.5)] hover:shadow-[0_6px_28px_-4px_rgba(200,146,42,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+          >
+            Vraag een offerte aan
+          </a>
         </div>
       )}
     </header>
