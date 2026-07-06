@@ -16,7 +16,7 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 shrink-0 bg-surface-elevated border-r border-white/5 min-h-screen p-6 flex flex-col">
-      <div className="font-heading text-lg mb-10 px-2">The Old Fashioned</div>
+      <div className="font-heading text-xl mb-10 px-2">The Old Fashioned</div>
       <nav className="flex flex-col gap-1 flex-1">
         {LINKS.map((link) => (
           <NavLink
@@ -24,7 +24,7 @@ export function Sidebar() {
             to={link.to}
             end={link.end}
             className={({ isActive }) =>
-              `rounded-lg px-4 py-2.5 text-sm transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
+              `rounded-lg px-4 py-3 text-base transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
                 isActive ? 'bg-gold/15 text-gold-light' : 'text-muted hover:bg-white/5 hover:text-white'
               }`
             }
@@ -35,7 +35,7 @@ export function Sidebar() {
       </nav>
       <button
         onClick={() => signOut()}
-        className="rounded-lg px-4 py-2.5 text-sm text-muted hover:bg-white/5 hover:text-white text-left transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        className="rounded-lg px-4 py-3 text-base text-muted hover:bg-white/5 hover:text-white text-left transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
       >
         Uitloggen
       </button>

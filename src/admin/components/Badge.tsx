@@ -17,5 +17,5 @@ const LABELS: Record<QuoteStatus, string> = {
 };
 
 export function Badge({ status }: { status: QuoteStatus }) {
-  return <span className={`inline-block rounded-full border px-3 py-1 text-xs uppercase tracking-wide ${STYLES[status]}`}>{LABELS[status]}</span>;
+  return <span className={`inline-block rounded-full border px-3 py-1.5 text-sm uppercase tracking-wide ${STYLES[status]}`}>{LABELS[status]}</span>;
 }

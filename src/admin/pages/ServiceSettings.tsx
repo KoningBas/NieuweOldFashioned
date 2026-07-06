@@ -23,17 +23,17 @@ export function ServiceSettings() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  if (!settings) return <AdminLayout title="Instellingen"><div className="text-muted">Laden...</div></AdminLayout>;
+  if (!settings) return <AdminLayout title="Instellingen"><div className="text-muted text-lg">Laden...</div></AdminLayout>;
 
   function field(key: keyof Settings, label: string, type: 'text' | 'number' = 'text') {
     return (
       <label className="block">
-        <span className="block text-sm text-muted mb-2">{label}</span>
+        <span className="block text-base text-muted mb-2">{label}</span>
         <input
           type={type}
           value={settings![key] as string | number}
           onChange={(e) => setSettings((s) => (s ? { ...s, [key]: type === 'number' ? Number(e.target.value) : e.target.value } : s))}
-          className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
+          className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-base text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
         />
       </label>
     );
@@ -56,10 +56,10 @@ export function ServiceSettings() {
         {field('max_guests', 'Maximaal aantal gasten', 'number')}
 
         <div className="md:col-span-2 flex items-center gap-4">
-          <button type="submit" className="rounded-full px-6 py-3 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+          <button type="submit" className="rounded-full px-6 py-3 text-base bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
             Opslaan
           </button>
-          {saved && <span className="text-emerald-300 text-sm" role="status">Opgeslagen</span>}
+          {saved && <span className="text-emerald-300 text-base" role="status">Opgeslagen</span>}
         </div>
       </form>
     </AdminLayout>
