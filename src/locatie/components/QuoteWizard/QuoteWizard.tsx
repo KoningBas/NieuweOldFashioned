@@ -6,6 +6,8 @@ import { StepIndicator } from './StepIndicator';
 import { Step1Package } from './Step1Package';
 import { Step2Counts } from './Step2Counts';
 import { Step3DateLocation } from './Step3DateLocation';
+import { Step4Contact } from './Step4Contact';
+import { Step5Summary } from './Step5Summary';
 
 export interface WizardState {
   step: number;
@@ -42,6 +44,7 @@ const INITIAL_STATE: WizardState = {
 export function QuoteWizard() {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
+  const [submitted, setSubmitted] = useState(false);
   const [availabilityCtx, setAvailabilityCtx] = useState<{
     availability: Availability[]; blockedDates: BlockedDate[]; settings: ServiceSettings; confirmedRequests: ConfirmedEventDate[];
   } | null>(null);
@@ -110,8 +113,36 @@ export function QuoteWizard() {
               onBack={() => setState((s) => ({ ...s, step: 2 }))}
             />
           )}
-          {state.step > 3 && selectedPackage && (
-            <div className="text-muted">Stap {state.step} van 5 &mdash; wordt in de volgende taak toegevoegd.</div>
+          {state.step === 4 && (
+            <Step4Contact
+              fullName={state.fullName}
+              email={state.email}
+              phone={state.phone}
+              specialRequests={state.specialRequests}
+              onFullNameChange={(v) => setState((s) => ({ ...s, fullName: v }))}
+              onEmailChange={(v) => setState((s) => ({ ...s, email: v }))}
+              onPhoneChange={(v) => setState((s) => ({ ...s, phone: v }))}
+              onSpecialRequestsChange={(v) => setState((s) => ({ ...s, specialRequests: v }))}
+              onNext={() => setState((s) => ({ ...s, step: 5 }))}
+              onBack={() => setState((s) => ({ ...s, step: 3 }))}
+            />
+          )}
+          {state.step === 5 && selectedPackage && availabilityCtx && !submitted && (
+            <Step5Summary
+              state={state}
+              pkg={selectedPackage}
+              settings={availabilityCtx.settings}
+              onBack={() => setState((s) => ({ ...s, step: 4 }))}
+              onSubmitted={() => setSubmitted(true)}
+            />
+          )}
+          {submitted && (
+            <div className="text-center py-10">
+              <h3 className="font-heading text-3xl text-gold-light mb-4">Offerte aangevraagd!</h3>
+              <p className="text-muted max-w-md mx-auto leading-[1.7]">
+                Bedankt, {state.fullName}. We nemen binnen enkele werkdagen contact met je op over jouw {state.eventType.toLowerCase()} op {state.eventDate}.
+              </p>
+            </div>
           )}
         </div>
       </div>
