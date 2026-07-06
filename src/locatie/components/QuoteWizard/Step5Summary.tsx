@@ -30,7 +30,7 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
   }
 
   async function handleSubmit() {
-    if (!breakdown) return;
+    if (submitting || !breakdown) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -71,7 +71,7 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
         {pkg.price_unit === 'per_cocktail' && (<><dt>Cocktails</dt><dd className="text-white text-right">{state.cocktailCount}</dd></>)}
       </dl>
 
-      {validationError && <p className="text-red-300/90 mb-8">{validationError}</p>}
+      {validationError && <p role="alert" className="text-red-300/90 mb-8">{validationError}</p>}
 
       {breakdown && (
         <div className="rounded-xl bg-surface border border-gold/20 p-6 mb-8">
@@ -81,7 +81,7 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
         </div>
       )}
 
-      {submitError && <p className="text-red-300/90 mb-6">{submitError}</p>}
+      {submitError && <p role="alert" className="text-red-300/90 mb-6">{submitError}</p>}
 
       <div className="flex gap-4">
         <button type="button" onClick={onBack} className="rounded-full px-8 py-4 border border-white/20 text-white hover:border-gold-light hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">

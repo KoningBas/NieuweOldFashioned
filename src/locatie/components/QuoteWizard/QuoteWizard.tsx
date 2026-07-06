@@ -136,6 +136,9 @@ export function QuoteWizard() {
               onSubmitted={() => setSubmitted(true)}
             />
           )}
+          {state.step === 5 && (!availabilityCtx || !selectedPackage) && !submitted && (
+            <div className="text-center py-10 text-muted">Bezig met laden...</div>
+          )}
           {submitted && (
             <div className="text-center py-10">
               <h3 className="font-heading text-3xl text-gold-light mb-4">Offerte aangevraagd!</h3>

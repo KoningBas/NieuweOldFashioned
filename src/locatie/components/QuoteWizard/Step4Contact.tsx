@@ -15,7 +15,7 @@ export function Step4Contact({
   fullName, email, phone, specialRequests,
   onFullNameChange, onEmailChange, onPhoneChange, onSpecialRequestsChange, onNext, onBack,
 }: Props) {
-  const canProceed = fullName.trim() !== '' && email.includes('@') && phone.trim() !== '';
+  const canProceed = fullName.trim() !== '' && /\S+@\S+\.\S+/.test(email.trim()) && phone.trim() !== '';
 
   return (
     <div>
