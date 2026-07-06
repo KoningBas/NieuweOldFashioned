@@ -1,11 +1,19 @@
+import { useState } from 'react';
+
 export function Hero() {
+  const [imageFailed, setImageFailed] = useState(false);
+
   return (
-    <section className="relative min-h-[92vh] flex items-end pb-24 pt-32 px-6 md:px-10 overflow-hidden">
-      <img
-        src="/OldImages/AbgarLocatie.jpg"
-        alt="Bartender bereidt cocktails op locatie tijdens een evenement"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+    <section className="relative min-h-[92vh] flex items-end pb-24 pt-32 px-6 md:px-10 overflow-hidden bg-surface">
+      {!imageFailed && (
+        <img
+          src="/OldImages/AbgarLocatie.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-surface/20" />
       <div className="absolute inset-0 bg-gradient-to-r from-surface/60 via-transparent to-transparent" />
       <div
