@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cocktails op Locatie | The Old Fashioned</title>
+  <meta name="description" content="Bartending en cocktailworkshops op jouw locatie, verzorgd door The Old Fashioned Rijssen. Vraag direct een offerte aan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#C8922A',
+            'primary-dark': '#A57520',
+            surface: '#0D0D0D',
+            'surface-elevated': '#1A1410',
+            gold: '#C8922A',
+            'gold-light': '#E8B86D',
+            muted: '#8A7A6A',
+          },
+          fontFamily: {
+            heading: ['"Bodoni Moda"', 'Georgia', 'serif'],
+            body: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 120%; }
+    body { font-family: 'Cormorant Garamond', Georgia, serif; background: #0D0D0D; color: #fff; margin: 0; overflow-x: hidden; }
+    .font-heading { font-family: 'Bodoni Moda', Georgia, serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/locatie/main.tsx"></script>
+</body>
+</html>
