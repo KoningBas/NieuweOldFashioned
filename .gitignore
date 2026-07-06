@@ -4,6 +4,7 @@ docs/
 screenshot-section.mjs
 memory/
 .env
+.env.local
 booking-service/token.json
 booking-service/state.json
 booking-service/logs/
