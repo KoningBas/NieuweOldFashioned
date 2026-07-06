@@ -5,8 +5,25 @@ import { fileURLToPath } from 'url';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
+function redirectAppRoots() {
+  return {
+    name: 'redirect-app-roots',
+    configureServer(server: import('vite').ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/admin' || req.url === '/locatie') {
+          res.writeHead(301, { Location: req.url + '/' });
+          res.end();
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  appType: 'mpa',
+  plugins: [react(), redirectAppRoots()],
   build: {
     outDir: 'dist',
     rollupOptions: {

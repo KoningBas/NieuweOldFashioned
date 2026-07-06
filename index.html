@@ -259,13 +259,13 @@
 
     <!-- LEFT: hamburger (mobile) + logo (desktop) -->
     <div class="flex items-center gap-3">
-      <button id="hamburger" class="nav-btn xl:hidden rounded-md p-1.5 text-white flex flex-col justify-center items-center gap-[5px] w-[34px] h-[34px]" aria-label="Menu openen">
+      <button id="hamburger" class="nav-btn lg:hidden rounded-md p-1.5 text-white flex flex-col justify-center items-center gap-[5px] w-[34px] h-[34px]" aria-label="Menu openen">
         <span class="hb-bar hb-top"></span>
         <span class="hb-bar hb-mid"></span>
         <span class="hb-bar hb-bot"></span>
       </button>
       <!-- Desktop logo -->
-      <a href="/" class="hidden xl:flex items-center h-10">
+      <a href="/" class="hidden lg:flex items-center h-10">
         <span class="font-heading text-xl text-white" style="letter-spacing:-0.01em;">The Old Fashioned</span>
       </a>
     </div>
@@ -273,14 +273,14 @@
     <!-- CENTER: mobile logo + desktop nav links -->
     <nav class="flex items-center justify-center">
       <!-- Mobile logo -->
-      <a href="/" class="xl:hidden flex items-center h-9 overflow-hidden">
+      <a href="/" class="lg:hidden flex items-center h-9 overflow-hidden">
         <span class="font-heading text-base sm:text-lg text-white whitespace-nowrap" style="letter-spacing:-0.01em;">The Old Fashioned</span>
       </a>
       <!-- Desktop nav links -->
-      <ul class="hidden xl:flex items-center gap-1 list-none p-0 m-0">
+      <ul class="hidden lg:flex items-center gap-1 list-none p-0 m-0">
         <li><a href="#bar" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">De Bar</a></li>
         <li><a href="#workshops" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Workshops</a></li>
-        <li><a href="#op-locatie" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Op Locatie</a></li>
+        <li><a href="/locatie/" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Op Locatie</a></li>
         <li><a href="#bartending" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Bartending</a></li>
         <li><a href="#locatie" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Locatie</a></li>
       </ul>
@@ -296,14 +296,14 @@
 </header>
 
 <!-- Mobile backdrop -->
-<div id="mobile-backdrop" class="fixed inset-0 z-30 bg-black/50 xl:hidden"></div>
+<div id="mobile-backdrop" class="fixed inset-0 z-30 bg-black/50 lg:hidden"></div>
 
 <!-- Mobile menu overlay -->
-<div id="mobile-menu" class="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm flex flex-col pt-20 px-6 xl:hidden">
+<div id="mobile-menu" class="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm flex flex-col pt-20 px-6 lg:hidden">
   <ul class="list-none p-0 m-0 flex flex-col gap-1">
     <li><a href="#bar" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">De Bar</a></li>
     <li><a href="#workshops" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Workshops</a></li>
-    <li><a href="#op-locatie" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Op Locatie</a></li>
+    <li><a href="/locatie/" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Op Locatie</a></li>
     <li><a href="#bartending" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Bartending</a></li>
     <li><a href="#locatie" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Locatie</a></li>
   </ul>
@@ -544,7 +544,7 @@
     <div class="lg:pointer-events-none lg:absolute lg:inset-0 lg:flex lg:max-w-5xl lg:mx-auto lg:flex-col lg:gap-4 lg:px-12 lg:items-start lg:justify-center lg:z-10 lg:bg-transparent
                 flex flex-col gap-4 px-6 py-10 pointer-events-auto bg-[#1A1410]">
       <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Cocktail Experience</p>
-      <h2 class="font-heading text-4xl sm:text-5xl lg:text-6xl text-white leading-tight" style="letter-spacing:-0.02em;">Workshop<br>Op Locatie</h2>
+      <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl text-white leading-tight" style="letter-spacing:-0.02em;">Workshop<br>Op Locatie</h2>
       <p class="font-body text-base sm:text-lg max-w-md leading-relaxed" style="color:rgba(255,255,255,0.78);">
         Wij komen naar jou toe. Onze bartender verzorgt een complete cocktailworkshop op jouw locatie — inclusief shots, materialen en begeleiding.
       </p>
