@@ -1,10 +1,22 @@
-import type { Availability, BlockedDate, QuoteRequest, ServiceSettings } from '../types/db';
+import type { Availability, BlockedDate, ServiceSettings } from '../types/db';
+
+// isDateSelectable() only ever reads `.status` and `.event_date` off each
+// confirmedRequests entry (see the double-booking check below). Callers may
+// pass either full QuoteRequest rows (e.g. tests) or the minimal
+// ConfirmedEventDate shape that the public-facing fetchAvailabilityContext()
+// returns (src/shared/lib/data.ts) to avoid leaking PII columns — both
+// satisfy this structurally, so we type against the minimal shape rather
+// than QuoteRequest.
+export interface ConfirmedRequestLike {
+  status: string;
+  event_date: string;
+}
 
 export interface AvailabilityContext {
   availability: Availability[];
   blockedDates: BlockedDate[];
   settings: ServiceSettings;
-  confirmedRequests: QuoteRequest[];
+  confirmedRequests: ConfirmedRequestLike[];
 }
 
 function toDateOnly(date: Date): string {

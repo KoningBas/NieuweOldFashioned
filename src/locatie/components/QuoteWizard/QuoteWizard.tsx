@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
-import { fetchFeaturedPackages } from '../../../shared/lib/data';
-import type { ServicePackage } from '../../../shared/types/db';
+import { fetchAvailabilityContext, fetchFeaturedPackages, fetchServiceSettings } from '../../../shared/lib/data';
+import type { Availability, BlockedDate, ServicePackage, ServiceSettings } from '../../../shared/types/db';
+import type { ConfirmedEventDate } from '../../../shared/lib/data';
 import { StepIndicator } from './StepIndicator';
 import { Step1Package } from './Step1Package';
+import { Step2Counts } from './Step2Counts';
+import { Step3DateLocation } from './Step3DateLocation';
 
 export interface WizardState {
   step: number;
@@ -39,12 +42,25 @@ const INITIAL_STATE: WizardState = {
 export function QuoteWizard() {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
+  const [availabilityCtx, setAvailabilityCtx] = useState<{
+    availability: Availability[]; blockedDates: BlockedDate[]; settings: ServiceSettings; confirmedRequests: ConfirmedEventDate[];
+  } | null>(null);
 
   useEffect(() => {
     fetchFeaturedPackages().then(setPackages).catch((err) => {
       console.error('Failed to load featured packages', err);
       setPackages([]);
     });
+  }, []);
+
+  useEffect(() => {
+    Promise.all([fetchServiceSettings(), fetchAvailabilityContext()])
+      .then(([settingsData, ctx]) => {
+        setAvailabilityCtx({ ...ctx, settings: settingsData });
+      })
+      .catch((err) => {
+        console.error('Failed to load service settings / availability', err);
+      });
   }, []);
 
   const selectedPackage = packages.find((p) => p.id === state.packageId) ?? null;
@@ -68,8 +84,34 @@ export function QuoteWizard() {
               onNext={() => setState((s) => ({ ...s, step: 2 }))}
             />
           )}
-          {state.step > 1 && selectedPackage && (
-            <div className="text-muted">Stap {state.step} van 5 &mdash; wordt in de volgende taken toegevoegd.</div>
+          {state.step === 2 && selectedPackage && (
+            <Step2Counts
+              pkg={selectedPackage}
+              guestCount={state.guestCount}
+              cocktailCount={state.cocktailCount}
+              onGuestCountChange={(v) => setState((s) => ({ ...s, guestCount: v }))}
+              onCocktailCountChange={(v) => setState((s) => ({ ...s, cocktailCount: v }))}
+              onNext={() => setState((s) => ({ ...s, step: 3 }))}
+              onBack={() => setState((s) => ({ ...s, step: 1 }))}
+            />
+          )}
+          {state.step === 3 && (
+            <Step3DateLocation
+              eventDate={state.eventDate}
+              eventCity={state.eventCity}
+              eventPostcode={state.eventPostcode}
+              distanceKm={state.distanceKm}
+              availabilityCtx={availabilityCtx}
+              onDateChange={(v) => setState((s) => ({ ...s, eventDate: v }))}
+              onCityChange={(v) => setState((s) => ({ ...s, eventCity: v }))}
+              onPostcodeChange={(v) => setState((s) => ({ ...s, eventPostcode: v }))}
+              onDistanceChange={(v) => setState((s) => ({ ...s, distanceKm: v }))}
+              onNext={() => setState((s) => ({ ...s, step: 4 }))}
+              onBack={() => setState((s) => ({ ...s, step: 2 }))}
+            />
+          )}
+          {state.step > 3 && selectedPackage && (
+            <div className="text-muted">Stap {state.step} van 5 &mdash; wordt in de volgende taak toegevoegd.</div>
           )}
         </div>
       </div>
