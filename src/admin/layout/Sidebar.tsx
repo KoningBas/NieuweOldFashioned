@@ -4,9 +4,10 @@ import { useAuth } from '../auth/AuthProvider';
 const LINKS = [
   { to: '/', label: 'Overzicht', end: true },
   { to: '/quotes', label: 'Offertes' },
+  { to: '/agenda', label: 'Agenda' },
   { to: '/packages', label: 'Pakketten' },
   { to: '/cocktails', label: 'Cocktailkaart' },
-  { to: '/availability', label: 'Beschikbaarheid' },
+  { to: '/openingstijden', label: 'Openingstijden' },
   { to: '/blocked-dates', label: 'Geblokkeerde data' },
   { to: '/settings', label: 'Instellingen' },
 ];

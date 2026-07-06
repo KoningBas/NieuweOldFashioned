@@ -636,7 +636,7 @@
           <p class="font-body text-sm text-gold uppercase tracking-[0.22em] mb-3">Kom langs</p>
           <h2 class="font-heading text-3xl sm:text-4xl text-white" style="letter-spacing:-0.02em;">Openingstijden</h2>
         </div>
-        <div class="flex flex-col gap-0">
+        <div id="oh-hours" class="flex flex-col gap-0">
           <div class="flex justify-between items-center py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.07);">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Dinsdag</span>
             <span class="font-body text-base text-white">16:00 – sluit</span>
@@ -718,7 +718,7 @@
     <!-- Col 3: Openingstijden compact -->
     <div class="flex flex-col gap-4">
       <h3 class="font-heading text-lg text-white">Openingstijden</h3>
-      <div class="flex flex-col gap-1.5">
+      <div id="oh-hours-footer" class="flex flex-col gap-1.5">
         <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Di – Wo</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">16:00</span></div>
         <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Donderdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">15:00</span></div>
         <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Vrijdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">14:00</span></div>
@@ -1211,6 +1211,106 @@
   window.openBookingModal = openBookingModal;
   window.closeBookingModal = closeBookingModal;
 })();
+</script>
+
+<!-- ================================================================
+  LIVE OPENINGSTIJDEN — leest de availability-tabel uit Supabase en
+  vult de grote sectie (#oh-hours) en de footer-kolom (#oh-hours-footer).
+  Deze pagina valt buiten de Vite-build, dus Supabase komt via een ESM-CDN.
+  Bij een fout of onvolledige data blijft de statische fallback-HTML staan.
+================================================================ -->
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const SB_URL = 'https://qbfieohnyzjzelbaxbrz.supabase.co';
+  const SB_KEY = 'sb_publishable_Rblimh5mQuUwnJqFr7loxA_lih0PylA';
+
+  const FULL = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+  const SHORT = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+  const ORDER = [2, 3, 4, 5, 6, 0, 1]; // Di..Za, dan Zo, Ma — houdt gesloten Zo/Ma gegroepeerd achteraan
+  const MUTED = '#8A7A6A';
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const hhmm = (s) => (s || '').slice(0, 5);
+
+  function closedLabelBig(run) {
+    if (run.length === 1) return FULL[run[0]];
+    if (run.length === 2) return `${FULL[run[0]]} & ${FULL[run[1]]}`;
+    return `${FULL[run[0]]} – ${FULL[run[run.length - 1]]}`;
+  }
+
+  function renderBig(byDay) {
+    const rows = [];
+    let i = 0;
+    while (i < ORDER.length) {
+      const wd = ORDER[i];
+      const r = byDay[wd];
+      if (r.is_available) {
+        rows.push({ label: FULL[wd], open: true, value: `${hhmm(r.start_time)} – sluit` });
+        i++;
+      } else {
+        const run = [];
+        while (i < ORDER.length && !byDay[ORDER[i]].is_available) { run.push(ORDER[i]); i++; }
+        rows.push({ label: closedLabelBig(run), open: false });
+      }
+    }
+    const html = rows.map((row, idx) => {
+      const border = idx === rows.length - 1 ? '' : ' style="border-bottom:1px solid rgba(255,255,255,0.07);"';
+      const val = row.open
+        ? `<span class="font-body text-base text-white">${esc(row.value)}</span>`
+        : `<span class="font-body text-base" style="color:${MUTED};">Gesloten</span>`;
+      return `<div class="flex justify-between items-center py-2.5"${border}><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">${esc(row.label)}</span>${val}</div>`;
+    }).join('');
+    const el = document.getElementById('oh-hours');
+    if (el) el.innerHTML = html;
+  }
+
+  function footerLabel(run) {
+    if (run.length === 1) return FULL[run[0]];
+    return `${SHORT[run[0]]} – ${SHORT[run[run.length - 1]]}`;
+  }
+
+  function renderFooter(byDay) {
+    const groups = [];
+    let i = 0;
+    while (i < ORDER.length) {
+      const r = byDay[ORDER[i]];
+      const key = r.is_available ? `o${hhmm(r.start_time)}` : 'c';
+      const run = [ORDER[i]];
+      i++;
+      while (i < ORDER.length) {
+        const nr = byDay[ORDER[i]];
+        const nkey = nr.is_available ? `o${hhmm(nr.start_time)}` : 'c';
+        if (nkey !== key) break;
+        run.push(ORDER[i]);
+        i++;
+      }
+      groups.push({ run, open: r.is_available, value: hhmm(r.start_time) });
+    }
+    const html = groups.map((g) => {
+      const val = g.open
+        ? `<span class="font-body text-base" style="color:rgba(255,255,255,0.78);">${esc(g.value)}</span>`
+        : `<span class="font-body text-base" style="color:${MUTED};">Gesloten</span>`;
+      return `<div class="flex justify-between"><span class="font-body text-base" style="color:${MUTED};">${esc(footerLabel(g.run))}</span>${val}</div>`;
+    }).join('');
+    const el = document.getElementById('oh-hours-footer');
+    if (el) el.innerHTML = html;
+  }
+
+  (async () => {
+    try {
+      const sb = createClient(SB_URL, SB_KEY);
+      const { data, error } = await sb.from('availability').select('*').order('weekday', { ascending: true });
+      if (error || !data) return; // netwerk-/RLS-fout → statische fallback blijft staan
+      const byDay = {};
+      data.forEach((r) => { byDay[r.weekday] = r; });
+      if (ORDER.some((wd) => !byDay[wd])) return; // onvolledige data → fallback
+      renderBig(byDay);
+      renderFooter(byDay);
+    } catch (_) {
+      // stil falen — de statische HTML is de fallback
+    }
+  })();
 </script>
 </body>
 </html>

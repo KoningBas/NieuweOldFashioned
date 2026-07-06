@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { Login } from './auth/Login';
 import { Overview } from './pages/Overview';
 import { QuoteRequests } from './pages/QuoteRequests';
+import { Agenda } from './pages/Agenda';
 import { ServicePackages } from './pages/ServicePackages';
 import { CocktailMenu } from './pages/CocktailMenu';
 import { Availability } from './pages/Availability';
@@ -32,9 +33,10 @@ function Gate() {
       <Routes>
         <Route path="/" element={<Overview />} />
         <Route path="/quotes" element={<QuoteRequests />} />
+        <Route path="/agenda" element={<Agenda />} />
         <Route path="/packages" element={<ServicePackages />} />
         <Route path="/cocktails" element={<CocktailMenu />} />
-        <Route path="/availability" element={<Availability />} />
+        <Route path="/openingstijden" element={<Availability />} />
         <Route path="/blocked-dates" element={<BlockedDates />} />
         <Route path="/settings" element={<ServiceSettings />} />
       </Routes>
