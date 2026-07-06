@@ -6,7 +6,10 @@ export function CocktailsSection() {
   const [cocktails, setCocktails] = useState<CocktailMenuItem[]>([]);
 
   useEffect(() => {
-    fetchFeaturedCocktails().then(setCocktails).catch(() => setCocktails([]));
+    fetchFeaturedCocktails().then(setCocktails).catch((err) => {
+      console.error('Failed to load featured cocktails', err);
+      setCocktails([]);
+    });
   }, []);
 
   if (cocktails.length === 0) return null;

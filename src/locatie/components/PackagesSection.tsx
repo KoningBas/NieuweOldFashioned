@@ -13,9 +13,13 @@ function formatPriceUnit(pkg: ServicePackage): string {
 
 export function PackagesSection() {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchFeaturedPackages().then(setPackages).catch(() => setPackages([]));
+    fetchFeaturedPackages().then(setPackages).catch((err) => {
+      console.error('Failed to load featured packages', err);
+      setPackages([]);
+    });
   }, []);
 
   if (packages.length === 0) return null;
@@ -32,13 +36,15 @@ export function PackagesSection() {
               key={pkg.id}
               className="group relative rounded-2xl overflow-hidden bg-surface-elevated border border-white/5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] hover:shadow-[0_25px_60px_-15px_rgba(200,146,42,0.25)] transition-transform duration-300 hover:-translate-y-1"
             >
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  src={PACKAGE_IMAGES[pkg.category] ?? '/OldImages/HighCocktail.jpg'}
-                  alt={pkg.package_name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ mixBlendMode: 'multiply' }}
-                />
+              <div className="relative h-64 overflow-hidden bg-surface-elevated">
+                {!failedImages.has(pkg.id) && (
+                  <img
+                    src={PACKAGE_IMAGES[pkg.category] ?? '/OldImages/HighCocktail.jpg'}
+                    alt={pkg.package_name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={() => setFailedImages((prev) => new Set(prev).add(pkg.id))}
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-surface-elevated via-surface-elevated/20 to-transparent" />
               </div>
               <div className="p-8">
@@ -49,7 +55,12 @@ export function PackagesSection() {
                     <span className="text-gold-light text-2xl font-heading">&euro;{pkg.price}</span>
                     <span className="text-muted text-sm ml-1">{formatPriceUnit(pkg)}</span>
                   </div>
-                  <a href="#offerte" className="text-sm text-gold-light hover:text-white transition-colors">Offerte aanvragen &rarr;</a>
+                  <a
+                    href="#offerte"
+                    className="text-sm text-gold-light hover:text-white transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 rounded"
+                  >
+                    Offerte aanvragen &rarr;
+                  </a>
                 </div>
               </div>
             </div>
