@@ -103,6 +103,21 @@ create policy "public read availability" on availability for select using (true)
 create policy "public read blocked dates" on blocked_dates for select using (true);
 create policy "public read service settings" on service_settings for select using (true);
 
+-- Public availability check for the quote wizard needs to know which dates are
+-- already confirmed (for the "one event per day" double-booking guard), but
+-- quote_requests holds customer PII (full_name, email, phone, special_requests).
+-- There is intentionally no public select policy on quote_requests itself.
+-- Instead, expose only the minimum via a narrow view: the event_date of
+-- confirmed bookings, nothing else. Views run with their owner's privileges
+-- against the base table (not the caller's), so this view can read
+-- quote_requests despite anon having no select policy on it, while the view
+-- definition itself enforces both the row filter (status = 'confirmed') and
+-- the column restriction (event_date only).
+create view public_confirmed_event_dates as
+  select event_date from quote_requests where status = 'confirmed';
+
+grant select on public_confirmed_event_dates to anon;
+
 -- public insert quote requests only
 create policy "public insert quote requests" on quote_requests for insert with check (status = 'new');
 
