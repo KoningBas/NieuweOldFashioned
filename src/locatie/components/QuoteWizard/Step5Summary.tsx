@@ -60,7 +60,7 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
 
   return (
     <div>
-      <h3 className="font-heading text-2xl mb-6">Offerte overzicht</h3>
+      <h3 className="font-heading text-3xl mb-6">Offerte overzicht</h3>
 
       <dl className="grid grid-cols-2 gap-y-3 text-muted mb-8">
         <dt>Pakket</dt><dd className="text-white text-right">{pkg.package_name}</dd>

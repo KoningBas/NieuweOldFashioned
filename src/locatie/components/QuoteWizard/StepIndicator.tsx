@@ -10,13 +10,13 @@ export function StepIndicator({ current }: { current: number }) {
         return (
           <div key={label} className="flex items-center gap-3 flex-1">
             <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium shrink-0 transition-colors duration-300 ${
-                active ? 'bg-gold text-surface' : done ? 'bg-gold-light/30 text-gold-light border border-gold-light/50' : 'bg-white/5 text-muted border border-white/10'
+              className={`w-11 h-11 rounded-full flex items-center justify-center text-lg font-medium shrink-0 transition-colors duration-300 ${
+                active ? 'bg-gold text-surface' : done ? 'bg-gold-light/30 text-gold-light border border-gold-light/50' : 'bg-white/5 text-prose border border-white/10'
               }`}
             >
               {step}
             </div>
-            <span className={`hidden md:inline text-sm ${active ? 'text-white' : 'text-muted'}`}>{label}</span>
+            <span className={`hidden md:inline text-lg ${active ? 'text-white' : 'text-prose'}`}>{label}</span>
             {step < LABELS.length && <div className="flex-1 h-px bg-white/10" />}
           </div>
         );

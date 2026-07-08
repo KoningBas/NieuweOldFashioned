@@ -4,43 +4,76 @@ export function Hero() {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
-    <section className="relative min-h-[92vh] flex items-end pb-24 pt-32 px-6 md:px-10 overflow-hidden bg-surface">
-      {!imageFailed && (
-        <img
-          src="/OldImages/AbgarLocatie.jpg"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={() => setImageFailed(true)}
+    <section
+      className="relative flex w-full justify-center max-w-none"
+      style={{ height: 'min(66.67vw, 100svh)', minHeight: '760px' }}
+    >
+      <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ height: '100%' }}>
+        {/* Background image */}
+        {!imageFailed && (
+          <img
+            src="/OldImages/AbgarLocatie.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => setImageFailed(true)}
+          />
+        )}
+        {/* Dark overlay gradient */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(13,13,13,0.35) 0%, rgba(13,13,13,0.85) 100%)' }}
         />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-surface/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-surface/60 via-transparent to-transparent" />
-      <div
-        className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full opacity-30 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #C8922A, transparent 70%)' }}
-      />
+        {/* Center darkening — improves text legibility without flattening the photo */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 50%, rgba(13,13,13,0.72) 0%, transparent 100%)' }}
+        />
+        {/* Warm amber glow at bottom */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(200,146,42,0.18) 0%, transparent 60%)' }}
+        />
+      </div>
 
-      <div className="relative max-w-7xl mx-auto w-full">
-        <p className="uppercase tracking-[0.3em] text-gold-light text-sm mb-6">Op jouw locatie</p>
-        <h1 className="font-heading text-5xl md:text-7xl leading-[1.05] tracking-[-0.02em] max-w-3xl mb-6">
+      {/* Text overlay */}
+      <div className="pointer-events-none absolute inset-0 flex max-w-4xl mx-auto flex-col gap-4 px-6 sm:px-8 items-center text-center justify-end lg:justify-center pt-32 lg:pt-0 pb-16 lg:pb-0 z-30">
+        <p
+          className="font-body text-base sm:text-lg text-gold-light uppercase tracking-[0.28em]"
+          style={{ textShadow: '0 1px 12px rgba(0,0,0,0.95), 0 4px 24px rgba(0,0,0,0.7)' }}
+        >
+          Op jouw locatie
+        </p>
+        <h1
+          className="font-heading text-5xl sm:text-6xl lg:text-7xl leading-tight text-white text-balance"
+          style={{
+            letterSpacing: '-0.02em',
+            textShadow: '0 2px 6px rgba(0,0,0,0.95), 0 8px 48px rgba(0,0,0,0.85), 0 20px 80px rgba(0,0,0,0.6)',
+          }}
+        >
           Cocktails op Locatie
         </h1>
-        <p className="text-muted text-xl leading-[1.7] max-w-xl mb-10">
+        <p
+          className="font-body text-base sm:text-lg leading-relaxed mt-1 max-w-xl text-balance"
+          style={{
+            color: 'rgba(255,255,255,0.92)',
+            textShadow: '0 1px 8px rgba(0,0,0,0.95), 0 4px 24px rgba(0,0,0,0.75), 0 12px 48px rgba(0,0,0,0.5)',
+          }}
+        >
           The Old Fashioned komt naar jouw feest, bruiloft, bedrijfsborrel of thuisfeest &mdash; met bartenders, materialen en een cocktailmenu op maat.
         </p>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3 pt-4 justify-center pointer-events-auto">
           <a
             href="#offerte"
-            className="rounded-full px-8 py-4 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium shadow-[0_8px_30px_-6px_rgba(200,146,42,0.6)] hover:shadow-[0_10px_40px_-4px_rgba(200,146,42,0.8)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+            className="btn-primary rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center"
           >
             Vraag een offerte aan
           </a>
           <a
-            href="#pakketten"
-            className="rounded-full px-8 py-4 border border-white/20 text-white hover:border-gold-light hover:text-gold-light hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+            href="#cocktailkaart"
+            className="btn-ghost rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center"
           >
-            Bekijk de mogelijkheden
+            Bekijk de cocktailkaart
           </a>
         </div>
       </div>

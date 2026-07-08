@@ -29,8 +29,8 @@ const INITIAL_STATE: WizardState = {
   step: 1,
   packageId: null,
   eventType: '',
-  guestCount: 50,
-  cocktailCount: 50,
+  guestCount: 0,
+  cocktailCount: 0,
   eventDate: '',
   eventCity: '',
   eventPostcode: '',
@@ -50,7 +50,21 @@ export function QuoteWizard() {
   } | null>(null);
 
   useEffect(() => {
-    fetchFeaturedPackages().then(setPackages).catch((err) => {
+    fetchFeaturedPackages().then((pkgs) => {
+      // Only the on-location bartending service is offered through this wizard,
+      // presented under the page's brand name "Cocktails op Locatie". Workshops
+      // are handled elsewhere, so they are excluded here. The quote still submits
+      // the real package_id; only the display name is overridden.
+      const filtered = pkgs
+        .filter((p) => !/workshop/i.test(p.package_name))
+        .map((p) => ({ ...p, package_name: 'Cocktails op Locatie' }));
+      const list = filtered.length > 0 ? filtered : pkgs;
+      setPackages(list);
+      // Single service → pre-select it so the visitor lands on the event-type choice.
+      if (list.length > 0) {
+        setState((s) => (s.packageId ? s : { ...s, packageId: list[0].id }));
+      }
+    }).catch((err) => {
       console.error('Failed to load featured packages', err);
       setPackages([]);
     });
@@ -71,7 +85,7 @@ export function QuoteWizard() {
   return (
     <section id="offerte" className="py-28 px-6 md:px-10">
       <div className="max-w-4xl mx-auto">
-        <p className="uppercase tracking-[0.3em] text-gold-light text-sm mb-4">Offerte aanvragen</p>
+        <p className="uppercase tracking-[0.3em] text-gold-light text-base mb-4">Offerte aanvragen</p>
         <h2 className="font-heading text-4xl md:text-5xl tracking-[-0.02em] mb-12">Vraag direct een offerte aan</h2>
 
         <StepIndicator current={state.step} />
@@ -142,7 +156,7 @@ export function QuoteWizard() {
           {submitted && (
             <div className="text-center py-10">
               <h3 className="font-heading text-3xl text-gold-light mb-4">Offerte aangevraagd!</h3>
-              <p className="text-muted max-w-md mx-auto leading-[1.7]">
+              <p className="text-prose text-lg max-w-md mx-auto leading-[1.7]">
                 Bedankt, {state.fullName}. We nemen binnen enkele werkdagen contact met je op over jouw {state.eventType.toLowerCase()} op {state.eventDate}.
               </p>
             </div>

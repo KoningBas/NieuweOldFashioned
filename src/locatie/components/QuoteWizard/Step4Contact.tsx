@@ -19,27 +19,27 @@ export function Step4Contact({
 
   return (
     <div>
-      <h3 className="font-heading text-2xl mb-6">Jouw gegevens</h3>
+      <h3 className="font-heading text-3xl mb-6">Jouw gegevens</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <label className="block">
-          <span className="block text-sm uppercase tracking-widest text-muted mb-3">Naam</span>
-          <input type="text" value={fullName} onChange={(e) => onFullNameChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+          <span className="block text-lg text-prose mb-3">Naam</span>
+          <input type="text" value={fullName} onChange={(e) => onFullNameChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
         </label>
         <label className="block">
-          <span className="block text-sm uppercase tracking-widest text-muted mb-3">E-mailadres</span>
-          <input type="email" value={email} onChange={(e) => onEmailChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+          <span className="block text-lg text-prose mb-3">E-mailadres</span>
+          <input type="email" value={email} onChange={(e) => onEmailChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
         </label>
       </div>
 
       <label className="block mb-6">
-        <span className="block text-sm uppercase tracking-widest text-muted mb-3">Telefoonnummer</span>
-        <input type="tel" value={phone} onChange={(e) => onPhoneChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+        <span className="block text-lg text-prose mb-3">Telefoonnummer</span>
+        <input type="tel" value={phone} onChange={(e) => onPhoneChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
       </label>
 
       <label className="block mb-10">
-        <span className="block text-sm uppercase tracking-widest text-muted mb-3">Bijzonderheden (optioneel)</span>
-        <textarea rows={4} value={specialRequests} onChange={(e) => onSpecialRequestsChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+        <span className="block text-lg text-prose mb-3">Bijzonderheden (optioneel)</span>
+        <textarea rows={4} value={specialRequests} onChange={(e) => onSpecialRequestsChange(e.target.value)} className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
       </label>
 
       <div className="flex gap-4">

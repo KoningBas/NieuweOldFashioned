@@ -10,36 +10,59 @@ interface Props {
   onBack: () => void;
 }
 
+const inputClass =
+  'w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light';
+const labelClass = 'block text-lg text-prose mb-3';
+
 export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange, onCocktailCountChange, onNext, onBack }: Props) {
   const isPerCocktail = pkg.price_unit === 'per_cocktail';
   const canProceed = guestCount >= 1 && (!isPerCocktail || cocktailCount >= pkg.min_quantity);
 
   return (
     <div>
-      <h3 className="font-heading text-2xl mb-6">Aantal gasten en cocktails</h3>
+      <h3 className="font-heading text-3xl mb-6">Aantal gasten en cocktails</h3>
 
       <label className="block mb-8">
-        <span className="block text-sm uppercase tracking-widest text-muted mb-3">Aantal gasten</span>
+        <span className={labelClass}>Aantal gasten</span>
         <input
           type="number"
           min={1}
-          value={guestCount}
-          onChange={(e) => onGuestCountChange(Number(e.target.value))}
-          className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
+          value={guestCount === 0 ? '' : guestCount}
+          placeholder="Bijv. 100"
+          onChange={(e) => onGuestCountChange(e.target.value === '' ? 0 : Number(e.target.value))}
+          className={inputClass}
         />
       </label>
 
       {isPerCocktail && (
-        <label className="block mb-8">
-          <span className="block text-sm uppercase tracking-widest text-muted mb-3">Aantal cocktails (min. {pkg.min_quantity})</span>
+        <label className="block mb-4">
+          <span className={labelClass}>Aantal cocktails (min. {pkg.min_quantity})</span>
           <input
             type="number"
             min={pkg.min_quantity}
-            value={cocktailCount}
-            onChange={(e) => onCocktailCountChange(Number(e.target.value))}
-            className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
+            value={cocktailCount === 0 ? '' : cocktailCount}
+            placeholder="Bijv. 100"
+            onChange={(e) => onCocktailCountChange(e.target.value === '' ? 0 : Number(e.target.value))}
+            className={inputClass}
           />
         </label>
+      )}
+
+      {isPerCocktail && (
+        <div className="flex gap-3 rounded-xl border border-gold/20 bg-gold/[0.06] p-4 mb-10">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-gold-light" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
+          </svg>
+          <div>
+            <p className="text-lg text-gold-light mb-1">Minimaal 1 cocktail per persoon</p>
+            <p className="text-base text-prose leading-[1.7]">
+              Reken op &eacute;&eacute;n cocktail per gast. Niet iedereen drinkt evenveel: kinderen en niet-drinkers slaan er een over,
+              anderen nemen er twee of drie. Over het hele gezelschap kom je zo gemiddeld op ongeveer &eacute;&eacute;n per persoon uit.
+            </p>
+          </div>
+        </div>
       )}
 
       <div className="flex gap-4">
