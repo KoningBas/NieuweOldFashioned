@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import type { ServicePackage } from '../../../shared/types/db';
 
 interface Props {
@@ -9,76 +9,6 @@ interface Props {
   onEventTypeChange: (value: string) => void;
   onNext: () => void;
 }
-
-const iconProps = {
-  width: 30,
-  height: 30,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.5,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-};
-
-const EVENT_TYPES: { label: string; icon: ReactNode }[] = [
-  {
-    label: 'Bruiloft',
-    icon: (
-      <svg {...iconProps}>
-        <path d="M12 20.5S3.5 15 3.5 9.2A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 8.5 2.2C20.5 15 12 20.5 12 20.5Z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Bedrijfsborrel',
-    icon: (
-      <svg {...iconProps}>
-        <path d="M4 4h16l-8 9-8-9Z" />
-        <path d="M12 13v6" />
-        <path d="M8 20h8" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Verjaardag',
-    icon: (
-      <svg {...iconProps}>
-        <path d="M4 21h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7Z" />
-        <path d="M4 16.5c1.6 1.4 3.1 1.4 4 0s2.4-1.4 4 0 3.1 1.4 4 0" />
-        <path d="M12 12V8" />
-        <path d="M12 8c-1-1 .6-2.4 0-4-.6 1.6 1 3 0 4Z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Festival',
-    icon: (
-      <svg {...iconProps}>
-        <path d="M6 21V4" />
-        <path d="M6 4h11l-2.5 3.5L17 11H6" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Thuisfeest',
-    icon: (
-      <svg {...iconProps}>
-        <path d="M4 11 12 4l8 7" />
-        <path d="M6 10v10h12V10" />
-        <path d="M10 20v-5h4v5" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Anders',
-    icon: (
-      <svg {...iconProps}>
-        <path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9L12 3Z" />
-      </svg>
-    ),
-  },
-];
 
 // Workshops get their own photo; the bartending / cocktail service uses the pour shot.
 function imageForPackage(pkg: ServicePackage): string {
@@ -139,40 +69,23 @@ export function Step1Package({ packages, selectedPackageId, eventType, onSelectP
       </div>
 
       <h3 className="font-heading text-3xl mb-6">Type evenement</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-12">
-        {EVENT_TYPES.map(({ label, icon }) => {
-          const selected = eventType === label;
-          return (
-            <button
-              key={label}
-              type="button"
-              aria-pressed={selected}
-              onClick={() => onEventTypeChange(label)}
-              className={`group relative flex flex-col items-center justify-center gap-3 rounded-xl px-3 py-7 border text-center transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
-                selected ? 'border-gold bg-gold/10 shadow-[0_0_0_1px_rgba(200,146,42,0.35)]' : 'border-white/10 bg-surface hover:border-white/25'
-              }`}
-            >
-              {selected && (
-                <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-surface">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
-                </span>
-              )}
-              <span className={`transition-colors duration-200 ${selected ? 'text-gold-light' : 'text-gold/70 group-hover:text-gold-light'}`}>
-                {icon}
-              </span>
-              <span className={`text-lg ${selected ? 'text-white' : 'text-prose'}`}>{label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <label className="block mb-12">
+        <input
+          type="text"
+          value={eventType}
+          placeholder="Bijv. Bruiloft"
+          onChange={(e) => onEventTypeChange(e.target.value)}
+          className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
+        />
+      </label>
 
       <button
         type="button"
-        disabled={!selectedPackageId || !eventType}
+        disabled={!selectedPackageId || !eventType.trim()}
         onClick={onNext}
-        className="rounded-full px-8 py-4 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        className="btn-primary rounded-full px-6 py-2.5 text-base font-body font-semibold disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
       >
-        Volgende stap
+        Verder
       </button>
     </div>
   );

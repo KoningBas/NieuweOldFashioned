@@ -35,42 +35,31 @@ export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange
       </label>
 
       {isPerCocktail && (
-        <label className="block mb-4">
-          <span className={labelClass}>Aantal cocktails (min. {pkg.min_quantity})</span>
-          <input
-            type="number"
-            min={pkg.min_quantity}
-            value={cocktailCount === 0 ? '' : cocktailCount}
-            placeholder="Bijv. 100"
-            onChange={(e) => onCocktailCountChange(e.target.value === '' ? 0 : Number(e.target.value))}
-            className={inputClass}
-          />
-        </label>
-      )}
-
-      {isPerCocktail && (
-        <div className="flex gap-3 rounded-xl border border-gold/20 bg-gold/[0.06] p-4 mb-10">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-gold-light" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M12 11v5" />
-            <path d="M12 8h.01" />
-          </svg>
-          <div>
-            <p className="text-lg text-gold-light mb-1">Minimaal 1 cocktail per persoon</p>
-            <p className="text-base text-prose leading-[1.7]">
-              Reken op &eacute;&eacute;n cocktail per gast. Niet iedereen drinkt evenveel: kinderen en niet-drinkers slaan er een over,
-              anderen nemen er twee of drie. Over het hele gezelschap kom je zo gemiddeld op ongeveer &eacute;&eacute;n per persoon uit.
-            </p>
-          </div>
+        <div className="mb-10">
+          <label className="block">
+            <span className={labelClass}>Aantal cocktails (min. {pkg.min_quantity})</span>
+            <input
+              type="number"
+              min={pkg.min_quantity}
+              value={cocktailCount === 0 ? '' : cocktailCount}
+              placeholder="Bijv. 100"
+              onChange={(e) => onCocktailCountChange(e.target.value === '' ? 0 : Number(e.target.value))}
+              className={inputClass}
+            />
+          </label>
+          <p className="mt-3 text-base text-prose leading-[1.7]">
+            Reken op &eacute;&eacute;n cocktail per gast. Niet iedereen drinkt evenveel: kinderen en niet-drinkers slaan er een over,
+            anderen nemen er twee of drie. Over het hele gezelschap kom je zo gemiddeld op ongeveer &eacute;&eacute;n per persoon uit.
+          </p>
         </div>
       )}
 
       <div className="flex gap-4">
-        <button type="button" onClick={onBack} className="rounded-full px-8 py-4 border border-white/20 text-white hover:border-gold-light hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+        <button type="button" onClick={onBack} className="rounded-full px-6 py-2.5 text-base border border-white/20 text-white hover:border-gold-light active:opacity-90 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
           Terug
         </button>
-        <button type="button" disabled={!canProceed} onClick={onNext} className="rounded-full px-8 py-4 bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
-          Volgende stap
+        <button type="button" disabled={!canProceed} onClick={onNext} className="btn-primary rounded-full px-6 py-2.5 text-base font-body font-semibold disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+          Verder
         </button>
       </div>
     </div>

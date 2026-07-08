@@ -4,3 +4,4 @@ docs/
 screenshot-section.mjs
 memory/
 .env.local
+dist/
