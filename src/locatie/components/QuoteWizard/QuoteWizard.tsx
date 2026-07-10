@@ -16,6 +16,7 @@ export interface WizardState {
   guestCount: number;
   cocktailCount: number;
   eventDate: string;
+  eventTime: string;
   eventCity: string;
   eventPostcode: string;
   distanceKm: number;
@@ -32,6 +33,7 @@ const INITIAL_STATE: WizardState = {
   guestCount: 0,
   cocktailCount: 0,
   eventDate: '',
+  eventTime: '',
   eventCity: '',
   eventPostcode: '',
   distanceKm: 5,
@@ -83,14 +85,14 @@ export function QuoteWizard() {
   const selectedPackage = packages.find((p) => p.id === state.packageId) ?? null;
 
   return (
-    <section id="offerte" className="py-28 px-6 md:px-10">
+    <section id="offerte" className="py-8 md:py-28 px-5 md:px-10">
       <div className="max-w-4xl mx-auto">
-        <p className="uppercase tracking-[0.3em] text-gold-light text-base mb-4">Offerte aanvragen</p>
-        <h2 className="font-heading text-4xl md:text-5xl tracking-[-0.02em] mb-12">Vraag direct een offerte aan</h2>
+        <p className="hidden md:block uppercase tracking-[0.3em] text-gold-light text-base mb-3 md:mb-4">Offerte aanvragen</p>
+        <h2 className="font-heading text-xl md:text-5xl tracking-[-0.02em] whitespace-nowrap md:whitespace-normal mb-4 md:mb-12">Vraag direct een offerte aan</h2>
 
         <StepIndicator current={state.step} />
 
-        <div className="rounded-2xl bg-surface-elevated border border-white/5 p-8 md:p-10 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.6)]">
+        <div className="rounded-2xl bg-surface-elevated border border-white/5 p-5 md:p-10 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.6)]">
           {state.step === 1 && (
             <Step1Package
               packages={packages}
@@ -115,11 +117,13 @@ export function QuoteWizard() {
           {state.step === 3 && (
             <Step3DateLocation
               eventDate={state.eventDate}
+              eventTime={state.eventTime}
               eventCity={state.eventCity}
               eventPostcode={state.eventPostcode}
               distanceKm={state.distanceKm}
               availabilityCtx={availabilityCtx}
               onDateChange={(v) => setState((s) => ({ ...s, eventDate: v }))}
+              onTimeChange={(v) => setState((s) => ({ ...s, eventTime: v }))}
               onCityChange={(v) => setState((s) => ({ ...s, eventCity: v }))}
               onPostcodeChange={(v) => setState((s) => ({ ...s, eventPostcode: v }))}
               onDistanceChange={(v) => setState((s) => ({ ...s, distanceKm: v }))}

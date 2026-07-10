@@ -1,58 +1,196 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const SFEER_PHOTOS: { src: string; alt: string; className?: string }[] = [
+  { src: '/OldImages/CocktailPour.jpg', alt: 'Bartender schenkt een cocktail over uit een gouden shaker' },
+  { src: '/OldImages/Kaart.png', alt: 'Gast bekijkt de cocktailkaart van The Old Fashioned' },
+  { src: '/OldImages/Rosalia.png', alt: 'Cocktail met munt geserveerd in een geribbeld wijnglas' },
+  { src: '/OldImages/CocktailTiki.jpg', alt: 'Groene tiki-cocktail in een gedecoreerd tikiglas' },
+  { src: '/OldImages/CocktailBloem.jpg', alt: 'Roze cocktail gegarneerd met een verse bloem', className: 'object-bottom' },
+];
+
 export function SfeerSection() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
+  const handleScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const i = max > 0 ? Math.round((el.scrollLeft / max) * (SFEER_PHOTOS.length - 1)) : 0;
+    setActive((prev) => (prev === i ? prev : i));
+  };
+
+  // Tablet & laptop: zelfde swipe/snap-carousel als mobiel, maar met meerdere foto's
+  // per beeld. Elke "stop" is een echte scroll-snap-positie (dus 1 stip per stop),
+  // opnieuw gemeten bij resize omdat het aantal zichtbare kaarten per breakpoint verschilt.
+  const deskTrackRef = useRef<HTMLDivElement>(null);
+  const [deskStops, setDeskStops] = useState<number[]>([0]);
+  const [deskActive, setDeskActive] = useState(0);
+
+  const measureStops = useCallback(() => {
+    const el = deskTrackRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    if (max <= 0) {
+      setDeskStops([0]);
+      setDeskActive(0);
+      return;
+    }
+    const stops: number[] = [];
+    for (const child of Array.from(el.children)) {
+      const left = Math.min((child as HTMLElement).offsetLeft, max);
+      if (!stops.some((s) => Math.abs(s - left) < 8)) stops.push(left);
+    }
+    if (stops[stops.length - 1] < max - 8) stops.push(max);
+    setDeskStops(stops);
+  }, []);
+
+  useEffect(() => {
+    measureStops();
+    const el = deskTrackRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => measureStops());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [measureStops]);
+
+  const handleDeskScroll = () => {
+    const el = deskTrackRef.current;
+    if (!el) return;
+    const sl = el.scrollLeft;
+    let best = 0;
+    let bestDist = Infinity;
+    deskStops.forEach((s, i) => {
+      const d = Math.abs(s - sl);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    });
+    setDeskActive((prev) => (prev === best ? prev : best));
+  };
+
+  const scrollDeskTo = (i: number) => {
+    const el = deskTrackRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(i, deskStops.length - 1));
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollTo({ left: deskStops[clamped], behavior: reduce ? 'auto' : 'smooth' });
+  };
+
   return (
     <section
       id="cocktailkaart"
-      className="py-28 px-6 md:px-10 bg-surface-elevated/40 scroll-mt-24"
+      className="py-12 md:py-28 px-6 md:px-10 bg-surface-elevated/40 scroll-mt-24"
     >
       <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
-        <p className="uppercase tracking-[0.3em] text-gold-light text-base mb-4">De cocktailkaart</p>
-        <h2 className="font-heading text-4xl md:text-5xl tracking-[-0.02em] mb-6 text-balance">
+        <p className="uppercase tracking-[0.3em] text-gold-light text-base mb-3 md:mb-4">De cocktailkaart</p>
+        <h2 className="font-heading text-3xl md:text-5xl tracking-[-0.02em] mb-4 md:mb-6 text-balance">
           Proef de sfeer van onze cocktails
         </h2>
-        <p className="text-prose text-xl leading-[1.7] max-w-xl text-pretty">
+        <p className="text-prose text-base md:text-xl leading-[1.6] md:leading-[1.7] max-w-xl text-pretty">
           Van rijke klassiekers tot eigenzinnige creaties met rook, vuur en verse
           seizoensingredienten &mdash; onze kaart brengt de sfeer van The Old Fashioned
           naar jouw evenement.
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-14 mb-14">
-        <div className="grid grid-cols-3 grid-rows-2 gap-3 md:gap-4 aspect-[16/9] md:aspect-[2/1]">
-          <div className="col-span-1 row-span-2 overflow-hidden">
-            <img
-              src="/OldImages/CocktailPour.jpg"
-              alt="Bartender schenkt een cocktail over uit een gouden shaker"
-              className="w-full h-full object-cover"
+      {/* Mobile: swipe carousel — grote, scherpe sfeerfoto's */}
+      <div className="md:hidden -mx-6 mt-8 mb-8">
+        <div
+          ref={trackRef}
+          onScroll={handleScroll}
+          className="flex gap-3 overflow-x-auto snap-x snap-mandatory px-6 scroll-px-6 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {SFEER_PHOTOS.map((p) => (
+            <div
+              key={p.src}
+              className="snap-start shrink-0 w-[80%] aspect-[4/5] overflow-hidden rounded-2xl bg-surface-elevated shadow-[0_20px_40px_-18px_rgba(0,0,0,0.8)]"
+            >
+              <img
+                src={p.src}
+                alt={p.alt}
+                loading="lazy"
+                className={`w-full h-full object-cover ${p.className ?? ''}`}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-center gap-2 mt-4" aria-hidden="true">
+          {SFEER_PHOTOS.map((p, i) => (
+            <span
+              key={p.src}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === active ? 'w-5 bg-gold-light' : 'w-1.5 bg-white/25'}`}
             />
+          ))}
+        </div>
+      </div>
+
+      {/* Tablet & laptop: zelfde swipe/snap-carousel, meer foto's zichtbaar + pijlen en klikbare stippen */}
+      <div className="hidden md:block max-w-7xl mx-auto mt-14 mb-14">
+        <div className="relative">
+          <div
+            ref={deskTrackRef}
+            onScroll={handleDeskScroll}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {SFEER_PHOTOS.map((p) => (
+              <div
+                key={p.src}
+                className="snap-start shrink-0 w-[44%] lg:w-[29%] aspect-[4/5] overflow-hidden rounded-2xl bg-surface-elevated shadow-[0_20px_40px_-18px_rgba(0,0,0,0.8)]"
+              >
+                <img
+                  src={p.src}
+                  alt={p.alt}
+                  loading="lazy"
+                  className={`w-full h-full object-cover ${p.className ?? ''}`}
+                />
+              </div>
+            ))}
           </div>
-          <div className="overflow-hidden">
-            <img
-              src="/OldImages/Kaart.png"
-              alt="Gast bekijkt de cocktailkaart van The Old Fashioned"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="overflow-hidden">
-            <img
-              src="/OldImages/Rosalia.png"
-              alt="Cocktail met munt geserveerd in een geribbeld wijnglas"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="overflow-hidden">
-            <img
-              src="/OldImages/CocktailTiki.jpg"
-              alt="Groene tiki-cocktail in een gedecoreerd tikiglas"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="overflow-hidden">
-            <img
-              src="/OldImages/CocktailBloem.jpg"
-              alt="Roze cocktail gegarneerd met een verse bloem"
-              className="w-full h-full object-cover object-bottom"
-            />
-          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollDeskTo(deskActive - 1)}
+            disabled={deskActive === 0}
+            aria-label="Vorige foto's"
+            className="absolute left-3 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full bg-black/55 backdrop-blur-sm border border-white/15 text-white transition-[opacity,background-color,border-color,transform] duration-200 hover:bg-black/75 hover:border-gold-light/60 hover:text-gold-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-light active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => scrollDeskTo(deskActive + 1)}
+            disabled={deskActive >= deskStops.length - 1}
+            aria-label="Volgende foto's"
+            className="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center h-11 w-11 rounded-full bg-black/55 backdrop-blur-sm border border-white/15 text-white transition-[opacity,background-color,border-color,transform] duration-200 hover:bg-black/75 hover:border-gold-light/60 hover:text-gold-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-light active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex justify-center gap-1 mt-4">
+          {deskStops.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => scrollDeskTo(i)}
+              aria-label={`Ga naar fotogroep ${i + 1}`}
+              aria-current={i === deskActive}
+              className="group grid place-items-center py-3 px-2 focus-visible:outline-none"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-[width,background-color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-gold-light group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background ${i === deskActive ? 'w-5 bg-gold-light' : 'w-1.5 bg-white/25 group-hover:bg-white/45'}`}
+              />
+            </button>
+          ))}
         </div>
       </div>
 

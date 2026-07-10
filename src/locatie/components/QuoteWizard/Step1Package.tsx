@@ -20,8 +20,8 @@ export function Step1Package({ packages, selectedPackageId, eventType, onSelectP
 
   return (
     <div>
-      <h3 className="font-heading text-3xl mb-6">Kies je pakket</h3>
-      <div className="mb-12">
+      <h3 className="font-heading text-base md:text-3xl mb-3 md:mb-6">Kies je pakket</h3>
+      <div className="mb-5 md:mb-12">
         {packages.map((pkg) => {
           const selected = pkg.id === selectedPackageId;
           const imageSrc = imageForPackage(pkg);
@@ -32,11 +32,11 @@ export function Step1Package({ packages, selectedPackageId, eventType, onSelectP
               type="button"
               aria-pressed={selected}
               onClick={() => onSelectPackage(pkg.id)}
-              className={`group grid w-full grid-cols-1 sm:grid-cols-[minmax(0,42%)_1fr] overflow-hidden rounded-2xl border text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
+              className={`group grid w-full grid-cols-[38%_1fr] md:grid-cols-[minmax(0,42%)_1fr] overflow-hidden rounded-xl md:rounded-2xl border text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
                 selected ? 'border-gold shadow-[0_0_0_1px_rgba(200,146,42,0.4),0_25px_50px_-25px_rgba(200,146,42,0.35)]' : 'border-white/10 hover:border-white/25'
               }`}
             >
-              <div className="relative aspect-video sm:aspect-auto sm:min-h-full overflow-hidden bg-surface">
+              <div className="relative min-h-full overflow-hidden bg-surface">
                 {!imageFailed ? (
                   <img
                     src={imageSrc}
@@ -50,16 +50,16 @@ export function Step1Package({ packages, selectedPackageId, eventType, onSelectP
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                 <div className="absolute inset-0 bg-gold/10 mix-blend-multiply" />
                 {selected && (
-                  <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-gold px-3 py-1 text-sm font-medium text-surface">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
+                  <span className="absolute left-1.5 top-1.5 md:left-3 md:top-3 inline-flex items-center gap-1 md:gap-1.5 rounded-full bg-gold px-1.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-sm font-medium text-surface">
+                    <svg className="h-2.5 w-2.5 md:h-[13px] md:w-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
                     Geselecteerd
                   </span>
                 )}
               </div>
-              <div className="flex flex-col justify-center gap-2 bg-surface-elevated p-6 md:p-7">
-                <div className="font-heading text-2xl">{pkg.package_name}</div>
-                <div className="text-prose text-base leading-[1.6]">{pkg.description}</div>
-                <div className="mt-1 text-gold-light text-lg">
+              <div className="flex flex-col justify-center gap-1 md:gap-2 bg-surface-elevated p-3.5 md:p-7">
+                <div className="font-heading text-lg leading-tight md:text-2xl">{pkg.package_name}</div>
+                <div className="text-prose text-xs leading-snug line-clamp-3 md:line-clamp-none md:text-base md:leading-[1.6]">{pkg.description}</div>
+                <div className="mt-0.5 md:mt-1 text-gold-light text-sm md:text-lg">
                   &euro;{pkg.price} {pkg.price_unit === 'per_cocktail' ? 'per cocktail' : 'per persoon'}
                 </div>
               </div>
@@ -68,14 +68,14 @@ export function Step1Package({ packages, selectedPackageId, eventType, onSelectP
         })}
       </div>
 
-      <h3 className="font-heading text-3xl mb-6">Type evenement</h3>
-      <label className="block mb-12">
+      <h3 className="font-heading text-base md:text-3xl mb-2 md:mb-6">Type evenement</h3>
+      <label className="block mb-5 md:mb-12">
         <input
           type="text"
           value={eventType}
           placeholder="Bijv. Bruiloft"
           onChange={(e) => onEventTypeChange(e.target.value)}
-          className="w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
+          className="w-full rounded-lg bg-surface border border-white/15 px-4 py-3 text-base md:px-5 md:py-3.5 md:text-lg text-white placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light"
         />
       </label>
 
@@ -83,7 +83,7 @@ export function Step1Package({ packages, selectedPackageId, eventType, onSelectP
         type="button"
         disabled={!selectedPackageId || !eventType.trim()}
         onClick={onNext}
-        className="btn-primary rounded-full px-6 py-2.5 text-base font-body font-semibold disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        className="btn-primary w-full md:w-auto rounded-full px-6 py-3 md:py-2.5 text-base font-body font-semibold disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
       >
         Verder
       </button>

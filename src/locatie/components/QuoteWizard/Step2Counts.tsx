@@ -11,8 +11,8 @@ interface Props {
 }
 
 const inputClass =
-  'w-full rounded-lg bg-surface border border-white/15 px-5 py-3.5 text-lg text-white placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light';
-const labelClass = 'block text-lg text-prose mb-3';
+  'w-full rounded-lg bg-surface border border-white/15 px-4 py-3 text-base md:px-5 md:py-3.5 md:text-lg text-white placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light';
+const labelClass = 'block text-sm md:text-lg text-prose mb-2 md:mb-3';
 
 export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange, onCocktailCountChange, onNext, onBack }: Props) {
   const isPerCocktail = pkg.price_unit === 'per_cocktail';
@@ -20,9 +20,9 @@ export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange
 
   return (
     <div>
-      <h3 className="font-heading text-3xl mb-6">Aantal gasten en cocktails</h3>
+      <h3 className="font-heading text-base md:text-3xl mb-4 md:mb-6">Aantal gasten en cocktails</h3>
 
-      <label className="block mb-8">
+      <label className="block mb-4 md:mb-8">
         <span className={labelClass}>Aantal gasten</span>
         <input
           type="number"
@@ -35,7 +35,7 @@ export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange
       </label>
 
       {isPerCocktail && (
-        <div className="mb-10">
+        <div className="mb-5 md:mb-10">
           <label className="block">
             <span className={labelClass}>Aantal cocktails (min. {pkg.min_quantity})</span>
             <input
@@ -47,7 +47,7 @@ export function Step2Counts({ pkg, guestCount, cocktailCount, onGuestCountChange
               className={inputClass}
             />
           </label>
-          <p className="mt-3 text-base text-prose leading-[1.7]">
+          <p className="mt-2 md:mt-3 text-xs md:text-base text-prose leading-snug md:leading-[1.7]">
             Reken op &eacute;&eacute;n cocktail per gast. Niet iedereen drinkt evenveel: kinderen en niet-drinkers slaan er een over,
             anderen nemen er twee of drie. Over het hele gezelschap kom je zo gemiddeld op ongeveer &eacute;&eacute;n per persoon uit.
           </p>

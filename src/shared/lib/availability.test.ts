@@ -89,7 +89,7 @@ describe('isDateSelectable', () => {
     const dateStr = toLocalDateStr(friday);
     const confirmedRequests: QuoteRequest[] = [{
       id: 'q1', full_name: '', email: '', phone: '', event_type: '', guest_count: 10, cocktail_count: 50,
-      package_id: 'p1', event_date: dateStr, event_city: '', event_postcode: '', distance_km: 5,
+      package_id: 'p1', event_date: dateStr, event_time: null, event_city: '', event_postcode: '', distance_km: 5,
       estimated_total: 0, status: 'confirmed', special_requests: null, created_at: '2026-01-01',
     }];
     expect(isDateSelectable(friday, { availability, blockedDates: [], settings, confirmedRequests })).toBe(false);
@@ -149,7 +149,7 @@ describe('isDateSelectable', () => {
     const dateStr = toLocalDateStr(friday);
     const nonConfirmedRequests: QuoteRequest[] = [{
       id: 'q2', full_name: '', email: '', phone: '', event_type: '', guest_count: 10, cocktail_count: 50,
-      package_id: 'p1', event_date: dateStr, event_city: '', event_postcode: '', distance_km: 5,
+      package_id: 'p1', event_date: dateStr, event_time: null, event_city: '', event_postcode: '', distance_km: 5,
       estimated_total: 0, status: 'new', special_requests: null, created_at: '2026-01-01',
     }];
     expect(

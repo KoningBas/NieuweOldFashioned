@@ -43,6 +43,7 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
         cocktail_count: state.cocktailCount,
         package_id: pkg.id,
         event_date: state.eventDate,
+        event_time: state.eventTime || null,
         event_city: state.eventCity,
         event_postcode: state.eventPostcode,
         distance_km: state.distanceKm,
@@ -60,12 +61,13 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
 
   return (
     <div>
-      <h3 className="font-heading text-3xl mb-6">Offerte overzicht</h3>
+      <h3 className="font-heading text-base md:text-3xl mb-4 md:mb-6">Offerte overzicht</h3>
 
-      <dl className="grid grid-cols-2 gap-y-3 text-muted mb-8">
+      <dl className="grid grid-cols-2 gap-y-2 md:gap-y-3 text-sm md:text-base text-muted mb-5 md:mb-8">
         <dt>Pakket</dt><dd className="text-white text-right">{pkg.package_name}</dd>
         <dt>Evenement</dt><dd className="text-white text-right">{state.eventType}</dd>
         <dt>Datum</dt><dd className="text-white text-right">{state.eventDate}</dd>
+        {state.eventTime && (<><dt>Begintijd</dt><dd className="text-white text-right">{state.eventTime}</dd></>)}
         <dt>Locatie</dt><dd className="text-white text-right">{state.eventCity} ({state.eventPostcode})</dd>
         <dt>Gasten</dt><dd className="text-white text-right">{state.guestCount}</dd>
         {pkg.price_unit === 'per_cocktail' && (<><dt>Cocktails</dt><dd className="text-white text-right">{state.cocktailCount}</dd></>)}
@@ -74,10 +76,10 @@ export function Step5Summary({ state, pkg, settings, onBack, onSubmitted }: Prop
       {validationError && <p role="alert" className="text-red-300/90 mb-8">{validationError}</p>}
 
       {breakdown && (
-        <div className="rounded-xl bg-surface border border-gold/20 p-6 mb-8">
-          <div className="flex justify-between text-muted mb-2"><span>Subtotaal</span><span>&euro;{breakdown.subtotal.toFixed(2)}</span></div>
-          <div className="flex justify-between text-muted mb-4"><span>Voorrijkosten</span><span>&euro;{breakdown.travelFee.toFixed(2)}</span></div>
-          <div className="flex justify-between text-xl font-heading text-gold-light border-t border-white/10 pt-4"><span>Geschatte totaalprijs</span><span>&euro;{breakdown.total.toFixed(2)}</span></div>
+        <div className="rounded-xl bg-surface border border-gold/20 p-4 md:p-6 mb-5 md:mb-8">
+          <div className="flex justify-between text-sm md:text-base text-muted mb-1.5 md:mb-2"><span>Subtotaal</span><span>&euro;{breakdown.subtotal.toFixed(2)}</span></div>
+          <div className="flex justify-between text-sm md:text-base text-muted mb-3 md:mb-4"><span>Voorrijkosten</span><span>&euro;{breakdown.travelFee.toFixed(2)}</span></div>
+          <div className="flex justify-between text-lg md:text-xl font-heading text-gold-light border-t border-white/10 pt-3 md:pt-4"><span>Geschatte totaalprijs</span><span>&euro;{breakdown.total.toFixed(2)}</span></div>
         </div>
       )}
 

@@ -111,7 +111,7 @@ export function QuoteRequests() {
                     className="min-w-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 rounded"
                   >
                     <h2 className="font-heading text-2xl leading-tight text-white transition-colors group-hover:text-gold-light truncate">{r.full_name}</h2>
-                    <p className="text-base text-muted">{r.event_type} · {formatDateNL(r.event_date)}</p>
+                    <p className="text-base text-muted">{r.event_type} · {formatDateNL(r.event_date)}{r.event_time ? ` · ${r.event_time.slice(0, 5)}` : ''}</p>
                   </button>
                 </div>
                 <Badge status={r.status} />
@@ -206,6 +206,7 @@ export function QuoteRequests() {
 
             <dl className="grid grid-cols-2 gap-x-5 gap-y-5">
               <DetailRow label="Evenement" value={openRequest.event_type} />
+              <DetailRow label="Begintijd" value={openRequest.event_time ? openRequest.event_time.slice(0, 5) : '—'} />
               <DetailRow label="Pakket" value={packageName(openRequest.package_id)} />
               <DetailRow label="Plaats" value={openRequest.event_city} />
               <DetailRow label="Postcode" value={openRequest.event_postcode} />

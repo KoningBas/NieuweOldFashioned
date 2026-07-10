@@ -74,6 +74,7 @@ export interface NewQuoteRequest {
   cocktail_count: number;
   package_id: string;
   event_date: string;
+  event_time: string | null;
   event_city: string;
   event_postcode: string;
   distance_km: number;
