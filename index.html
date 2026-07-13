@@ -49,7 +49,45 @@
     }
     .font-heading { font-family: 'Bodoni Moda', Georgia, serif; }
 
-    /* Nav hover wipe effect */
+    /* ================================================================
+       NAV — mirrors src/shared/components/Nav.tsx. Change one, change both.
+       ================================================================ */
+    .nav-inner {
+      grid-template-columns: auto 1fr auto;
+      transition: background 300ms ease-out, backdrop-filter 300ms ease-out,
+                  border-radius 300ms ease-out, border-color 300ms ease-out;
+      border: 1px solid transparent;
+    }
+    /* From tablet up the side columns are equal, so the links sit on the true
+       centre of the viewport even here, where the right column is empty. */
+    @media (min-width: 768px) {
+      .nav-inner { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+    }
+    header.scrolled .nav-inner,
+    header.menu-open .nav-inner {
+      background: rgba(13,13,13,0.88);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .wordmark { letter-spacing: -0.01em; }
+    .wordmark:focus-visible { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 4px; border-radius: 4px; }
+    /* Centre the mobile wordmark on the viewport, not on the space left over
+       by the hamburger. Display stays with the Tailwind classes. */
+    .wordmark-mobile {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    /* On a 320px phone the wordmark and the CTA fight for the same pixels.
+       This page has no CTA, but the rule stays mirrored with the component. */
+    @media (max-width: 359px) {
+      .wordmark-mobile .font-heading { font-size: 0.78rem; }
+      .nav-cta { padding-left: 10px; padding-right: 10px; font-size: 0.76rem; }
+    }
+
     .nav-btn {
       position: relative;
       overflow: hidden;
@@ -66,8 +104,138 @@
       transition: transform 0.2s ease;
       z-index: -1;
     }
-    .nav-btn:hover::before { transform: scaleX(1); }
+    /* Touch devices report a hover that never leaves; guard so a tap doesn't
+       strand the wipe behind the hamburger. */
+    @media (hover: hover) {
+      .nav-btn:hover::before { transform: scaleX(1); }
+    }
     .nav-btn:active { opacity: 0.8; }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 3px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, rgba(232,184,109,0) 0%, #E8B86D 22%, #E8B86D 78%, rgba(232,184,109,0) 100%);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 340ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease;
+    }
+    .nav-link.is-active::after { transform: scaleX(1); }
+    @media (hover: hover) {
+      .nav-link:hover::after { transform: scaleX(1); opacity: 0.4; }
+      .nav-link.is-active:hover::after { opacity: 1; }
+    }
+
+    #mobile-backdrop {
+      background: rgba(0,0,0,0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms ease;
+    }
+    #mobile-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    #mobile-menu {
+      position: fixed;
+      z-index: 40;
+      top: 74px;
+      left: 12px;
+      right: 12px;
+      padding: 8px 18px 18px;
+      border-radius: 14px;
+      background: rgba(13,13,13,0.94);
+      backdrop-filter: blur(16px) saturate(115%);
+      border: 1px solid rgba(255,255,255,0.09);
+      box-shadow:
+        0 26px 60px -22px rgba(0,0,0,0.92),
+        0 10px 34px -16px rgba(200,146,42,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity 200ms ease, transform 300ms cubic-bezier(0.22,1,0.36,1),
+                  visibility 0s linear 300ms;
+    }
+    #mobile-menu.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      transition: opacity 200ms ease, transform 340ms cubic-bezier(0.22,1,0.36,1),
+                  visibility 0s linear 0s;
+    }
+
+    .menu-row + .menu-row .menu-link { border-top: 1px solid rgba(255,255,255,0.07); }
+    .menu-link {
+      display: block;
+      padding: 15px 2px;
+      font-size: 1.25rem;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      color: #fff;
+      text-decoration: none;
+      transition: color 180ms ease;
+    }
+    .menu-link:hover { color: #E8B86D; }
+    .menu-link:active { opacity: 0.75; }
+    .menu-link.is-active { color: #E8B86D; }
+    .menu-label { display: inline-block; padding-bottom: 3px; }
+    .menu-link.is-active .menu-label { border-bottom: 2px solid #E8B86D; }
+
+    .menu-foot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 0.9rem;
+      color: #C4B7A6;
+      text-decoration: none;
+      transition: color 180ms ease;
+    }
+    .menu-foot:hover { color: #fff; }
+    .menu-foot-sep { color: rgba(255,255,255,0.3); }
+    .menu-foot-link { color: #C8922A; }
+    .menu-foot:hover .menu-foot-link { color: #E8B86D; }
+
+    /* Panel contents settle in behind the panel itself. */
+    #mobile-menu .menu-row,
+    #mobile-menu .menu-foot { opacity: 0; transform: translateY(-6px); }
+    #mobile-menu.open .menu-row,
+    #mobile-menu.open .menu-foot {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 260ms ease, transform 380ms cubic-bezier(0.22,1,0.36,1);
+      transition-delay: calc(60ms + var(--i, 0) * 45ms);
+    }
+
+    .hb-bar {
+      display: block;
+      width: 22px;
+      height: 2.2px;
+      background: #fff;
+      border-radius: 1px;
+      transform-origin: center;
+      transition: transform 300ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease;
+    }
+    #hamburger.open .hb-top { transform: translateY(7.2px) rotate(45deg); }
+    #hamburger.open .hb-mid { opacity: 0; transform: scaleX(0.4); }
+    #hamburger.open .hb-bot { transform: translateY(-7.2px) rotate(-45deg); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nav-inner, .nav-btn, .nav-btn::before, .nav-link::after, .hb-bar,
+      #mobile-backdrop, #mobile-menu,
+      #mobile-menu.open .menu-row, #mobile-menu.open .menu-foot {
+        transition-duration: 1ms !important;
+        transition-delay: 0s !important;
+      }
+      #mobile-menu, #mobile-menu.open { transform: none; }
+      #mobile-menu .menu-row, #mobile-menu .menu-foot { transform: none; }
+    }
 
     /* Primary button — shiny blue */
     .btn-primary {
@@ -119,20 +287,6 @@
       transition: transform 0.5s cubic-bezier(0,0,0,1);
     }
 
-    /* Mobile menu */
-    #mobile-menu { transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-    #mobile-menu.open { transform: translateX(0); }
-
-    /* Backdrop */
-    #mobile-backdrop { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    #mobile-backdrop.open { opacity: 1; pointer-events: auto; }
-
-    /* Hamburger bars */
-    .hb-bar { display: block; width: 22px; height: 2.2px; background: #fff; border-radius: 1px; transform-origin: center; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease; }
-    #hamburger.open .hb-top { transform: translateY(7px) rotate(45deg); }
-    #hamburger.open .hb-mid { opacity: 0; transform: scaleX(0); }
-    #hamburger.open .hb-bot { transform: translateY(-7px) rotate(-45deg); }
-
     /* Occasion card hover */
     .occasion-card { transition: filter 0.3s ease; }
     .occasion-card:hover { filter: brightness(1.12); }
@@ -146,14 +300,6 @@
     .fade-section.visible {
       opacity: 1;
       transform: translateY(0);
-    }
-
-    /* Nav scroll */
-    header.scrolled .nav-inner {
-      background: rgba(13,13,13,0.88);
-      backdrop-filter: blur(12px);
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
     }
 
     /* ---- Tiles (Over The Old Fashioned) ---- */
@@ -197,7 +343,8 @@
 
     /* Focus states */
     .nav-btn:focus-visible { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 2px; }
-    #mobile-menu a:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; }
+    .menu-link:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; border-radius: 4px; }
+    .menu-foot:focus-visible { outline: 2px solid #C8922A; outline-offset: 3px; border-radius: 4px; }
     footer a:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; border-radius: 2px; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -208,60 +355,55 @@
 <!-- ================================================================
   HEADER / NAV
 ================================================================ -->
-<header id="site-header" class="sticky top-0 z-50 flex h-[80px] w-full justify-center ease-out -mb-[80px] sm:-mb-[88px]">
-  <div class="nav-inner max-w-[1600px] w-full grid items-center px-3 sm:px-6" style="grid-template-columns: auto 1fr auto; transition: background 300ms ease-out, backdrop-filter 300ms ease-out, border-radius 300ms ease-out, border-color 300ms ease-out;">
+<header id="site-header" class="sticky top-0 z-50 flex h-[80px] w-full justify-center -mb-[80px] sm:-mb-[88px]">
+  <div class="nav-inner relative max-w-[1600px] w-full grid items-center px-3 sm:px-6">
 
-    <!-- LEFT: hamburger (mobile) + logo (desktop) -->
-    <div class="flex items-center gap-3">
-      <button id="hamburger" class="nav-btn lg:hidden rounded-md p-1.5 text-white flex flex-col justify-center items-center gap-[5px] w-[34px] h-[34px]" aria-label="Menu openen">
+    <!-- LEFT: hamburger (mobile) + wordmark (desktop) -->
+    <div class="flex items-center">
+      <button id="hamburger" type="button"
+              class="nav-btn md:hidden rounded-md text-white flex flex-col justify-center items-center gap-[5px] w-[38px] h-[38px]"
+              aria-label="Menu openen" aria-expanded="false" aria-controls="mobile-menu">
         <span class="hb-bar hb-top"></span>
         <span class="hb-bar hb-mid"></span>
         <span class="hb-bar hb-bot"></span>
       </button>
-      <!-- Desktop logo -->
-      <a href="/" class="hidden lg:flex items-center h-10">
-        <span class="font-heading text-xl text-white" style="letter-spacing:-0.01em;">The Old Fashioned</span>
+      <a href="/" class="wordmark hidden md:flex items-center h-10 no-underline">
+        <span class="font-heading text-xl text-white">The Old Fashioned</span>
       </a>
     </div>
 
-    <!-- CENTER: mobile logo + desktop nav links -->
-    <nav class="flex items-center justify-center">
-      <!-- Mobile logo -->
-      <a href="/" class="lg:hidden flex items-center h-9 overflow-hidden">
-        <span class="font-heading text-base sm:text-lg text-white whitespace-nowrap" style="letter-spacing:-0.01em;">The Old Fashioned</span>
+    <!-- CENTER: wordmark (mobile) + links (desktop) -->
+    <nav aria-label="Hoofdnavigatie" class="flex items-center justify-center">
+      <a href="/" class="wordmark wordmark-mobile flex md:hidden items-center h-9 no-underline">
+        <span class="font-heading text-[0.95rem] sm:text-lg text-white whitespace-nowrap">The Old Fashioned</span>
       </a>
-      <!-- Desktop nav links -->
-      <ul class="hidden lg:flex items-center gap-1 list-none p-0 m-0">
-        <li><a href="#over-ons" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">De Bar</a></li>
-        <li><a href="#workshops" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Workshops</a></li>
-        <li><a href="/locatie/" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Op Locatie</a></li>
-        <li><a href="#bartending" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Bartending</a></li>
-        <li><a href="#locatie" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Locatie</a></li>
+      <ul class="hidden md:flex items-center gap-1 list-none p-0 m-0">
+        <li><a href="/" aria-current="page" class="nav-btn nav-link is-active rounded-md px-3 py-1.5 text-base text-gold-light font-body no-underline">De Bar</a></li>
+        <li><a href="/workshops/" class="nav-btn nav-link rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Workshops</a></li>
+        <li><a href="/locatie/" class="nav-btn nav-link rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Op Locatie</a></li>
       </ul>
     </nav>
 
-    <!-- RIGHT: Boek Workshop CTA -->
-    <div class="flex items-center justify-end">
-      <a href="#workshops" class="btn-primary rounded-full px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-body font-semibold no-underline whitespace-nowrap">
-        Boek Workshop
-      </a>
-    </div>
+    <!-- RIGHT: no CTA on the bar page; the whole page is the pitch -->
+    <div class="flex items-center justify-end"></div>
   </div>
 </header>
 
 <!-- Mobile backdrop -->
-<div id="mobile-backdrop" class="fixed inset-0 z-30 bg-black/50 lg:hidden"></div>
+<div id="mobile-backdrop" class="fixed inset-0 z-30 md:hidden" aria-hidden="true"></div>
 
-<!-- Mobile menu overlay -->
-<div id="mobile-menu" class="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm flex flex-col pt-20 px-6 lg:hidden">
-  <ul class="list-none p-0 m-0 flex flex-col gap-1">
-    <li><a href="#over-ons" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">De Bar</a></li>
-    <li><a href="#workshops" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Workshops</a></li>
-    <li><a href="/locatie/" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Op Locatie</a></li>
-    <li><a href="#bartending" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Bartending</a></li>
-    <li><a href="#locatie" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Locatie</a></li>
+<!-- Mobile dropdown panel -->
+<div id="mobile-menu" class="md:hidden">
+  <ul class="list-none p-0 m-0">
+    <li class="menu-row" style="--i:0"><a href="/" aria-current="page" class="menu-link font-heading is-active"><span class="menu-label">De Bar</span></a></li>
+    <li class="menu-row" style="--i:1"><a href="/workshops/" class="menu-link font-heading"><span class="menu-label">Workshops</span></a></li>
+    <li class="menu-row" style="--i:2"><a href="/locatie/" class="menu-link font-heading"><span class="menu-label">Op Locatie</span></a></li>
   </ul>
-  <a href="#workshops" class="btn-primary mt-8 rounded-full px-8 py-4 text-center font-heading text-xl no-underline">Boek Workshop</a>
+  <a href="#locatie" class="menu-foot" style="--i:3">
+    <span>Grotestraat 12, Rijssen</span>
+    <span class="menu-foot-sep" aria-hidden="true">·</span>
+    <span class="menu-foot-link">Openingstijden</span>
+  </a>
 </div>
 
 <!-- ================================================================
@@ -361,13 +503,14 @@
 
       <!-- Foto -->
       <div class="relative rounded-2xl overflow-hidden aspect-[4/5] bg-surface-elevated shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)]">
-        <img src="OldImages/hostess-indy.jpg"
-             alt="Hostess Indy serveert twee signature cocktails op een dienblad tijdens een feest"
+        <img src="OldImages/paco-bas.jpeg"
+             alt="Twee bartenders in gilet en opgestroopte mouwen, klaar voor de gasten bij de ingang"
              class="w-full h-full object-cover"
-             style="object-position:center 20%; filter:sepia(0.3) saturate(1.05) hue-rotate(-14deg) contrast(1.04);"
+             style="object-position:center 22%; filter:sepia(0.14) saturate(0.95) contrast(1.03) brightness(1.14);"
              loading="lazy">
-        <!-- warme laag: trekt het paarse zaallicht naar het gouden palet -->
-        <div class="absolute inset-0 bg-gold-light mix-blend-multiply opacity-40" aria-hidden="true"></div>
+        <!-- warme laag: haalt het groen uit het daglicht en trekt de foto naar het gouden palet.
+             Laag gehouden: deze foto is bij daglicht genomen en slaat snel dicht. -->
+        <div class="absolute inset-0 bg-gold-light mix-blend-multiply opacity-[0.14]" aria-hidden="true"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" aria-hidden="true"></div>
       </div>
 
@@ -415,11 +558,13 @@
 
       <!-- Foto — rechts op desktop, bovenaan op mobiel -->
       <div class="order-1 md:order-2 relative rounded-2xl overflow-hidden aspect-[4/5] bg-surface-elevated shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)]">
-        <img src="OldImages/pornstar-martini.jpg"
-             alt="Twee pornstar martini's op een zwart tafeltje: een XXL-glas en een gewoon glas, elk met een schijfje passievrucht op de schuimlaag"
+        <img src="OldImages/hostess-indy.jpg"
+             alt="Hostess Indy serveert twee signature cocktails op een dienblad tijdens een feest"
              class="w-full h-full object-cover"
-             style="object-position:center 45%;"
+             style="object-position:center 20%; filter:sepia(0.3) saturate(1.05) hue-rotate(-14deg) contrast(1.04);"
              loading="lazy">
+        <!-- warme laag: trekt het paarse zaallicht naar het gouden palet -->
+        <div class="absolute inset-0 bg-gold-light mix-blend-multiply opacity-40" aria-hidden="true"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" aria-hidden="true"></div>
       </div>
 
@@ -578,27 +723,27 @@
 </footer>
 
 <script>
-  // Mobile menu toggle
+  // Mobile menu — mirrors src/shared/components/Nav.tsx
+  const DESKTOP_BREAKPOINT = 768;
+  const header = document.getElementById('site-header');
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobile-menu');
   const mobileBackdrop = document.getElementById('mobile-backdrop');
 
-  function openMenu() {
-    mobileMenu.classList.add('open');
-    mobileBackdrop.classList.add('open');
-    hamburger.classList.add('open');
-    hamburger.setAttribute('aria-label', 'Menu sluiten');
+  function setMenu(open) {
+    mobileMenu.classList.toggle('open', open);
+    mobileBackdrop.classList.toggle('open', open);
+    hamburger.classList.toggle('open', open);
+    header.classList.toggle('menu-open', open);
+    hamburger.setAttribute('aria-expanded', String(open));
+    hamburger.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
+    document.body.style.overflow = open ? 'hidden' : '';
   }
 
-  function closeMenu() {
-    mobileMenu.classList.remove('open');
-    mobileBackdrop.classList.remove('open');
-    hamburger.classList.remove('open');
-    hamburger.setAttribute('aria-label', 'Menu openen');
-  }
+  const closeMenu = () => setMenu(false);
 
   hamburger.addEventListener('click', () => {
-    hamburger.classList.contains('open') ? closeMenu() : openMenu();
+    setMenu(!hamburger.classList.contains('open'));
   });
 
   mobileBackdrop.addEventListener('click', closeMenu);
@@ -607,8 +752,17 @@
     link.addEventListener('click', closeMenu);
   });
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !hamburger.classList.contains('open')) return;
+    closeMenu();
+    hamburger.focus();
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= DESKTOP_BREAKPOINT) closeMenu();
+  });
+
   // Nav scroll effect
-  const header = document.getElementById('site-header');
   window.addEventListener('scroll', () => {
     header.classList.toggle('scrolled', window.scrollY > 60);
   }, { passive: true });

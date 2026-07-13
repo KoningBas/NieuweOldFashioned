@@ -31,11 +31,11 @@ export function Footer() {
         <div className="flex flex-col gap-4">
           <h3 className="font-heading text-lg text-white">Navigatie</h3>
           <ul className="list-none p-0 m-0 flex flex-col gap-2">
-            <li><a href="/" className="font-body text-base no-underline text-muted transition-colors hover:text-white">Home</a></li>
-            <li><a href="/locatie/" className="font-body text-base no-underline text-muted transition-colors hover:text-white">Cocktails op Locatie</a></li>
-            <li><a href="#zo-werkt-het" className="font-body text-base no-underline text-muted transition-colors hover:text-white">Zo werkt een workshop</a></li>
-            <li><a href="#arrangementen" className="font-body text-base no-underline text-muted transition-colors hover:text-white">Bites &amp; Streetfood</a></li>
-            <li><a href="#reserveren" className="font-body text-base no-underline text-muted transition-colors hover:text-white">Reserveren</a></li>
+            <li><a href="/" className="font-body text-base no-underline text-prose transition-colors hover:text-white">Home</a></li>
+            <li><a href="/locatie/" className="font-body text-base no-underline text-prose transition-colors hover:text-white">Cocktails op Locatie</a></li>
+            <li><a href="#zo-werkt-het" className="font-body text-base no-underline text-prose transition-colors hover:text-white">Zo werkt een workshop</a></li>
+            <li><a href="#arrangementen" className="font-body text-base no-underline text-prose transition-colors hover:text-white">Bites &amp; Streetfood</a></li>
+            <li><a href="#reserveren" className="font-body text-base no-underline text-prose transition-colors hover:text-white">Reserveren</a></li>
           </ul>
         </div>
 

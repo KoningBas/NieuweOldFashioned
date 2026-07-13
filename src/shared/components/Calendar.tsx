@@ -12,6 +12,9 @@ interface Props {
   /** Tighter cells and padding, for forms where the calendar sits beside other
    *  fields rather than owning its own wizard step. */
   compact?: boolean;
+  /** White chrome instead of the gold-and-muted default: full-white borders and
+   *  labels, and a white selected day. For surfaces that carry no gold at all. */
+  wit?: boolean;
 }
 
 const WEEKDAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
@@ -45,9 +48,30 @@ function isStruck(date: Date, ctx: AvailabilityContext | null): boolean {
   return false;
 }
 
-export function Calendar({ value, onChange, ctx, compact = false }: Props) {
+export function Calendar({ value, onChange, ctx, compact = false, wit = false }: Props) {
   const today = useMemo(() => new Date(), []);
   const selected = value ? parseDateOnly(value) : null;
+
+  // Every place the calendar reaches for an accent colour, in one spot.
+  const accent = wit
+    ? {
+        rand: 'border-white',
+        chroom: 'text-white',
+        knopHover: 'hover:bg-white/10 hover:text-white',
+        gekozen: 'bg-white text-surface font-semibold',
+        beschikbaar: 'text-white hover:bg-white/15',
+        vandaag: 'bg-white',
+        focus: 'focus-visible:outline-white',
+      }
+    : {
+        rand: 'border-white/10',
+        chroom: 'text-muted',
+        knopHover: 'hover:bg-white/5 hover:text-gold-light',
+        gekozen: 'bg-gold text-surface font-semibold shadow-[0_2px_10px_-2px_rgba(200,146,42,0.7)]',
+        beschikbaar: 'text-white hover:bg-gold/15 hover:text-gold-light',
+        vandaag: 'bg-gold-light',
+        focus: 'focus-visible:outline-gold-light',
+      };
 
   // The month currently on screen, and the day that owns keyboard focus.
   const [view, setView] = useState<Date>(() => startOfMonth(selected ?? today));
@@ -56,11 +80,6 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
   const gridRef = useRef<HTMLDivElement>(null);
   // Only steal DOM focus after a keyboard move, never on first paint.
   const shouldFocusRef = useRef(false);
-
-  // Keep the visible month in sync whenever keyboard focus crosses a boundary.
-  useEffect(() => {
-    if (!sameMonth(focusDate, view)) setView(startOfMonth(focusDate));
-  }, [focusDate, view]);
 
   useEffect(() => {
     if (!shouldFocusRef.current || !gridRef.current) return;
@@ -71,9 +90,22 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
 
   const canGoPrev = view > startOfMonth(today);
 
+  /** Keyboard navigation may walk out of the visible month; the view follows it. */
   function moveFocus(next: Date) {
     shouldFocusRef.current = true;
     setFocusDate(next);
+    if (!sameMonth(next, view)) setView(startOfMonth(next));
+  }
+
+  /**
+   * The month buttons move the view. Keyboard focus moves along into the new
+   * month — leaving it behind in the old one would drag the view straight back —
+   * but DOM focus stays on the button that was clicked.
+   */
+  function showMonth(month: Date) {
+    const start = startOfMonth(month);
+    setView(start);
+    setFocusDate(sameMonth(start, today) ? today : start);
   }
 
   function select(date: Date) {
@@ -108,15 +140,15 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(view.getFullYear(), view.getMonth(), d));
 
   return (
-    <div className={`rounded-xl bg-surface border border-white/10 select-none ${compact ? 'p-3' : 'p-4 md:p-5'}`}>
+    <div className={`rounded-xl bg-surface border ${accent.rand} select-none ${compact ? 'p-3' : 'p-4 md:p-5'}`}>
       {/* Month navigation */}
       <div className={`flex items-center justify-between ${compact ? 'mb-1.5' : 'mb-3'}`}>
         <button
           type="button"
-          onClick={() => canGoPrev && setView(addMonths(view, -1))}
+          onClick={() => canGoPrev && showMonth(addMonths(view, -1))}
           disabled={!canGoPrev}
           aria-label="Vorige maand"
-          className={`grid place-items-center rounded-full text-prose transition-colors duration-200 hover:bg-white/5 hover:text-gold-light disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-prose focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
+          className={`grid place-items-center rounded-full ${accent.chroom} ${accent.knopHover} transition-colors duration-200 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent focus-visible:outline focus-visible:outline-2 ${accent.focus} focus-visible:outline-offset-2 ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
         >
           <ChevronLeft />
         </button>
@@ -125,9 +157,9 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
         </div>
         <button
           type="button"
-          onClick={() => setView(addMonths(view, 1))}
+          onClick={() => showMonth(addMonths(view, 1))}
           aria-label="Volgende maand"
-          className={`grid place-items-center rounded-full text-prose transition-colors duration-200 hover:bg-white/5 hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
+          className={`grid place-items-center rounded-full ${accent.chroom} ${accent.knopHover} transition-colors duration-200 focus-visible:outline focus-visible:outline-2 ${accent.focus} focus-visible:outline-offset-2 ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
         >
           <ChevronRight />
         </button>
@@ -139,7 +171,7 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
           <div
             key={w}
             role="columnheader"
-            className={`text-center text-xs font-medium uppercase tracking-wider text-muted ${compact ? 'py-0.5' : 'py-1.5'}`}
+            className={`text-center text-xs font-medium uppercase tracking-wider ${accent.chroom} ${compact ? 'py-0.5' : 'py-1.5'}`}
           >
             {w}
           </div>
@@ -159,13 +191,15 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
 
           let stateClass: string;
           if (isSelected) {
-            stateClass = 'bg-gold text-surface font-semibold shadow-[0_2px_10px_-2px_rgba(200,146,42,0.7)]';
+            stateClass = accent.gekozen;
           } else if (selectable) {
-            stateClass = 'text-white hover:bg-gold/15 hover:text-gold-light';
+            stateClass = accent.beschikbaar;
           } else if (struck) {
-            stateClass = 'text-muted/70 line-through decoration-muted/70 cursor-not-allowed';
+            stateClass = wit
+              ? 'text-white/45 line-through decoration-white/45 cursor-not-allowed'
+              : 'text-muted/70 line-through decoration-muted/70 cursor-not-allowed';
           } else {
-            stateClass = 'text-white/25 cursor-not-allowed';
+            stateClass = wit ? 'text-white/35 cursor-not-allowed' : 'text-white/25 cursor-not-allowed';
           }
 
           return (
@@ -178,13 +212,16 @@ export function Calendar({ value, onChange, ctx, compact = false }: Props) {
                 aria-disabled={!selectable}
                 aria-selected={isSelected}
                 onClick={() => select(date)}
-                className={`relative grid place-items-center rounded-full tabular-nums transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-1 ${
+                className={`relative grid place-items-center rounded-full tabular-nums transition-colors duration-150 focus-visible:outline focus-visible:outline-2 ${accent.focus} focus-visible:outline-offset-1 ${
                   compact ? 'h-8 w-8 text-sm' : 'h-10 w-10 text-base'
                 } ${stateClass}`}
               >
                 {date.getDate()}
                 {isToday && !isSelected && (
-                  <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gold-light" aria-hidden="true" />
+                  <span
+                    className={`absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full ${accent.vandaag}`}
+                    aria-hidden="true"
+                  />
                 )}
               </button>
             </div>

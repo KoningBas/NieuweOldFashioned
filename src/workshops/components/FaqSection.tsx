@@ -74,7 +74,7 @@ export function FaqSection() {
                     <span
                       aria-hidden="true"
                       className={`relative block h-4 w-4 shrink-0 transition-colors duration-200 motion-reduce:transition-none ${
-                        isOpen ? 'text-gold-light' : 'text-muted'
+                        isOpen ? 'text-gold-light' : 'text-prose'
                       }`}
                     >
                       <span className="absolute left-0 top-1/2 h-px w-4 -translate-y-1/2 bg-current" />

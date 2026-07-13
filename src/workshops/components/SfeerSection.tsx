@@ -200,7 +200,7 @@ export function SfeerSection() {
           disabled
           aria-disabled="true"
           title="Binnenkort beschikbaar"
-          className="inline-flex items-center gap-3 rounded-md px-8 py-4 font-body text-base sm:text-lg border-2 border-white/20 text-muted cursor-not-allowed opacity-60 select-none"
+          className="inline-flex items-center gap-3 rounded-md px-8 py-4 font-body text-base sm:text-lg border-2 border-white/20 text-prose cursor-not-allowed opacity-60 select-none"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -209,7 +209,7 @@ export function SfeerSection() {
           </svg>
           Download het workshopmenu
         </button>
-        <span className="mt-4 text-sm uppercase tracking-[0.22em] text-muted/80">PDF volgt binnenkort</span>
+        <span className="mt-4 text-sm uppercase tracking-[0.22em] text-prose/80">PDF volgt binnenkort</span>
       </div>
     </section>
   );

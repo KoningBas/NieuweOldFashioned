@@ -91,6 +91,22 @@ function naarMinuten(hhmm: string): number {
 }
 
 /**
+ * Reads a start time the way a guest types it. '19:00', '1900', '19.00',
+ * '19u00', '19 uur' and '19' all mean 19:00; '7' means 07:00 and '930' means
+ * 09:30. Returns 'HH:MM', or null when it is not a time at all.
+ */
+export function normaliseerTijd(invoer: string): string | null {
+  const cijfers = invoer.replace(/\D/g, '');
+  if (cijfers === '' || cijfers.length > 4) return null;
+
+  const uur = cijfers.length <= 2 ? Number(cijfers) : Number(cijfers.slice(0, -2));
+  const minuut = cijfers.length <= 2 ? 0 : Number(cijfers.slice(-2));
+  if (uur > 23 || minuut > 59) return null;
+
+  return `${String(uur).padStart(2, '0')}:${String(minuut).padStart(2, '0')}`;
+}
+
+/**
  * Builds the availability context the calendar and the date check run on.
  *
  * `settings` is null when the settings row could not be fetched; the fixed
@@ -213,14 +229,18 @@ export function valideerReservering(form: ReserveringForm, ctx: AvailabilityCont
     fouten.datum = 'Reserveer minimaal drie dagen van tevoren.';
   }
 
-  if (form.tijd === '') {
-    fouten.tijd = 'Kies een begintijd.';
+  // The guest types the time freely, so it is read leniently and only then checked.
+  const tijd = normaliseerTijd(form.tijd);
+  if (form.tijd.trim() === '') {
+    fouten.tijd = 'Vul een begintijd in.';
+  } else if (tijd === null) {
+    fouten.tijd = 'Vul een tijd in zoals 19:00.';
   } else if (form.waar === 'bar' && fouten.datum === undefined) {
     // On location the guest picks the time freely — we come to them.
     const venster = barTijdvenster(form.datum, ctx?.availability ?? null);
     if (venster === null) {
       fouten.tijd = 'Op deze dag zijn er geen workshops in de bar mogelijk. Kies een andere datum.';
-    } else if (naarMinuten(form.tijd) < naarMinuten(venster.start) || naarMinuten(form.tijd) > naarMinuten(venster.eind)) {
+    } else if (naarMinuten(tijd) < naarMinuten(venster.start) || naarMinuten(tijd) > naarMinuten(venster.eind)) {
       // With the opening hours unknown (Supabase unreachable) the window starts
       // at midnight, and "tussen 00:00 en 19:00" reads as nonsense to a guest —
       // only the cap is worth stating there.
@@ -267,7 +287,7 @@ export function bouwBericht(form: ReserveringForm): string {
   regels.push(
     `Aantal personen: ${form.personen.trim()}`,
     `Datum: ${form.datum === '' ? '-' : formatDateLongNL(form.datum)}`,
-    `Begintijd: ${form.tijd}`,
+    `Begintijd: ${normaliseerTijd(form.tijd) ?? form.tijd.trim()}`,
   );
 
   if (form.bericht.trim() !== '') {

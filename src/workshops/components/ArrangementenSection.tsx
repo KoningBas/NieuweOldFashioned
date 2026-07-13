@@ -3,7 +3,6 @@ type Arrangement = {
   prijs: string;
   duur: string;
   omschrijving: string;
-  /* TODO: vervangen zodra de echte foto's van de borrelplank en het streetfood binnen zijn. */
   foto: string;
   alt: string;
 };
@@ -15,8 +14,8 @@ const ARRANGEMENTEN: Arrangement[] = [
     duur: '1,5 tot 2 uur',
     omschrijving:
       'Een ruime borrelplank die tijdens de workshop op tafel komt. Genoeg om de avond op te bouwen, zonder dat je aan tafel gaat zitten.',
-    foto: 'https://placehold.co/800x1000/1A1410/C8922A?text=Bites',
-    alt: 'Placeholder voor een foto van de borrelplank',
+    foto: '/OldImages/bites-borrelplank.jpg',
+    alt: 'Borrelplank op gouden schalen: nacho’s, kip, calamares, krulfriet en salade, met twee cocktails erbij',
   },
   {
     naam: 'Streetfood',
@@ -24,8 +23,8 @@ const ARRANGEMENTEN: Arrangement[] = [
     duur: '2 tot 2,5 uur',
     omschrijving:
       'Een compleet avondarrangement in twee gangen: een voorgerecht en een hoofdgerecht. Je maakt je cocktails, daarna schuif je aan.',
-    foto: 'https://placehold.co/800x1000/1A1410/C8922A?text=Streetfood',
-    alt: 'Placeholder voor een foto van het streetfood-arrangement',
+    foto: '/OldImages/streetfood-spareribs.jpg',
+    alt: 'Gelakte spareribs in krantenpapier op een houten plank, met een cocktail op de achtergrond',
   },
 ];
 
@@ -60,7 +59,7 @@ export function ArrangementenSection() {
                 <p className="font-heading text-xl md:text-2xl text-gold-light whitespace-nowrap">{a.prijs}</p>
               </div>
 
-              <p className="font-body text-base text-muted mt-1">{a.duur}</p>
+              <p className="font-body text-base text-prose mt-1">{a.duur}</p>
 
               <p className="text-prose text-base md:text-lg leading-[1.7] mt-3 md:mt-4 max-w-[52ch] text-pretty">
                 {a.omschrijving}
@@ -69,7 +68,7 @@ export function ArrangementenSection() {
           ))}
         </div>
 
-        <p className="font-body text-base md:text-lg text-muted mt-10 md:mt-14 text-center leading-[1.7]">
+        <p className="font-body text-base md:text-lg text-prose mt-10 md:mt-14 text-center leading-[1.7]">
           Bites en Streetfood serveren we in de bar. Op locatie verzorgen we de workshop zelf, het
           eten regel je daar zelf.
         </p>

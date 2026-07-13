@@ -9,6 +9,7 @@ import {
   bouwOnderwerp,
   foutenVanStap,
   maakContext,
+  normaliseerTijd,
   valideerReservering,
   type ReserveringForm,
 } from './reservering';
@@ -42,6 +43,33 @@ function form(overrides: Partial<ReserveringForm> = {}): ReserveringForm {
     ...overrides,
   };
 }
+
+describe('normaliseerTijd', () => {
+  it.each([
+    ['19:00', '19:00'],
+    ['1900', '19:00'],
+    ['19.00', '19:00'],
+    ['19u00', '19:00'],
+    ['19 uur', '19:00'],
+    ['19', '19:00'],
+    ['7', '07:00'],
+    ['930', '09:30'],
+    [' 09:05 ', '09:05'],
+    ['0000', '00:00'],
+  ])('reads %j as %j', (invoer, verwacht) => {
+    expect(normaliseerTijd(invoer)).toBe(verwacht);
+  });
+
+  it.each([
+    [''],
+    ['half acht'],
+    ['24:00'],
+    ['1961'], // 61 minutes
+    ['12345'],
+  ])('rejects %j', (invoer) => {
+    expect(normaliseerTijd(invoer)).toBeNull();
+  });
+});
 
 describe('valideerReservering', () => {
   afterEach(() => {
@@ -113,6 +141,18 @@ describe('valideerReservering', () => {
     freeze();
     expect(valideerReservering(form({ tijd: '14:00' }), ctx).tijd).toBe(
       'Workshops in de bar starten tussen 15:00 en 19:00.',
+    );
+  });
+
+  it('accepts a start time the guest typed without a colon', () => {
+    freeze();
+    expect(valideerReservering(form({ tijd: '1800' }), ctx).tijd).toBeUndefined();
+  });
+
+  it('rejects text that is not a time', () => {
+    freeze();
+    expect(valideerReservering(form({ tijd: 'half acht' }), ctx).tijd).toBe(
+      'Vul een tijd in zoals 19:00.',
     );
   });
 
