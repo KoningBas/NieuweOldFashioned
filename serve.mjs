@@ -1,52 +1,20 @@
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
+import { createServer } from 'vite';
 import { fileURLToPath } from 'url';
+import path from 'path';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
 
-const MIME = {
-  '.html': 'text/html',
-  '.css': 'text/css',
-  '.js': 'application/javascript',
-  '.mjs': 'application/javascript',
-  '.json': 'application/json',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-  '.webp': 'image/webp',
-  '.ico': 'image/x-icon',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
-};
-
-const server = http.createServer((req, res) => {
-  const urlPath = decodeURIComponent(req.url.split('?')[0]);
-  let filePath = path.join(__dirname, urlPath === '/' ? 'index.html' : urlPath);
-  // Directory or extensionless path → serve its index.html
-  if (filePath.endsWith(path.sep) || path.extname(filePath) === '') {
-    filePath = path.join(filePath, 'index.html');
-  }
-  const ext = path.extname(filePath);
-  const contentType = MIME[ext] || 'application/octet-stream';
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404);
-      res.end('Not found');
-      return;
-    }
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(data);
-  });
+// locatie/ and admin/ are Vite apps whose entry is a .tsx module. A plain static
+// file server hands the browser raw TSX with the wrong MIME type, the module is
+// blocked, React never mounts and the page renders as an empty black body. So
+// serve everything through Vite, which transpiles the TSX and injects env vars.
+const server = await createServer({
+  root,
+  configFile: path.join(root, 'vite.config.ts'),
+  // host: true binds to 0.0.0.0 so phones on the same wifi can open the dev build.
+  server: { port: PORT, strictPort: true, host: true },
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+await server.listen();
+server.printUrls();

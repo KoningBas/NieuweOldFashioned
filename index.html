@@ -27,6 +27,7 @@
             'gold': '#C8922A',
             'gold-light': '#E8B86D',
             'muted': '#8A7A6A',
+            'prose': '#C4B7A6',
           },
           fontFamily: {
             heading: ['"Bodoni Moda"', 'Georgia', 'serif'],
@@ -158,6 +159,62 @@
     /* Workshop card image zoom on hover */
     .workshop-card:hover .card-img { transform: scale(1.04); }
 
+    /* ---- Tiles (Over The Old Fashioned) ---- */
+    .tile { position: relative; overflow: hidden; border-radius: 3px; aspect-ratio: 1 / 1; display: block; }
+    .tile-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+                transition: transform 700ms cubic-bezier(0.16,1,0.3,1); }
+    /* colour treatment layer — warms the photo toward the brand */
+    .tile-tone { position: absolute; inset: 0; background: #3A2410; mix-blend-mode: multiply; opacity: 0.42; }
+    .tile-scrim { position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 32%, rgba(0,0,0,0.05) 68%, transparent 100%); }
+    .tile-label { position: absolute; inset-inline: 0; bottom: 0; display: flex; align-items: center;
+                  justify-content: space-between; gap: 10px; padding: 18px 18px 16px; }
+    .tile-text { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.86rem;
+                 text-transform: uppercase; letter-spacing: 0.13em; line-height: 1.3; }
+    @media (min-width: 1024px) { .tile-text { font-size: 0.95rem; letter-spacing: 0.16em; } }
+    /* static tiles */
+    .tile--still { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.07), 0 18px 40px -28px rgba(0,0,0,0.9); }
+    .tile--still .tile-text { color: #E8B86D; }
+    /* the one clickable tile — earns a gold frame, a lift and an arrow */
+    .tile--link { text-decoration: none;
+      box-shadow: inset 0 0 0 1px rgba(200,146,42,0.45), 0 18px 40px -26px rgba(0,0,0,0.9);
+      transition: transform 400ms cubic-bezier(0.16,1,0.3,1), box-shadow 400ms cubic-bezier(0.16,1,0.3,1); }
+    .tile--link .tile-text { color: #F0C060; }
+    .tile--link .tile-arrow { color: #F0C060; flex-shrink: 0;
+      transition: transform 400ms cubic-bezier(0.16,1,0.3,1); }
+    .tile--link:hover { transform: translateY(-4px);
+      box-shadow: inset 0 0 0 1px rgba(240,192,96,0.85), 0 30px 56px -24px rgba(0,0,0,0.95), 0 0 40px -14px rgba(200,146,42,0.5); }
+    .tile--link:hover .tile-img { transform: scale(1.06); }
+    .tile--link:hover .tile-arrow { transform: translateX(5px); }
+    .tile--link:active { transform: translateY(-1px); }
+    .tile--link:focus-visible { outline: 2px solid #E8B86D; outline-offset: 3px; }
+    .tile-hint { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.72rem;
+      letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+
+    /* ---- Workshop rows (Workshops in de Bar) ---- */
+    .ws-row { display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer;
+      padding: 14px 0; color: inherit; border-top: 1px solid rgba(255,255,255,0.09);
+      transition: padding-left 300ms cubic-bezier(0.16,1,0.3,1); }
+    .ws-row:hover { padding-left: 8px; }
+    .ws-row:hover .ws-name { color: #F0C060; }
+    .ws-row:hover .ws-arrow { transform: translateX(4px); color: #F0C060; }
+    .ws-row:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; border-radius: 3px; }
+    .ws-name { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.28rem; color: #fff;
+      transition: color 250ms ease; }
+    .ws-meta { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.9rem; color: #A2907E; }
+    .ws-price { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.35rem; color: #fff; white-space: nowrap; }
+    .ws-arrow { color: #C8922A; flex-shrink: 0; transition: transform 300ms cubic-bezier(0.16,1,0.3,1), color 250ms ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tile-img, .tile--link, .tile-arrow, .ws-row, .ws-arrow, .card-img { transition: none !important; }
+      .tile--link:hover, .tile--link:active { transform: none; }
+      .tile--link:hover .tile-img { transform: none; }
+      .ws-row:hover { padding-left: 0; }
+      .ws-row:hover .ws-arrow { transform: none; }
+      .fade-section { opacity: 1; transform: none; transition: opacity 0.2s ease; }
+    }
+
     /* Booking Modal */
     .bm-day-cell {
       width: 100%; height: 30px; display: flex; align-items: center; justify-content: center;
@@ -278,7 +335,7 @@
       </a>
       <!-- Desktop nav links -->
       <ul class="hidden lg:flex items-center gap-1 list-none p-0 m-0">
-        <li><a href="#bar" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">De Bar</a></li>
+        <li><a href="#over-ons" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">De Bar</a></li>
         <li><a href="#workshops" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Workshops</a></li>
         <li><a href="/locatie/" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Op Locatie</a></li>
         <li><a href="#bartending" class="nav-btn rounded-md px-3 py-1.5 text-base text-white font-body no-underline">Bartending</a></li>
@@ -301,7 +358,7 @@
 <!-- Mobile menu overlay -->
 <div id="mobile-menu" class="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm flex flex-col pt-20 px-6 lg:hidden">
   <ul class="list-none p-0 m-0 flex flex-col gap-1">
-    <li><a href="#bar" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">De Bar</a></li>
+    <li><a href="#over-ons" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">De Bar</a></li>
     <li><a href="#workshops" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Workshops</a></li>
     <li><a href="/locatie/" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Op Locatie</a></li>
     <li><a href="#bartending" class="block py-3 text-xl font-heading text-white no-underline border-b border-zinc-800">Bartending</a></li>
@@ -344,7 +401,7 @@
         <a href="#workshops" class="btn-primary rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center">
           Boek een workshop
         </a>
-        <a href="#bar" class="btn-ghost rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center">
+        <a href="#over-ons" class="btn-ghost rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline w-full sm:w-auto text-center">
           Ontdek de bar
         </a>
       </div>
@@ -353,172 +410,137 @@
 
   <!-- SECTION 2: OVER ONS -->
   <section id="over-ons" class="flex w-full justify-center bg-surface py-16 sm:py-24 px-4">
-    <div class="max-w-3xl text-center flex flex-col items-center gap-6">
-      <p class="font-body text-sm sm:text-base text-gold uppercase tracking-[0.22em]">Over The Old Fashioned</p>
-      <h2 class="font-heading text-3xl sm:text-4xl text-white leading-snug text-balance" style="letter-spacing:-0.02em;">
-        Meer dan een bar.<br>Een beleving.
-      </h2>
-      <p class="font-body text-base sm:text-lg leading-relaxed text-balance max-w-2xl" style="color:rgba(255,255,255,0.78);">
-        The Old Fashioned is een premium cocktailbar in het centrum van Rijssen. We combineren een historische locatie met een stijlvolle, moderne sfeer. Van signature cocktails tot cocktailworkshops en bartending op jouw feest — wij zorgen voor een onvergetelijke ervaring.
-      </p>
-      <!-- Drie pijlers -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-4 w-full">
-        <div class="flex flex-col items-center gap-3">
-          <div class="w-8 h-px bg-gold"></div>
-          <h3 class="font-heading text-lg text-white">Cocktailbar</h3>
-          <p class="font-body text-sm leading-relaxed text-center" style="color:#8A7A6A;">Signature cocktails, klassieke drinks en een sfeer om in te blijven.</p>
+    <div class="max-w-[1180px] w-full flex flex-col items-center gap-6">
+      <div class="max-w-3xl text-center flex flex-col items-center gap-5">
+        <p class="font-body text-sm sm:text-base text-gold uppercase tracking-[0.22em]">Over The Old Fashioned</p>
+        <h2 class="font-heading text-white" style="font-size:clamp(1.3rem,5.4vw,3.1rem); line-height:1.15; letter-spacing:-0.025em; white-space:nowrap;">
+          Cocktails met vakmanschap
+        </h2>
+        <p class="font-body text-base sm:text-lg leading-relaxed text-pretty max-w-2xl" style="color:rgba(255,255,255,0.82);">
+          The Old Fashioned is een cocktailbar in het centrum van Rijssen. Een historisch pand, een moderne kaart. Van signature cocktails tot workshops en bartending op jouw feest: alles maken we met de hand.
+        </p>
+      </div>
+      <!-- Drie vierkanten: cocktailkaart · food & bites · high cocktail -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mt-4 sm:mt-6 w-full">
+
+        <!-- 1. Cocktailkaart — het enige klikbare vierkant (PDF download) -->
+        <a href="cocktailkaart.pdf" download class="tile tile--link">
+          <img src="OldImages/Vuurcock.png" alt="Cocktail met een vlam, geshaked achter de bar in Rijssen" class="tile-img" loading="lazy">
+          <div class="tile-tone"></div>
+          <div class="tile-scrim"></div>
+          <div class="tile-label">
+            <span class="tile-text">Bekijk de cocktailkaart</span>
+            <svg class="tile-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <!-- 2. Food & Bites -->
+        <div class="tile tile--still">
+          <img src="SushiFood&amp;Bites.png" alt="Sushi en bites op de bar" class="tile-img" loading="lazy">
+          <div class="tile-tone"></div>
+          <div class="tile-scrim"></div>
+          <div class="tile-label">
+            <span class="tile-text">Food &amp; Bites</span>
+          </div>
         </div>
-        <div class="flex flex-col items-center gap-3">
-          <div class="w-8 h-px bg-gold"></div>
-          <h3 class="font-heading text-lg text-white">Beleving</h3>
-          <p class="font-body text-sm leading-relaxed text-center" style="color:#8A7A6A;">Cocktailworkshops voor groepen, in de bar of op jouw locatie.</p>
+
+        <!-- 3. High Cocktail -->
+        <div class="tile tile--still">
+          <img src="OldImages/HighCocktail.jpg" alt="High Cocktail: etagère met hapjes naast twee cocktails" class="tile-img" loading="lazy">
+          <div class="tile-tone"></div>
+          <div class="tile-scrim"></div>
+          <div class="tile-label">
+            <span class="tile-text">High Cocktail</span>
+          </div>
         </div>
-        <div class="flex flex-col items-center gap-3">
-          <div class="w-8 h-px bg-gold"></div>
-          <h3 class="font-heading text-lg text-white">Events</h3>
-          <p class="font-body text-sm leading-relaxed text-center" style="color:#8A7A6A;">Professionele bartenders voor feesten en evenementen op locatie.</p>
-        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- SECTION 3: DE BAR -->
-  <section id="bar" class="flex w-full flex-col items-center py-16 sm:py-20 px-4 gap-12" style="background:#1A1410;">
-    <div class="max-w-[1200px] w-full flex flex-col gap-12">
-      <!-- Header -->
-      <div class="text-center flex flex-col items-center gap-3">
-        <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Grotestraat 12, Rijssen</p>
-        <h2 class="font-heading text-3xl sm:text-4xl text-white" style="letter-spacing:-0.02em;">De Bar</h2>
-        <p class="font-body text-base max-w-lg leading-relaxed" style="color:rgba(255,255,255,0.68);">
-          Kom langs voor een avond vol smaak. Signature cocktails, klassieke drinks en een sfeer om in te blijven.
-        </p>
+  <!-- SECTION 3: BARTENDING OP LOCATIE — zelfde opzet als "Onze aanpak" op /locatie/ -->
+  <section id="bartending" class="py-12 md:py-28 px-6 md:px-10 scroll-mt-24" style="background:#1A1410;">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-center">
+
+      <!-- Foto -->
+      <div class="relative rounded-2xl overflow-hidden aspect-[4/5] bg-surface-elevated shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)]">
+        <img src="OldImages/hostess-indy.jpg"
+             alt="Hostess Indy serveert twee signature cocktails op een dienblad tijdens een feest"
+             class="w-full h-full object-cover"
+             style="object-position:center 20%; filter:sepia(0.3) saturate(1.05) hue-rotate(-14deg) contrast(1.04);"
+             loading="lazy">
+        <!-- warme laag: trekt het paarse zaallicht naar het gouden palet -->
+        <div class="absolute inset-0 bg-gold-light mix-blend-multiply opacity-40" aria-hidden="true"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" aria-hidden="true"></div>
       </div>
 
-      <!-- Foto grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Grote foto links -->
-        <div class="relative overflow-hidden rounded-sm aspect-[4/3] sm:aspect-auto sm:min-h-[400px]">
-          <img src="OldImages/Vuurcock.png" alt="Cocktail bij The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0" style="height:12.5%; background:linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);"></div>
-          <div class="absolute bottom-0 left-0 p-4">
-            <a href="cocktailkaart.html" class="font-body text-sm uppercase tracking-widest inline-flex items-center gap-1.5 no-underline transition-opacity hover:opacity-75" style="color:#E8B86D;">
-              Bekijk de cocktailkaart
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-        <!-- Rechts: sushi foto + aanbod -->
-        <div class="flex flex-col gap-4">
-          <div class="relative overflow-hidden rounded-sm aspect-[4/3]">
-            <img src="SushiFood&amp;Bites.png" alt="Bites bij The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 p-4">
-              <span class="font-body text-sm text-gold-light uppercase tracking-widest">Food & Bites</span>
-            </div>
-          </div>
-          <!-- High Cocktail kaart -->
-          <div class="relative overflow-hidden rounded-sm aspect-[4/3] flex-1">
-            <img src="OldImages/HighCocktail.jpg" alt="High Cocktail" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0" style="height:12.5%; background:linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);"></div>
-            <div class="absolute bottom-0 left-0 p-4">
-              <span class="font-body text-sm uppercase tracking-widest" style="color:#E8B86D;">High Cocktail</span>
-            </div>
-          </div>
-        </div>
+      <!-- Tekst -->
+      <div>
+        <p class="font-body uppercase text-sm tracking-[0.22em] md:text-base md:tracking-[0.3em] text-gold-light mb-3 md:mb-4">Bartending op locatie</p>
+        <h2 class="font-heading text-3xl md:text-5xl tracking-[-0.02em] mb-4 md:mb-6 text-balance md:[text-wrap:normal]">Wij verzorgen de complete ervaring</h2>
+
+        <p class="font-body text-prose text-base leading-[1.6] md:text-xl md:leading-[1.7] mb-4 md:mb-5 text-pretty">
+          Wij nemen de bar mee. Onze bartenders komen met shakers, ijs, glaswerk en verse ingredienten naar jouw locatie, en werken met dezelfde huisgemaakte siropen en signature recepten als in de bar in Rijssen.
+        </p>
+        <p class="font-body text-prose text-base leading-[1.6] md:text-xl md:leading-[1.7] text-pretty">
+          Vooraf stellen we een cocktailkaart samen die past bij het gezelschap, van klassiekers tot creaties met rook en vuur. Op de dag zelf bouwen we op, schenken we, en ruimen we achteraf alles weer op.
+        </p>
+
+        <a href="/locatie/" class="btn-primary inline-block rounded-md px-7 py-4 text-base sm:text-lg font-body no-underline mt-7 md:mt-9">
+          Meer informatie
+        </a>
       </div>
+
     </div>
   </section>
 
   <!-- SECTION 4: WORKSHOPS IN DE BAR -->
-  <section id="workshops" class="flex w-full flex-col items-center bg-surface py-16 sm:py-24 px-4 gap-10">
-    <div class="max-w-[1200px] w-full flex flex-col gap-10">
-      <!-- Header -->
-      <div class="text-center flex flex-col items-center gap-3">
-        <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Samen cocktails maken</p>
-        <h2 class="font-heading text-3xl sm:text-4xl text-white" style="letter-spacing:-0.02em;">Workshops in de Bar</h2>
-        <p class="font-body text-base max-w-lg leading-relaxed" style="color:rgba(255,255,255,0.68);">
-          Leer onder begeleiding van onze bartender twee cocktails maken. Inclusief hapjes of streetfood. Vanaf 4 personen.
-        </p>
+  <section id="workshops" class="flex w-full justify-center bg-surface py-16 sm:py-20 px-4">
+    <div class="workshop-card max-w-4xl w-full flex flex-col sm:flex-row overflow-hidden rounded-sm"
+         style="background:#1A1410; box-shadow:0 36px 70px -46px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(255,255,255,0.06);">
+
+      <!-- Foto -->
+      <div class="relative sm:w-[38%] min-h-[200px] sm:min-h-0 overflow-hidden">
+        <img src="OldImages/671005256_18321173341269765_1376636770653829239_n..jpg"
+             alt="Tiki-cocktail met limoen en pandanblad op de bar"
+             class="card-img absolute inset-0 h-full w-full object-cover" style="object-position:center 60%;" loading="lazy">
+        <div class="absolute inset-0" style="background:linear-gradient(to right, transparent 55%, rgba(26,20,16,0.9) 100%);"></div>
+        <div class="absolute inset-0 sm:hidden" style="background:linear-gradient(to top, rgba(26,20,16,0.85) 0%, transparent 60%);"></div>
       </div>
 
-      <!-- Twee workshop kaarten -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-        <!-- Cocktails & Bites -->
-        <div class="workshop-card rounded-sm flex flex-col overflow-hidden" style="background:#1A1410;">
-          <div class="relative aspect-[16/9] overflow-hidden">
-            <img src="OldImages/686449277_18324155140269765_6087244181663442445_n..jpg" alt="Cocktailworkshop The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center 30%;" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute top-4 left-4">
-              <span class="font-body text-sm text-black px-2 py-1 rounded-sm uppercase tracking-widest" style="background:#C8922A;">Populair</span>
-            </div>
-          </div>
-          <div class="flex flex-col gap-4 p-6">
-            <div>
-              <h3 class="font-heading text-2xl text-white">Cocktails &amp; Bites</h3>
-              <p class="font-body text-sm mt-1" style="color:#8A7A6A;">1,5 – 2 uur · Vanaf 4 personen</p>
-            </div>
-            <p class="font-body text-base leading-relaxed" style="color:rgba(255,255,255,0.72);">
-              Maak 2 cocktails onder begeleiding van een bartender. Inclusief een hapjesplank. Alcoholvrije opties beschikbaar.
-            </p>
-            <ul class="flex flex-col gap-1.5">
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>2 cocktails maken
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Inclusief hapjesplank
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Extra cocktail mogelijk (+€8,50)
-              </li>
-            </ul>
-            <div class="flex items-end justify-between mt-2">
-              <div>
-                <span class="font-heading text-3xl text-white">€32</span>
-                <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
-              </div>
-              <button onclick="openBookingModal(event,'Cocktails &amp; Bites')" class="btn-primary rounded-md px-6 py-3 text-base font-body">Boek nu</button>
-            </div>
-          </div>
+      <!-- Tekst + de twee workshops als rijen -->
+      <div class="sm:w-[62%] flex flex-col gap-5 p-6 sm:p-8">
+        <div class="flex flex-col gap-2">
+          <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Samen cocktails maken</p>
+          <h2 class="font-heading text-2xl sm:text-3xl text-white" style="letter-spacing:-0.02em;">Workshops in de Bar</h2>
+          <p class="font-body text-base leading-relaxed text-pretty" style="color:rgba(255,255,255,0.75);">
+            Achter onze bar maak je twee cocktails onder begeleiding van een bartender. Vanaf 4 personen, met hapjes of streetfood erbij.
+          </p>
         </div>
 
-        <!-- Cocktails & Streetfood -->
-        <div class="workshop-card rounded-sm flex flex-col overflow-hidden" style="background:#1A1410;">
-          <div class="relative aspect-[16/9] overflow-hidden">
-            <img src="OldImages/658359118_18319648537269765_8115539474338810376_n..jpg" alt="Streetfood The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" style="object-position: center 40%;" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-          </div>
-          <div class="flex flex-col gap-4 p-6">
-            <div>
-              <h3 class="font-heading text-2xl text-white">Cocktails &amp; Streetfood</h3>
-              <p class="font-body text-sm mt-1" style="color:#8A7A6A;">2,5 – 3 uur · Vanaf 4 personen</p>
-            </div>
-            <p class="font-body text-base leading-relaxed" style="color:rgba(255,255,255,0.72);">
-              Maak 2 cocktails én geniet van een compleet streetfood plateau. Een avondje uit dat je niet snel vergeet.
-            </p>
-            <ul class="flex flex-col gap-1.5">
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>2 cocktails maken
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Inclusief streetfood plateau
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Extra cocktail mogelijk (+€8,50)
-              </li>
-            </ul>
-            <div class="flex items-end justify-between mt-2">
-              <div>
-                <span class="font-heading text-3xl text-white">€42</span>
-                <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
-              </div>
-              <button onclick="openBookingModal(event,'Cocktails &amp; Streetfood')" class="btn-primary rounded-md px-6 py-3 text-base font-body">Boek nu</button>
-            </div>
-          </div>
-        </div>
+        <div class="flex flex-col">
+          <button type="button" onclick="openBookingModal(event,'Cocktails &amp; Bites')" class="ws-row" aria-label="Boek de workshop Cocktails en Bites">
+            <span class="flex flex-col gap-0.5 min-w-0">
+              <span class="ws-name">Cocktails &amp; Bites</span>
+              <span class="ws-meta">1,5 – 2 uur · hapjesplank</span>
+            </span>
+            <span class="flex items-center gap-3 flex-shrink-0">
+              <span class="ws-price">€32<span class="ws-meta"> p.p.</span></span>
+              <svg class="ws-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </button>
 
+          <button type="button" onclick="openBookingModal(event,'Cocktails &amp; Streetfood')" class="ws-row" aria-label="Boek de workshop Cocktails en Streetfood">
+            <span class="flex flex-col gap-0.5 min-w-0">
+              <span class="ws-name">Cocktails &amp; Streetfood</span>
+              <span class="ws-meta">2,5 – 3 uur · streetfood plateau</span>
+            </span>
+            <span class="flex items-center gap-3 flex-shrink-0">
+              <span class="ws-price">€42<span class="ws-meta"> p.p.</span></span>
+              <svg class="ws-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -567,66 +589,7 @@
 
   </section>
 
-  <!-- SECTION 6: BARTENDING OP LOCATIE -->
-  <section id="bartending" class="flex w-full flex-col items-center py-16 sm:py-24 px-4 gap-10" style="background:#1A1410;">
-    <div class="max-w-[1200px] w-full flex flex-col gap-10">
-
-      <!-- Header -->
-      <div class="text-center flex flex-col items-center gap-3">
-        <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Voor feesten &amp; evenementen</p>
-        <h2 class="font-heading text-3xl sm:text-4xl text-white" style="letter-spacing:-0.02em;">Bartending Op Locatie</h2>
-        <p class="font-body text-base max-w-lg leading-relaxed" style="color:rgba(255,255,255,0.68);">
-          Professionele bartenders voor jouw feest of evenement. Maatwerk cocktailmenu of vaste kaart — wij regelen alles.
-        </p>
-      </div>
-
-      <!-- Één grote kaart -->
-      <div class="flex justify-center">
-        <div class="workshop-card rounded-sm flex flex-col lg:flex-row overflow-hidden w-full max-w-4xl" style="background:#0D0D0D;">
-          <div class="relative lg:w-2/5 min-h-[280px] lg:min-h-0 lg:h-auto overflow-hidden">
-            <img src="OldImages/686185813_18323187394269765_443102986254546554_n..jpg" alt="Bartending op locatie The Old Fashioned" class="card-img absolute inset-0 h-full w-full object-cover" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-          </div>
-          <div class="flex flex-col gap-4 p-6 lg:w-3/5">
-            <div>
-              <h3 class="font-heading text-2xl text-white">Bartending Op Locatie</h3>
-              <p class="font-body text-sm mt-1" style="color:#8A7A6A;">Flexibel · Vanaf 50 cocktails</p>
-            </div>
-            <p class="font-body text-base leading-relaxed" style="color:rgba(255,255,255,0.72);">
-              Onze bartenders komen naar jouw feest of evenement. Van bruiloft tot bedrijfsborrel — wij zorgen voor een onvergetelijke cocktailervaring.
-            </p>
-            <ul class="flex flex-col gap-1.5">
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Keuze uit cocktailkaart of maatwerk menu
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Alle ingrediënten en materialen verzorgd
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Ook mocktails beschikbaar
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>€8 per cocktail of mocktail
-              </li>
-              <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-                <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Voorrij binnen 10 km: €50 · 10–30 km: €75
-              </li>
-            </ul>
-            <div class="flex items-end justify-between mt-2">
-              <div>
-                <span class="font-heading text-3xl text-white">€8</span>
-                <span class="font-body text-sm ml-1" style="color:#8A7A6A;">p.p.</span>
-              </div>
-              <button onclick="openBookingModal(event,'Bartending op Locatie')" class="btn-primary rounded-md px-6 py-3 text-base font-body">Vraag een offerte aan</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- SECTION 7: OPENINGSTIJDEN & LOCATIE -->
+  <!-- SECTION 6: OPENINGSTIJDEN & LOCATIE -->
   <section id="locatie" class="flex w-full flex-col items-center bg-surface py-16 sm:py-24 px-4">
     <div class="max-w-[1200px] w-full flex flex-col lg:flex-row gap-10">
 
@@ -707,10 +670,11 @@
     <div class="flex flex-col gap-4">
       <h3 class="font-heading text-lg text-white">Navigatie</h3>
       <ul class="list-none p-0 m-0 flex flex-col gap-2">
-        <li><a href="#bar" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">De Bar</a></li>
+        <li><a href="#over-ons" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">De Bar</a></li>
+        <li><a href="#bartending" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">Bartending op Locatie</a></li>
         <li><a href="#workshops" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">Workshops in de Bar</a></li>
         <li><a href="#op-locatie" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">Workshop op Locatie</a></li>
-        <li><a href="#bartending" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">Bartending op Locatie</a></li>
+        <li><a href="/locatie/" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">Cocktails op Locatie</a></li>
         <li><a href="#locatie" class="font-body text-base no-underline transition-colors hover:text-white" style="color:#8A7A6A;">Openingstijden &amp; Locatie</a></li>
       </ul>
     </div>
