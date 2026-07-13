@@ -4,6 +4,7 @@
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/:path*", "destination": "/admin/index.html" },
-    { "source": "/locatie", "destination": "/locatie/index.html" }
+    { "source": "/locatie", "destination": "/locatie/index.html" },
+    { "source": "/workshops", "destination": "/workshops/index.html" }
   ]
 }

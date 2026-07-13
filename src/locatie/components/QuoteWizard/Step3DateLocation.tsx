@@ -2,7 +2,7 @@ import type { Availability, BlockedDate, ServiceSettings } from '../../../shared
 import { isDateSelectable } from '../../../shared/lib/availability';
 import { parseDateOnly, formatDateLongNL } from '../../../shared/lib/format';
 import type { ConfirmedEventDate } from '../../../shared/lib/data';
-import { Calendar } from './Calendar';
+import { Calendar } from '../../../shared/components/Calendar';
 
 interface Props {
   eventDate: string;

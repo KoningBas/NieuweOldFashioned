@@ -10,7 +10,7 @@ function redirectAppRoots() {
     name: 'redirect-app-roots',
     configureServer(server: import('vite').ViteDevServer) {
       server.middlewares.use((req, res, next) => {
-        if (req.url === '/admin' || req.url === '/locatie') {
+        if (req.url === '/admin' || req.url === '/locatie' || req.url === '/workshops') {
           res.writeHead(301, { Location: req.url + '/' });
           res.end();
           return;
@@ -29,6 +29,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         locatie: resolve(root, 'locatie/index.html'),
+        workshops: resolve(root, 'workshops/index.html'),
         admin: resolve(root, 'admin/index.html'),
       },
     },

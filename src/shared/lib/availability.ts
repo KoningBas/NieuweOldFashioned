@@ -12,10 +12,16 @@ export interface ConfirmedRequestLike {
   event_date: string;
 }
 
+// isDateSelectable() only reads `booking_notice_hours` off `settings`, so the
+// context asks for no more than that. Callers holding a full ServiceSettings
+// row (the quote wizard) still satisfy this structurally; callers that have no
+// settings row at all (the workshops form, which falls back to a fixed notice
+// window when Supabase is unreachable) can synthesize one without inventing
+// values for a dozen unrelated columns.
 export interface AvailabilityContext {
   availability: Availability[];
   blockedDates: BlockedDate[];
-  settings: ServiceSettings;
+  settings: Pick<ServiceSettings, 'booking_notice_hours'>;
   confirmedRequests: ConfirmedRequestLike[];
 }
 

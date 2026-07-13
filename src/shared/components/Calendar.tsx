@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { AvailabilityContext } from '../../../shared/lib/availability';
-import { isDateSelectable } from '../../../shared/lib/availability';
-import { toDateOnly, parseDateOnly, formatDateLongNL } from '../../../shared/lib/format';
+import type { AvailabilityContext } from '../lib/availability';
+import { isDateSelectable } from '../lib/availability';
+import { toDateOnly, parseDateOnly, formatDateLongNL } from '../lib/format';
 
 interface Props {
   /** Selected date as 'YYYY-MM-DD', or '' when nothing is picked yet. */
@@ -9,6 +9,9 @@ interface Props {
   onChange: (value: string) => void;
   /** Availability rules; null while still loading — every day renders unselectable until it arrives. */
   ctx: AvailabilityContext | null;
+  /** Tighter cells and padding, for forms where the calendar sits beside other
+   *  fields rather than owning its own wizard step. */
+  compact?: boolean;
 }
 
 const WEEKDAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
@@ -42,7 +45,7 @@ function isStruck(date: Date, ctx: AvailabilityContext | null): boolean {
   return false;
 }
 
-export function Calendar({ value, onChange, ctx }: Props) {
+export function Calendar({ value, onChange, ctx, compact = false }: Props) {
   const today = useMemo(() => new Date(), []);
   const selected = value ? parseDateOnly(value) : null;
 
@@ -105,26 +108,26 @@ export function Calendar({ value, onChange, ctx }: Props) {
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(view.getFullYear(), view.getMonth(), d));
 
   return (
-    <div className="rounded-xl bg-surface border border-white/10 p-4 md:p-5 select-none">
+    <div className={`rounded-xl bg-surface border border-white/10 select-none ${compact ? 'p-3' : 'p-4 md:p-5'}`}>
       {/* Month navigation */}
-      <div className="flex items-center justify-between mb-3">
+      <div className={`flex items-center justify-between ${compact ? 'mb-1.5' : 'mb-3'}`}>
         <button
           type="button"
           onClick={() => canGoPrev && setView(addMonths(view, -1))}
           disabled={!canGoPrev}
           aria-label="Vorige maand"
-          className="grid h-9 w-9 place-items-center rounded-full text-prose transition-colors duration-200 hover:bg-white/5 hover:text-gold-light disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-prose focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+          className={`grid place-items-center rounded-full text-prose transition-colors duration-200 hover:bg-white/5 hover:text-gold-light disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-prose focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
         >
           <ChevronLeft />
         </button>
-        <div aria-live="polite" className="font-heading text-lg md:text-xl text-white tracking-wide">
+        <div aria-live="polite" className={`font-heading text-white tracking-wide ${compact ? 'text-base' : 'text-lg md:text-xl'}`}>
           {capitalize(MONTH_YEAR.format(view))}
         </div>
         <button
           type="button"
           onClick={() => setView(addMonths(view, 1))}
           aria-label="Volgende maand"
-          className="grid h-9 w-9 place-items-center rounded-full text-prose transition-colors duration-200 hover:bg-white/5 hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+          className={`grid place-items-center rounded-full text-prose transition-colors duration-200 hover:bg-white/5 hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
         >
           <ChevronRight />
         </button>
@@ -133,7 +136,11 @@ export function Calendar({ value, onChange, ctx }: Props) {
       {/* Weekday header */}
       <div className="grid grid-cols-7 mb-1" role="row">
         {WEEKDAY_LABELS.map((w) => (
-          <div key={w} role="columnheader" className="py-1.5 text-center text-xs font-medium uppercase tracking-wider text-muted">
+          <div
+            key={w}
+            role="columnheader"
+            className={`text-center text-xs font-medium uppercase tracking-wider text-muted ${compact ? 'py-0.5' : 'py-1.5'}`}
+          >
             {w}
           </div>
         ))}
@@ -171,7 +178,9 @@ export function Calendar({ value, onChange, ctx }: Props) {
                 aria-disabled={!selectable}
                 aria-selected={isSelected}
                 onClick={() => select(date)}
-                className={`relative grid h-10 w-10 place-items-center rounded-full text-base tabular-nums transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-1 ${stateClass}`}
+                className={`relative grid place-items-center rounded-full tabular-nums transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-1 ${
+                  compact ? 'h-8 w-8 text-sm' : 'h-10 w-10 text-base'
+                } ${stateClass}`}
               >
                 {date.getDate()}
                 {isToday && !isSelected && (

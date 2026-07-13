@@ -156,9 +156,6 @@
       border: 1px solid rgba(255,255,255,0.08);
     }
 
-    /* Workshop card image zoom on hover */
-    .workshop-card:hover .card-img { transform: scale(1.04); }
-
     /* ---- Tiles (Over The Old Fashioned) ---- */
     .tile { position: relative; overflow: hidden; border-radius: 3px; aspect-ratio: 1 / 1; display: block; }
     .tile-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -191,119 +188,19 @@
     .tile-hint { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.72rem;
       letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
 
-    /* ---- Workshop rows (Workshops in de Bar) ---- */
-    .ws-row { display: flex; align-items: center; justify-content: space-between; gap: 14px;
-      width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer;
-      padding: 14px 0; color: inherit; border-top: 1px solid rgba(255,255,255,0.09);
-      transition: padding-left 300ms cubic-bezier(0.16,1,0.3,1); }
-    .ws-row:hover { padding-left: 8px; }
-    .ws-row:hover .ws-name { color: #F0C060; }
-    .ws-row:hover .ws-arrow { transform: translateX(4px); color: #F0C060; }
-    .ws-row:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; border-radius: 3px; }
-    .ws-name { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.28rem; color: #fff;
-      transition: color 250ms ease; }
-    .ws-meta { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.9rem; color: #A2907E; }
-    .ws-price { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.35rem; color: #fff; white-space: nowrap; }
-    .ws-arrow { color: #C8922A; flex-shrink: 0; transition: transform 300ms cubic-bezier(0.16,1,0.3,1), color 250ms ease; }
-
     @media (prefers-reduced-motion: reduce) {
-      .tile-img, .tile--link, .tile-arrow, .ws-row, .ws-arrow, .card-img { transition: none !important; }
+      .tile-img, .tile--link, .tile-arrow, .card-img { transition: none !important; }
       .tile--link:hover, .tile--link:active { transform: none; }
       .tile--link:hover .tile-img { transform: none; }
-      .ws-row:hover { padding-left: 0; }
-      .ws-row:hover .ws-arrow { transform: none; }
       .fade-section { opacity: 1; transform: none; transition: opacity 0.2s ease; }
     }
 
-    /* Booking Modal */
-    .bm-day-cell {
-      width: 100%; height: 30px; display: flex; align-items: center; justify-content: center;
-      font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.88rem;
-      border: none; background: transparent; color: rgba(255,255,255,0.85);
-      cursor: pointer; border-radius: 0; transition: background 0.12s, color 0.12s;
-    }
-    .bm-day-cell:not(:disabled):not(.selected):hover { background: #1A1410; color: #C8922A; border-radius:4px; }
-    .bm-day-cell.selected { background: #C8922A !important; color: #fff !important; border-radius:4px; }
-    .bm-day-cell:disabled { opacity: 0.28; cursor: not-allowed; text-decoration: line-through; }
-    .bm-time-btn {
-      padding: 8px 4px; border: 1px solid rgba(255,255,255,0.12); background: transparent;
-      color: rgba(255,255,255,0.78); font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 0.95rem; cursor: pointer;
-      transition: background 0.12s, color 0.12s, border-color 0.12s; border-radius:6px;
-    }
-    .bm-time-btn:not(.selected):hover { background: #1A1410; color: #C8922A; border-color: #C8922A; }
-    .bm-time-btn.selected { background: #C8922A; color: #fff; border-color: #C8922A; }
-    .bm-type-btn {
-      padding:10px 8px; border:1px solid rgba(200,146,42,0.3); background:transparent;
-      color:rgba(255,255,255,0.78); font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:0.95rem; cursor:pointer; border-radius:6px; width:100%;
-      transition:background 0.12s, color 0.12s, border-color 0.12s;
-    }
-    .bm-type-btn:not(.selected):hover { background:#1A1410; color:#C8922A; border-color:#C8922A; }
-    .bm-type-btn.selected { background:#C8922A; color:#fff; border-color:#C8922A; }
-    #bm-close:hover { color: #E8B86D; }
-    #bm-close:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
-    #bm-prev:hover, #bm-next:hover { color: #E8B86D; }
-    #bm-prev:focus-visible, #bm-next:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
-    .bm-day-cell:focus-visible { outline: 2px solid #E8B86D; outline-offset: -2px; border-radius: 4px; }
-    .bm-time-btn:focus-visible { outline: 2px solid #E8B86D; outline-offset: -2px; }
-    .bm-type-btn:focus-visible { outline: 2px solid #E8B86D; outline-offset: -2px; }
+    /* Focus states */
     .nav-btn:focus-visible { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 2px; }
     #mobile-menu a:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; }
     footer a:focus-visible { outline: 2px solid #C8922A; outline-offset: 2px; border-radius: 2px; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .bm-time-panel { max-height: 12rem; overflow-y: auto; }
-    @media (max-width: 639px) {
-      .bm-body { flex: 0 0 auto !important; overflow: visible !important; height: auto !important; }
-      .bm-body > div:first-child { overflow: visible !important; }
-      #bm-scroll-region { -ms-overflow-style: none; scrollbar-width: none; }
-      #bm-scroll-region::-webkit-scrollbar { display: none; }
-    }
-    @media (min-width: 640px) {
-      .bm-body { flex-direction: row !important; height: 300px; flex: none !important; }
-      .bm-time-panel {
-        border-top: none !important;
-        border-left: 1px solid rgba(255,255,255,0.07) !important;
-        width: 180px !important; flex-shrink: 0; overflow-y: auto;
-        max-height: none !important; align-self: stretch;
-      }
-      #bm-time-slots { grid-template-columns: 1fr !important; }
-    }
-    .bm-time-panel::-webkit-scrollbar { width: 3px; }
-    .bm-time-panel::-webkit-scrollbar-track { background: transparent; }
-    .bm-time-panel::-webkit-scrollbar-thumb { background: rgba(200,146,42,0.4); border-radius: 2px; }
-    @keyframes bm-enter { from { opacity:0; transform:scale(0.93) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-    @keyframes bm-exit  { from { opacity:1; transform:scale(1) translateY(0); } to { opacity:0; transform:scale(0.93) translateY(6px); } }
-    @keyframes bm-fade-in  { from { opacity:0; } to { opacity:1; } }
-    @keyframes bm-fade-out { from { opacity:1; } to { opacity:0; } }
-    .bm-card-enter { animation: bm-enter  280ms cubic-bezier(0.34,1.56,0.64,1) both; }
-    .bm-card-exit  { animation: bm-exit   170ms cubic-bezier(0.4,0,1,1)         both; }
-    .bm-bd-enter   { animation: bm-fade-in  220ms ease both; }
-    .bm-bd-exit    { animation: bm-fade-out 170ms ease both; }
-    /* Booking modal contact form */
-    .bm-form-grid { display:grid; grid-template-columns:1fr; gap:10px; }
-    @media (min-width:640px) { .bm-form-grid { grid-template-columns:1fr 1fr; } }
-    .bm-form-full { grid-column:1 / -1; }
-    .bm-form-label {
-      display:block;
-      font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:0.68rem; color:rgba(255,255,255,0.88); letter-spacing:0.2em;
-      text-transform:uppercase; margin-bottom:5px;
-    }
-    .bm-form-input {
-      display:block; width:100%; background:#1A1410;
-      border:1px solid rgba(200,146,42,0.3);
-      color:#fff; font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:1rem; padding:7px 12px;
-      outline:none; box-sizing:border-box; transition:border-color 0.15s; border-radius:6px;
-    }
-    .bm-form-input:focus { outline:2px solid #E8B86D; outline-offset:0; }
-    .bm-form-input.bm-input-error { border-color:#ef4444; }
-    .bm-form-error {
-      display:block; font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:0.78rem; color:#ef4444; margin-top:3px;
-    }
   </style>
 </head>
 <body>
@@ -494,54 +391,38 @@
     </div>
   </section>
 
-  <!-- SECTION 4: WORKSHOPS IN DE BAR -->
-  <section id="workshops" class="flex w-full justify-center bg-surface py-16 sm:py-20 px-4">
-    <div class="workshop-card max-w-4xl w-full flex flex-col sm:flex-row overflow-hidden rounded-sm"
-         style="background:#1A1410; box-shadow:0 36px 70px -46px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(255,255,255,0.06);">
+  <!-- SECTION 4: WORKSHOPS IN DE BAR — gespiegeld t.o.v. #bartending: tekst links, foto rechts.
+       De knop wijst naar /workshops/; die pagina moet nog gebouwd worden. -->
+  <section id="workshops" class="py-12 md:py-28 px-6 md:px-10 scroll-mt-24 bg-surface">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-center">
 
-      <!-- Foto -->
-      <div class="relative sm:w-[38%] min-h-[200px] sm:min-h-0 overflow-hidden">
-        <img src="OldImages/671005256_18321173341269765_1376636770653829239_n..jpg"
-             alt="Tiki-cocktail met limoen en pandanblad op de bar"
-             class="card-img absolute inset-0 h-full w-full object-cover" style="object-position:center 60%;" loading="lazy">
-        <div class="absolute inset-0" style="background:linear-gradient(to right, transparent 55%, rgba(26,20,16,0.9) 100%);"></div>
-        <div class="absolute inset-0 sm:hidden" style="background:linear-gradient(to top, rgba(26,20,16,0.85) 0%, transparent 60%);"></div>
+      <!-- Tekst — links op desktop, onder de foto op mobiel -->
+      <div class="order-2 md:order-1">
+        <p class="font-body uppercase text-sm tracking-[0.22em] md:text-base md:tracking-[0.3em] text-gold-light mb-3 md:mb-4">Samen cocktails maken</p>
+        <h2 class="font-heading text-3xl md:text-5xl tracking-[-0.02em] mb-4 md:mb-6 text-balance md:[text-wrap:normal]">Workshops in de Bar</h2>
+
+        <p class="font-body text-prose text-base leading-[1.6] md:text-xl md:leading-[1.7] mb-4 md:mb-5 text-pretty">
+          Je staat achter onze bar, met een bartender naast je. Twee cocktails maak je zelf: shaken, proeven, bijstellen tot het klopt. Daarna drink je ze op.
+        </p>
+        <p class="font-body text-prose text-base leading-[1.6] md:text-xl md:leading-[1.7] text-pretty">
+          Vanaf vier personen, en er hoort eten bij: een hapjesplank naast je shaker, of een streetfood plateau als je er langer voor gaat zitten. Wij zorgen voor de rest.
+        </p>
+
+        <a href="/workshops/" class="btn-primary inline-block rounded-md px-7 py-4 text-base sm:text-lg font-body no-underline mt-7 md:mt-9">
+          Meer over de workshops
+        </a>
       </div>
 
-      <!-- Tekst + de twee workshops als rijen -->
-      <div class="sm:w-[62%] flex flex-col gap-5 p-6 sm:p-8">
-        <div class="flex flex-col gap-2">
-          <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Samen cocktails maken</p>
-          <h2 class="font-heading text-2xl sm:text-3xl text-white" style="letter-spacing:-0.02em;">Workshops in de Bar</h2>
-          <p class="font-body text-base leading-relaxed text-pretty" style="color:rgba(255,255,255,0.75);">
-            Achter onze bar maak je twee cocktails onder begeleiding van een bartender. Vanaf 4 personen, met hapjes of streetfood erbij.
-          </p>
-        </div>
-
-        <div class="flex flex-col">
-          <button type="button" onclick="openBookingModal(event,'Cocktails &amp; Bites')" class="ws-row" aria-label="Boek de workshop Cocktails en Bites">
-            <span class="flex flex-col gap-0.5 min-w-0">
-              <span class="ws-name">Cocktails &amp; Bites</span>
-              <span class="ws-meta">1,5 – 2 uur · hapjesplank</span>
-            </span>
-            <span class="flex items-center gap-3 flex-shrink-0">
-              <span class="ws-price">€32<span class="ws-meta"> p.p.</span></span>
-              <svg class="ws-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </span>
-          </button>
-
-          <button type="button" onclick="openBookingModal(event,'Cocktails &amp; Streetfood')" class="ws-row" aria-label="Boek de workshop Cocktails en Streetfood">
-            <span class="flex flex-col gap-0.5 min-w-0">
-              <span class="ws-name">Cocktails &amp; Streetfood</span>
-              <span class="ws-meta">2,5 – 3 uur · streetfood plateau</span>
-            </span>
-            <span class="flex items-center gap-3 flex-shrink-0">
-              <span class="ws-price">€42<span class="ws-meta"> p.p.</span></span>
-              <svg class="ws-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </span>
-          </button>
-        </div>
+      <!-- Foto — rechts op desktop, bovenaan op mobiel -->
+      <div class="order-1 md:order-2 relative rounded-2xl overflow-hidden aspect-[4/5] bg-surface-elevated shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)]">
+        <img src="OldImages/pornstar-martini.jpg"
+             alt="Twee pornstar martini's op een zwart tafeltje: een XXL-glas en een gewoon glas, elk met een schijfje passievrucht op de schuimlaag"
+             class="w-full h-full object-cover"
+             style="object-position:center 45%;"
+             loading="lazy">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" aria-hidden="true"></div>
       </div>
+
     </div>
   </section>
 
@@ -567,21 +448,14 @@
                 flex flex-col gap-4 px-6 py-10 pointer-events-auto bg-[#1A1410]">
       <p class="font-body text-sm text-gold uppercase tracking-[0.22em]">Cocktail Experience</p>
       <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl text-white leading-tight" style="letter-spacing:-0.02em;">Workshop<br>Op Locatie</h2>
-      <p class="font-body text-base sm:text-lg max-w-md leading-relaxed" style="color:rgba(255,255,255,0.78);">
-        Wij komen naar jou toe. Onze bartender verzorgt een complete cocktailworkshop op jouw locatie — inclusief shots, materialen en begeleiding.
+      <p class="font-body text-base sm:text-lg max-w-md leading-relaxed text-pretty" style="color:rgba(255,255,255,0.78);">
+        Wij komen naar jou toe. Onze bartender neemt shakers, ijs, glaswerk en verse ingrediënten mee, en bouwt een bar op waar jij wilt: thuis, op kantoor of in een zaal.
       </p>
-      <ul class="flex flex-col gap-1.5 mb-2">
-        <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-          <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>2 cocktails leren maken · inclusief shots
-        </li>
-        <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-          <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>€32 p.p. · ook alcoholvrij mogelijk
-        </li>
-        <li class="flex items-center gap-2 font-body text-sm" style="color:rgba(255,255,255,0.68);">
-          <div class="w-1 h-1 rounded-full flex-shrink-0" style="background:#C8922A;"></div>Voorrij binnen 15 km: €50
-        </li>
-      </ul>
-      <button onclick="openBookingModal(event,'Workshop op Locatie')" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body mt-1 w-full sm:w-auto text-center">Vraag een offerte aan</button>
+      <p class="font-body text-base sm:text-lg max-w-md leading-relaxed text-pretty mb-2" style="color:rgba(255,255,255,0.78);">
+        Je maakt twee cocktails onder begeleiding, shots inbegrepen. Drinkt er iemand niet? Die maakt dezelfde cocktails alcoholvrij.
+      </p>
+      <!-- Wijst naar /workshops/; die pagina moet nog gebouwd worden. -->
+      <a href="/workshops/" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline mt-1 w-full sm:w-auto text-center">Meer over workshops op locatie</a>
     </div>
 
     <!-- Desktop hoogte spacer -->
@@ -703,110 +577,6 @@
 
 </footer>
 
-<!-- ================================================================
-  BOOKING MODAL
-================================================================ -->
-<div id="booking-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:16px;" aria-modal="true" role="dialog" aria-labelledby="bm-modal-title">
-  <div id="bm-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);"></div>
-  <div id="bm-card" style="position:relative;z-index:10000;width:100%;max-width:680px;background:#1A1410;border:1px solid rgba(200,146,42,0.22);overflow:hidden;max-height:92svh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,0.85),0 0 0 1px rgba(200,146,42,0.08);border-radius:16px;">
-
-    <!-- Modal header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">
-      <div>
-        <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;color:#C8922A;letter-spacing:0.22em;text-transform:uppercase;margin:0 0 4px;">Workshop reservering</p>
-        <h2 id="bm-modal-title" style="font-family:'Bodoni Moda',Georgia,serif;font-size:1.4rem;color:#fff;margin:0;letter-spacing:-0.02em;">Kies een datum &amp; tijdstip</h2>
-      </div>
-      <button id="bm-close" type="button" style="width:36px;height:36px;border:none;background:transparent;color:#8A7A6A;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:color 0.15s;" aria-label="Sluiten">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-
-    <!-- Shared scroll region: bm-body + contact form. On mobile this scrolls; on desktop it holds fixed heights. -->
-    <div id="bm-scroll-region" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
-    <!-- Modal body: calendar + time slots -->
-    <div class="bm-body" style="display:flex;flex-direction:column;overflow:hidden;flex:1;">
-
-      <!-- Calendar panel -->
-      <div style="padding:20px 24px;flex:1;min-width:0;overflow:hidden;">
-        <!-- Month navigation -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <button id="bm-prev" type="button" style="width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8A7A6A;border-radius:4px;transition:color 0.15s;" aria-label="Vorige maand">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span id="bm-month-label" style="font-family:'Bodoni Moda',Georgia,serif;font-size:1rem;color:#fff;"></span>
-          <button id="bm-next" type="button" style="width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8A7A6A;border-radius:4px;transition:color 0.15s;" aria-label="Volgende maand">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-        <!-- Day-of-week headers (Mon-first) -->
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;opacity:0.45;">Ma</div>
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Di</div>
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Wo</div>
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Do</div>
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Vr</div>
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;">Za</div>
-          <div style="text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;padding:4px 0;color:#8A7A6A;opacity:0.45;">Zo</div>
-        </div>
-        <!-- Calendar grid (filled by JS) -->
-        <div id="bm-calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
-      </div>
-
-      <!-- Time slots panel -->
-      <div class="bm-time-panel" style="border-top:1px solid rgba(255,255,255,0.07);padding:20px 24px;flex-shrink:0;">
-        <div id="bm-time-slots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
-      </div>
-    </div>
-
-    <!-- Contact form section -->
-    <div id="bm-contact-section" style="border-top:1px solid rgba(255,255,255,0.07);padding:14px 24px;flex-shrink:0;">
-      <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:0.72rem;color:#fff;letter-spacing:0.18em;text-transform:uppercase;margin:0 0 16px;">Jouw gegevens</p>
-      <div class="bm-form-grid">
-        <div class="bm-form-full">
-          <label class="bm-form-label">Workshop</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <button type="button" id="bm-type-bites" class="bm-type-btn" aria-pressed="false">Cocktails &amp; Bites</button>
-            <button type="button" id="bm-type-streetfood" class="bm-type-btn" aria-pressed="false">Cocktails &amp; Streetfood</button>
-          </div>
-          <span id="bm-type-err" class="bm-form-error"></span>
-        </div>
-        <div>
-          <label for="bm-naam" class="bm-form-label">Naam</label>
-          <input id="bm-naam" type="text" class="bm-form-input" autocomplete="name">
-          <span id="bm-naam-err" class="bm-form-error"></span>
-        </div>
-        <div>
-          <label for="bm-personen" class="bm-form-label">Aantal personen</label>
-          <input id="bm-personen" type="number" step="1" class="bm-form-input" autocomplete="off">
-          <span id="bm-personen-err" class="bm-form-error"></span>
-        </div>
-        <div>
-          <label for="bm-email" class="bm-form-label">E-mailadres</label>
-          <input id="bm-email" type="email" class="bm-form-input" autocomplete="email">
-          <span id="bm-email-err" class="bm-form-error"></span>
-        </div>
-        <div>
-          <label for="bm-telefoon" class="bm-form-label">Telefoonnummer</label>
-          <input id="bm-telefoon" type="tel" class="bm-form-input" autocomplete="tel">
-          <span id="bm-telefoon-err" class="bm-form-error"></span>
-        </div>
-        <div class="bm-form-full">
-          <label for="bm-opmerking" class="bm-form-label">Opmerking <span style="opacity:0.55;">(optioneel)</span></label>
-          <textarea id="bm-opmerking" rows="3" class="bm-form-input" style="resize:vertical;"></textarea>
-        </div>
-      </div>
-    </div>
-    </div><!-- /#bm-scroll-region -->
-
-    <!-- Modal footer -->
-    <div style="border-top:1px solid rgba(255,255,255,0.07);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#0D0D0D;flex-shrink:0;">
-      <span id="bm-selection-label" style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;flex:1;min-width:0;"></span>
-      <button id="bm-confirm" type="button" class="btn-primary" style="padding:10px 24px;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;white-space:nowrap;flex-shrink:0;border-radius:4px;">Bevestig reservering</button>
-    </div>
-
-  </div>
-</div>
-
 <script>
   // Mobile menu toggle
   const hamburger = document.getElementById('hamburger');
@@ -857,324 +627,6 @@
     el.classList.add('fade-section');
     observer.observe(el);
   });
-</script>
-
-<script>
-(function () {
-  'use strict';
-
-  var _workshopName = '';
-  var _selectedDate = null;
-  var _selectedTime = null;
-  var _viewYear, _viewMonth;
-
-  // Contact form element refs (set in initFormFields)
-  var _fNaam, _fNaamErr, _fPersonen, _fPersonenErr, _fEmail, _fEmailErr, _fTelefoon, _fTelefoonErr, _fOpmerking;
-  var _fTypeBites, _fTypeStreetfood, _fTypeErr;
-  var _selectedType = null;
-  var _closeTimer = null;
-
-  var TODAY = new Date();
-  TODAY.setHours(0, 0, 0, 0);
-
-  var NL_DAYS = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
-  var NL_MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
-
-  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  var TIME_SLOTS = [];
-  for (var h = 14; h <= 20; h++) {
-    TIME_SLOTS.push(pad(h) + ':00');
-    if (h < 20) TIME_SLOTS.push(pad(h) + ':30');
-  }
-
-  function pad(n) { return n < 10 ? '0' + n : String(n); }
-
-  function selectType(name) {
-    _selectedType = name;
-    _workshopName = name;
-    if (_fTypeBites) {
-      _fTypeBites.classList.toggle('selected', name === 'Cocktails & Bites');
-      _fTypeBites.setAttribute('aria-pressed', String(name === 'Cocktails & Bites'));
-    }
-    if (_fTypeStreetfood) {
-      _fTypeStreetfood.classList.toggle('selected', name === 'Cocktails & Streetfood');
-      _fTypeStreetfood.setAttribute('aria-pressed', String(name === 'Cocktails & Streetfood'));
-    }
-    if (_fTypeErr) _fTypeErr.textContent = '';
-  }
-
-  function setFieldError(input, errEl, msg) {
-    errEl.textContent = msg;
-    if (msg) input.classList.add('bm-input-error');
-    else input.classList.remove('bm-input-error');
-  }
-
-  function validateNaam() {
-    var ok = _fNaam.value.trim().length > 0;
-    if (!ok) setFieldError(_fNaam, _fNaamErr, 'Naam is verplicht');
-    else setFieldError(_fNaam, _fNaamErr, '');
-    return ok;
-  }
-
-  function validatePersonen() {
-    var raw = _fPersonen.value;
-    var val = parseInt(raw, 10);
-    if (!raw || isNaN(val)) { setFieldError(_fPersonen, _fPersonenErr, 'Voer een geldig aantal in'); return false; }
-    if (val < 4) { setFieldError(_fPersonen, _fPersonenErr, 'Minimaal 4 personen vereist'); return false; }
-    setFieldError(_fPersonen, _fPersonenErr, '');
-    return true;
-  }
-
-  function validateEmail() {
-    var v = _fEmail.value.trim();
-    if (!v) { setFieldError(_fEmail, _fEmailErr, 'E-mailadres is verplicht'); return false; }
-    if (!EMAIL_RE.test(v)) { setFieldError(_fEmail, _fEmailErr, 'Voer een geldig e-mailadres in'); return false; }
-    setFieldError(_fEmail, _fEmailErr, '');
-    return true;
-  }
-
-  function validateTelefoon() {
-    var ok = _fTelefoon.value.trim().length > 0;
-    if (!ok) setFieldError(_fTelefoon, _fTelefoonErr, 'Telefoonnummer is verplicht');
-    else setFieldError(_fTelefoon, _fTelefoonErr, '');
-    return ok;
-  }
-
-  function validateForm() {
-    var naam = _fNaam && _fNaam.value.trim().length > 0;
-    var p = _fPersonen && parseInt(_fPersonen.value, 10) >= 4;
-    var email = _fEmail && EMAIL_RE.test(_fEmail.value.trim());
-    var tel = _fTelefoon && _fTelefoon.value.trim().length > 0;
-    return !!(_selectedType && naam && p && email && tel);
-  }
-
-  function resetForm() {
-    _selectedType = null;
-    if (_fTypeBites) { _fTypeBites.classList.remove('selected'); _fTypeBites.setAttribute('aria-pressed', 'false'); }
-    if (_fTypeStreetfood) { _fTypeStreetfood.classList.remove('selected'); _fTypeStreetfood.setAttribute('aria-pressed', 'false'); }
-    if (_fTypeErr) _fTypeErr.textContent = '';
-    [_fNaam, _fPersonen, _fEmail, _fTelefoon].forEach(function (el) {
-      if (el) { el.value = ''; el.classList.remove('bm-input-error'); }
-    });
-    [_fNaamErr, _fPersonenErr, _fEmailErr, _fTelefoonErr].forEach(function (el) {
-      if (el) el.textContent = '';
-    });
-    if (_fOpmerking) _fOpmerking.value = '';
-  }
-
-  function initFormFields() {
-    _fTypeBites = document.getElementById('bm-type-bites');
-    _fTypeStreetfood = document.getElementById('bm-type-streetfood');
-    _fTypeErr = document.getElementById('bm-type-err');
-    _fTypeBites.addEventListener('click', function () { selectType('Cocktails & Bites'); updateFooter(); });
-    _fTypeStreetfood.addEventListener('click', function () { selectType('Cocktails & Streetfood'); updateFooter(); });
-
-    _fNaam = document.getElementById('bm-naam');
-    _fNaamErr = document.getElementById('bm-naam-err');
-    _fPersonen = document.getElementById('bm-personen');
-    _fPersonenErr = document.getElementById('bm-personen-err');
-    _fEmail = document.getElementById('bm-email');
-    _fEmailErr = document.getElementById('bm-email-err');
-    _fTelefoon = document.getElementById('bm-telefoon');
-    _fTelefoonErr = document.getElementById('bm-telefoon-err');
-    _fOpmerking = document.getElementById('bm-opmerking');
-
-    _fNaam.addEventListener('blur', function () { validateNaam(); updateFooter(); });
-    _fPersonen.addEventListener('blur', function () { validatePersonen(); updateFooter(); });
-    _fEmail.addEventListener('blur', function () { validateEmail(); updateFooter(); });
-    _fTelefoon.addEventListener('blur', function () { validateTelefoon(); updateFooter(); });
-  }
-
-  function openBookingModal(e, workshopName) {
-    e.preventDefault();
-    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
-    _workshopName = workshopName || '';
-    _selectedDate = null;
-    _selectedTime = null;
-    _viewYear = TODAY.getFullYear();
-    _viewMonth = TODAY.getMonth();
-    renderCalendar();
-    renderTimeSlots();
-    resetForm();
-    if (_workshopName === 'Cocktails & Bites') selectType('Cocktails & Bites');
-    else if (_workshopName === 'Cocktails & Streetfood') selectType('Cocktails & Streetfood');
-    else if (_workshopName) _selectedType = _workshopName;
-    updateFooter();
-    var modal = document.getElementById('booking-modal');
-    var card = document.getElementById('bm-card');
-    var bd = document.getElementById('bm-backdrop');
-    modal.style.display = 'flex';
-    card.classList.remove('bm-card-exit', 'bm-card-enter');
-    bd.classList.remove('bm-bd-exit', 'bm-bd-enter');
-    void card.offsetWidth;
-    card.classList.add('bm-card-enter');
-    bd.classList.add('bm-bd-enter');
-    document.body.style.overflow = 'hidden';
-    setTimeout(function () {
-      var closeBtn = document.getElementById('bm-close');
-      if (closeBtn) closeBtn.focus();
-    }, 50);
-  }
-
-  function closeBookingModal() {
-    var modal = document.getElementById('booking-modal');
-    var card = document.getElementById('bm-card');
-    var bd = document.getElementById('bm-backdrop');
-    card.classList.remove('bm-card-enter');
-    bd.classList.remove('bm-bd-enter');
-    card.classList.add('bm-card-exit');
-    bd.classList.add('bm-bd-exit');
-    _closeTimer = setTimeout(function () {
-      modal.style.display = 'none';
-      card.classList.remove('bm-card-exit');
-      bd.classList.remove('bm-bd-exit');
-      document.body.style.overflow = '';
-      _closeTimer = null;
-    }, 175);
-  }
-
-  function renderCalendar() {
-    var monthName = NL_MONTHS[_viewMonth];
-    document.getElementById('bm-month-label').textContent =
-      monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' ' + _viewYear;
-
-    var prevBtn = document.getElementById('bm-prev');
-    var isCurrentMonth = (_viewYear === TODAY.getFullYear() && _viewMonth === TODAY.getMonth());
-    prevBtn.disabled = isCurrentMonth;
-    prevBtn.style.opacity = isCurrentMonth ? '0.25' : '1';
-    prevBtn.style.cursor = isCurrentMonth ? 'not-allowed' : 'pointer';
-
-    var grid = document.getElementById('bm-calendar-grid');
-    grid.innerHTML = '';
-
-    var firstDay = new Date(_viewYear, _viewMonth, 1);
-    var daysInMonth = new Date(_viewYear, _viewMonth + 1, 0).getDate();
-
-    // Monday-first offset (Mon=0 … Sun=6)
-    var dow = firstDay.getDay();
-    var offset = dow === 0 ? 6 : dow - 1;
-
-    for (var i = 0; i < offset; i++) {
-      grid.appendChild(document.createElement('div'));
-    }
-
-    for (var d = 1; d <= daysInMonth; d++) {
-      var date = new Date(_viewYear, _viewMonth, d);
-      var dayOfWeek = date.getDay();
-      var isPast = date < TODAY;
-      var isDisabled = isPast || dayOfWeek === 0 || dayOfWeek === 1;
-      var isSelected = _selectedDate !== null
-        && _selectedDate.getFullYear() === _viewYear
-        && _selectedDate.getMonth() === _viewMonth
-        && _selectedDate.getDate() === d;
-
-      var cell = document.createElement('button');
-      cell.type = 'button';
-      cell.className = 'bm-day-cell' + (isSelected ? ' selected' : '');
-      cell.textContent = d;
-      if (isDisabled) {
-        cell.disabled = true;
-      } else {
-        (function (day) {
-          cell.addEventListener('click', function () {
-            _selectedDate = new Date(_viewYear, _viewMonth, day);
-            renderCalendar();
-            updateFooter();
-          });
-        })(d);
-      }
-      grid.appendChild(cell);
-    }
-  }
-
-  function renderTimeSlots() {
-    var container = document.getElementById('bm-time-slots');
-    container.innerHTML = '';
-    TIME_SLOTS.forEach(function (time) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'bm-time-btn' + (_selectedTime === time ? ' selected' : '');
-      btn.textContent = time;
-      btn.addEventListener('click', function () {
-        _selectedTime = time;
-        renderTimeSlots();
-        updateFooter();
-      });
-      container.appendChild(btn);
-    });
-  }
-
-  function updateFooter() {
-    var label = document.getElementById('bm-selection-label');
-    var confirmBtn = document.getElementById('bm-confirm');
-    var formOk = validateForm();
-    if (_selectedDate && _selectedTime) {
-      var dn = NL_DAYS[_selectedDate.getDay()];
-      var day = _selectedDate.getDate();
-      var mn = NL_MONTHS[_selectedDate.getMonth()];
-      var yr = _selectedDate.getFullYear();
-      label.textContent = dn + ' ' + day + ' ' + mn + ' ' + yr + ' om ' + _selectedTime;
-      label.style.color = '#E8B86D';
-    } else {
-      label.textContent = 'Kies een datum en tijdstip';
-      label.style.color = '#8A7A6A';
-    }
-    var canConfirm = !!(_selectedDate && _selectedTime && formOk);
-    confirmBtn.disabled = !canConfirm;
-    confirmBtn.style.opacity = canConfirm ? '1' : '0.4';
-    confirmBtn.style.cursor = canConfirm ? 'pointer' : 'not-allowed';
-  }
-
-  function confirmBooking() {
-    if (!_selectedDate || !_selectedTime || !validateForm()) return;
-    var dn = NL_DAYS[_selectedDate.getDay()];
-    var day = _selectedDate.getDate();
-    var mn = NL_MONTHS[_selectedDate.getMonth()];
-    var yr = _selectedDate.getFullYear();
-    var subject = 'Workshopaanvraag ' + _workshopName + ' – ' + dn + ' ' + day + ' ' + mn + ' ' + yr + ' om ' + _selectedTime;
-    var naam = _fNaam.value.trim();
-    var personen = _fPersonen.value.trim();
-    var email = _fEmail.value.trim();
-    var telefoon = _fTelefoon.value.trim();
-    var opmerking = _fOpmerking.value.trim();
-    var body = 'Workshop: ' + _workshopName + '\nNaam: ' + naam + '\nAantal personen: ' + personen + '\nE-mail: ' + email + '\nTelefoon: ' + telefoon;
-    if (opmerking) body += '\nOpmerking: ' + opmerking;
-    closeBookingModal();
-    var mailtoUrl = 'mailto:Theqingzakelijk@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    window.open(mailtoUrl, '_blank');
-  }
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      var modal = document.getElementById('booking-modal');
-      if (modal.style.display === 'flex') closeBookingModal();
-    }
-  });
-
-  document.getElementById('bm-prev').addEventListener('click', function () {
-    var prev = new Date(_viewYear, _viewMonth - 1, 1);
-    var min = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
-    if (prev >= min) {
-      _viewMonth--;
-      if (_viewMonth < 0) { _viewMonth = 11; _viewYear--; }
-      renderCalendar();
-    }
-  });
-  document.getElementById('bm-next').addEventListener('click', function () {
-    _viewMonth++;
-    if (_viewMonth > 11) { _viewMonth = 0; _viewYear++; }
-    renderCalendar();
-  });
-  document.getElementById('bm-close').addEventListener('click', closeBookingModal);
-  document.getElementById('bm-backdrop').addEventListener('click', closeBookingModal);
-  document.getElementById('bm-confirm').addEventListener('click', confirmBooking);
-
-  initFormFields();
-
-  window.openBookingModal = openBookingModal;
-  window.closeBookingModal = closeBookingModal;
-})();
 </script>
 
 <!-- ================================================================
