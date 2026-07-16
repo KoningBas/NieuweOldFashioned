@@ -36,13 +36,13 @@ export function ArrangementenSection() {
     >
       <div className="max-w-7xl mx-auto">
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center mb-8 md:mb-16">
-          <p className="uppercase tracking-[0.3em] text-gold-light text-base mb-3 md:mb-4">Bij de workshop in de bar</p>
+          <p className="uppercase tracking-[0.3em] text-gold-light text-base mb-3 md:mb-4">Kies je etenarrangement</p>
           <h2 className="font-heading text-3xl md:text-5xl tracking-[-0.02em] mb-4 md:mb-6 text-balance">
             Bites of Streetfood
           </h2>
           <p className="text-prose text-base md:text-xl leading-[1.6] md:leading-[1.7] max-w-xl text-pretty">
-            In de bar eet je mee. Je kiest vooraf welke van de twee, en dat bepaalt meteen de prijs
-            en hoe lang je blijft.
+            Bij een workshop in de bar eet je mee. Je kiest vooraf Bites of Streetfood, en dat bepaalt
+            meteen de prijs en hoe lang je blijft.
           </p>
         </div>
 
@@ -67,11 +67,6 @@ export function ArrangementenSection() {
             </div>
           ))}
         </div>
-
-        <p className="font-body text-base md:text-lg text-prose mt-10 md:mt-14 text-center leading-[1.7]">
-          Bites en Streetfood serveren we in de bar. Op locatie verzorgen we de workshop zelf, het
-          eten regel je daar zelf.
-        </p>
       </div>
     </section>
   );

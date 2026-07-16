@@ -1,6 +1,12 @@
 import { useState } from 'react';
 
-const FAQS = [
+type Faq = {
+  question: string;
+  answer: string;
+  cta?: { href: string; label: string };
+};
+
+const FAQS: Faq[] = [
   {
     question: 'Vanaf hoeveel personen?',
     answer:
@@ -27,9 +33,10 @@ const FAQS = [
       'Met Bites blijf je anderhalf tot twee uur. Met Streetfood erbij wordt het twee tot tweeënhalf uur.',
   },
   {
-    question: 'Wat nemen jullie mee op locatie?',
+    question: 'Zijn er ook workshops op locatie?',
     answer:
-      'Tools, glaswerk, ijs, verse ingrediënten en garnering. Jij zorgt voor een tafel en wat ruimte om te werken. Voorrijkosten zijn € 50.',
+      'Ja. Vanaf 15 personen komen we naar je toe: thuis, op kantoor of in een zaal. Op de pagina Op Locatie zet je het in een offerte.',
+    cta: { href: '/locatie/#offerte', label: 'Naar Op Locatie' },
   },
 ];
 
@@ -100,9 +107,20 @@ export function FaqSection() {
                       isOpen ? 'visible opacity-100' : 'invisible opacity-0'
                     }`}
                   >
-                    <p className="max-w-[68ch] px-5 pb-5 pt-0 md:px-6 md:pb-6 text-prose text-base md:text-lg leading-[1.7] text-pretty">
-                      {item.answer}
-                    </p>
+                    <div className="px-5 pb-5 pt-0 md:px-6 md:pb-6">
+                      <p className="max-w-[68ch] text-prose text-base md:text-lg leading-[1.7] text-pretty">
+                        {item.answer}
+                      </p>
+                      {item.cta && (
+                        <a
+                          href={item.cta.href}
+                          className="btn-ghost mt-4 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-base font-body no-underline"
+                        >
+                          {item.cta.label}
+                          <span aria-hidden="true">&rarr;</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </li>

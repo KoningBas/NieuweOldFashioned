@@ -19,7 +19,6 @@ import {
   type Arrangement,
   type ReserveringForm,
   type Stap,
-  type Waar,
 } from '../lib/reservering';
 
 const veldClass =
@@ -91,18 +90,6 @@ export function ReserveringSection() {
     return aangeraakt.has(veld) ? fouten[veld] : undefined;
   }
 
-  function kiesWaar(waar: Waar) {
-    // The time rules differ per location, so a start time that was valid in the
-    // bar may not be valid on location and vice versa — clear it rather than
-    // leave a silently wrong value behind.
-    setForm((f) => ({ ...f, waar, arrangement: waar === 'bar' ? f.arrangement : null, tijd: '' }));
-    setAangeraakt((s) => {
-      const next = new Set(s);
-      next.delete('tijd');
-      return next;
-    });
-  }
-
   function verstuur() {
     if (!stapCompleet || stap !== 2) return;
     window.location.href = bouwMailtoHref(form);
@@ -153,73 +140,23 @@ export function ReserveringSection() {
                   <div className="grid md:grid-cols-2 gap-4 md:gap-5">
                     <div className="flex flex-col gap-4">
                       <fieldset className="border-0 p-0 m-0">
-                        <legend className={labelClass}>Waar wil je de workshop?</legend>
+                        <legend className={labelClass}>Arrangement</legend>
                         <div className="grid grid-cols-2 gap-2 md:gap-3">
-                          {(['bar', 'locatie'] as const).map((waar) => (
+                          {(Object.keys(ARRANGEMENTEN) as Arrangement[]).map((naam) => (
                             <KeuzeKaart
-                              key={waar}
-                              gekozen={form.waar === waar}
-                              titel={waar === 'bar' ? 'In de bar' : 'Op locatie'}
-                              onder={`Vanaf ${MIN_PERSONEN[waar]} pers.`}
-                              onClick={() => kiesWaar(waar)}
+                              key={naam}
+                              gekozen={form.arrangement === naam}
+                              titel={naam}
+                              onder={ARRANGEMENTEN[naam]}
+                              onClick={() => {
+                                zet('arrangement', naam);
+                                raakAan('arrangement');
+                              }}
                             />
                           ))}
                         </div>
+                        {fout('arrangement') && <p className={foutClass}>{fout('arrangement')}</p>}
                       </fieldset>
-
-                      {/* Arrangement (alleen in de bar) — op locatie regel je het eten zelf. */}
-                      {form.waar === 'bar' && (
-                        <fieldset className="border-0 p-0 m-0">
-                          <legend className={labelClass}>Arrangement</legend>
-                          <div className="grid grid-cols-2 gap-2 md:gap-3">
-                            {(Object.keys(ARRANGEMENTEN) as Arrangement[]).map((naam) => (
-                              <KeuzeKaart
-                                key={naam}
-                                gekozen={form.arrangement === naam}
-                                titel={naam}
-                                onder={ARRANGEMENTEN[naam]}
-                                onClick={() => {
-                                  zet('arrangement', naam);
-                                  raakAan('arrangement');
-                                }}
-                              />
-                            ))}
-                          </div>
-                          {fout('arrangement') && <p className={foutClass}>{fout('arrangement')}</p>}
-                        </fieldset>
-                      )}
-
-                      {/* Adres (alleen op locatie) */}
-                      {form.waar === 'locatie' && (
-                        <div className="grid grid-cols-2 gap-2 md:gap-3">
-                          <label className="block">
-                            <span className={labelClass}>Plaats</span>
-                            <input
-                              type="text"
-                              value={form.plaats}
-                              autoComplete="address-level2"
-                              onChange={(e) => zet('plaats', e.target.value)}
-                              onBlur={() => raakAan('plaats')}
-                              aria-invalid={fout('plaats') !== undefined}
-                              className={veldClass}
-                            />
-                            {fout('plaats') && <span className={`block ${foutClass}`}>{fout('plaats')}</span>}
-                          </label>
-                          <label className="block">
-                            <span className={labelClass}>Adres</span>
-                            <input
-                              type="text"
-                              value={form.adres}
-                              autoComplete="street-address"
-                              onChange={(e) => zet('adres', e.target.value)}
-                              onBlur={() => raakAan('adres')}
-                              aria-invalid={fout('adres') !== undefined}
-                              className={veldClass}
-                            />
-                            {fout('adres') && <span className={`block ${foutClass}`}>{fout('adres')}</span>}
-                          </label>
-                        </div>
-                      )}
 
                       <div>
                         <span className={labelClass}>Datum</span>
@@ -417,6 +354,16 @@ export function ReserveringSection() {
             </>
           )}
         </div>
+
+        <p className="mt-4 md:mt-5 text-center text-sm md:text-base text-white/80 leading-[1.6]">
+          Op locatie, vanaf 15 personen?{' '}
+          <a
+            href="/locatie/#offerte"
+            className="rounded text-white underline underline-offset-4 decoration-white/60 transition-colors duration-200 hover:decoration-white active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 motion-reduce:transition-none"
+          >
+            Vraag een offerte aan &rarr;
+          </a>
+        </p>
       </div>
     </section>
   );

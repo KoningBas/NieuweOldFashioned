@@ -43,6 +43,21 @@ export function AboutSection() {
               Wat je maakt, drink je zelf op. Wil je na afloop nog iets van de kaart, dan schenken we door voor 9 euro per cocktail.
             </p>
           </div>
+
+          {/* Op locatie: same workshop, we come to the guest. Booked via the Op Locatie page. */}
+          <div className="mt-6 md:mt-9 border-t border-white/10 pt-6 md:pt-8">
+            <p className="text-prose text-base md:text-xl leading-[1.6] md:leading-[1.7] mb-4 md:mb-6">
+              <span className="text-white">Liever ergens anders?</span> Vanaf 15 personen komen we naar
+              je toe: thuis, op kantoor of in een zaal. Tools, glaswerk en de bartender gaan mee.
+            </p>
+            <a
+              href="/locatie/#offerte"
+              className="btn-ghost inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-body no-underline"
+            >
+              Workshops op locatie
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>
