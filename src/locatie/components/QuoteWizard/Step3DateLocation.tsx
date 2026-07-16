@@ -22,7 +22,7 @@ interface Props {
 
 const fieldClass =
   'w-full rounded-lg bg-surface border border-white/15 px-4 py-3 text-base md:px-5 md:py-3.5 md:text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light';
-const labelClass = 'block text-sm md:text-lg text-prose mb-2 md:mb-3';
+const labelClass = 'block text-sm md:text-lg text-white mb-2 md:mb-3';
 
 export function Step3DateLocation({
   eventDate, eventTime, eventCity, eventPostcode, availabilityCtx,
@@ -55,7 +55,7 @@ export function Step3DateLocation({
           <div className="hidden md:block">
             <Calendar value={eventDate} onChange={onDateChange} ctx={availabilityCtx} />
             {eventDate !== '' && !selectedDateInvalid && (
-              <p className="mt-3 text-base text-prose">
+              <p className="mt-3 text-base text-white">
                 Gekozen: <span className="text-gold-light">{formatDateLongNL(eventDate)}</span>
               </p>
             )}

@@ -1,4 +1,4 @@
-const LABELS = ['Pakket', 'Aantallen', 'Datum & locatie', 'Contact', 'Overzicht'];
+const LABELS = ['Pakket', 'Aantallen', 'Datum & locatie', 'Contact'];
 
 export function StepIndicator({ current }: { current: number }) {
   return (

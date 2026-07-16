@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { ServicePackage } from '../../../shared/types/db';
 
 interface Props {
@@ -10,58 +9,31 @@ interface Props {
   onNext: () => void;
 }
 
-// Workshops get their own photo; the bartending / cocktail service uses the pour shot.
-function imageForPackage(pkg: ServicePackage): string {
-  return /workshop/i.test(pkg.package_name) ? '/OldImages/CocktailTiki.jpg' : '/OldImages/CocktailPour.jpg';
-}
-
 export function Step1Package({ packages, selectedPackageId, eventType, onSelectPackage, onEventTypeChange, onNext }: Props) {
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-
   return (
     <div>
       <h3 className="font-heading text-base md:text-3xl mb-3 md:mb-6">Kies je pakket</h3>
-      <div className="mb-5 md:mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 mb-5 md:mb-12">
         {packages.map((pkg) => {
           const selected = pkg.id === selectedPackageId;
-          const imageSrc = imageForPackage(pkg);
-          const imageFailed = failedImages.has(imageSrc);
           return (
             <button
               key={pkg.id}
               type="button"
               aria-pressed={selected}
               onClick={() => onSelectPackage(pkg.id)}
-              className={`group grid w-full grid-cols-[38%_1fr] md:grid-cols-[minmax(0,42%)_1fr] overflow-hidden rounded-xl md:rounded-2xl border text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
-                selected ? 'border-gold shadow-[0_0_0_1px_rgba(200,146,42,0.4),0_25px_50px_-25px_rgba(200,146,42,0.35)]' : 'border-white/10 hover:border-white/25'
+              className={`flex h-full flex-col rounded-xl md:rounded-2xl border bg-surface p-4 md:p-6 text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${
+                selected
+                  ? 'border-gold shadow-[0_0_0_1px_rgba(200,146,42,0.4),0_25px_50px_-25px_rgba(200,146,42,0.35)]'
+                  : 'border-white/10 hover:border-white/25'
               }`}
             >
-              <div className="relative min-h-full overflow-hidden bg-surface">
-                {!imageFailed ? (
-                  <img
-                    src={imageSrc}
-                    alt={`${pkg.package_name} — sfeerbeeld`}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                    onError={() => setFailedImages((prev) => new Set(prev).add(imageSrc))}
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-surface-elevated to-surface" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                <div className="absolute inset-0 bg-gold/10 mix-blend-multiply" />
-                {selected && (
-                  <span className="absolute left-1.5 top-1.5 md:left-3 md:top-3 inline-flex items-center gap-1 md:gap-1.5 rounded-full bg-gold px-1.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-sm font-medium text-surface">
-                    <svg className="h-2.5 w-2.5 md:h-[13px] md:w-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
-                    Geselecteerd
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col justify-center gap-1 md:gap-2 bg-surface-elevated p-3.5 md:p-7">
-                <div className="font-heading text-lg leading-tight md:text-2xl">{pkg.package_name}</div>
-                <div className="text-prose text-xs leading-snug line-clamp-3 md:line-clamp-none md:text-base md:leading-[1.6]">{pkg.description}</div>
-                <div className="mt-0.5 md:mt-1 text-gold-light text-sm md:text-lg">
-                  &euro;{pkg.price} {pkg.price_unit === 'per_cocktail' ? 'per cocktail' : 'per persoon'}
-                </div>
+              <span className={`font-heading text-lg leading-tight md:text-2xl ${selected ? 'text-gold-light' : 'text-white'}`}>
+                {pkg.package_name}
+              </span>
+              <p className="mt-2 text-sm leading-[1.6] text-white md:mt-3 md:text-base">{pkg.description}</p>
+              <div className="mt-3 text-base text-gold-light md:mt-4 md:text-lg">
+                &euro;{pkg.price} {pkg.price_unit === 'per_cocktail' ? 'per cocktail' : 'per persoon'}
               </div>
             </button>
           );

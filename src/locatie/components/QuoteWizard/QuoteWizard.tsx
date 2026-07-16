@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { fetchAvailabilityContext, fetchFeaturedPackages, fetchServiceSettings } from '../../../shared/lib/data';
+import { fetchAvailabilityContext, fetchFeaturedPackages, fetchServiceSettings, submitQuoteRequest } from '../../../shared/lib/data';
 import type { Availability, BlockedDate, ServicePackage, ServiceSettings } from '../../../shared/types/db';
 import type { ConfirmedEventDate } from '../../../shared/lib/data';
+import { computeQuote, QuoteValidationError } from '../../../shared/lib/quote';
 import { StepIndicator } from './StepIndicator';
 import { Step1Package } from './Step1Package';
 import { Step2Counts } from './Step2Counts';
 import { Step3DateLocation } from './Step3DateLocation';
 import { Step4Contact } from './Step4Contact';
-import { Step5Summary } from './Step5Summary';
 
 export interface WizardState {
   step: number;
@@ -47,25 +47,19 @@ export function QuoteWizard() {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [availabilityCtx, setAvailabilityCtx] = useState<{
     availability: Availability[]; blockedDates: BlockedDate[]; settings: ServiceSettings; confirmedRequests: ConfirmedEventDate[];
   } | null>(null);
 
   useEffect(() => {
+    // Both on-location services run through this wizard: bartending and the
+    // workshop. The guest picks one on step 1 — no pre-selection, since neither
+    // is the default. Each package carries its own price_unit, which drives the
+    // counts step and the quote total downstream.
     fetchFeaturedPackages().then((pkgs) => {
-      // Only the on-location bartending service is offered through this wizard,
-      // presented under the page's brand name "Cocktails op Locatie". Workshops
-      // are handled elsewhere, so they are excluded here. The quote still submits
-      // the real package_id; only the display name is overridden.
-      const filtered = pkgs
-        .filter((p) => !/workshop/i.test(p.package_name))
-        .map((p) => ({ ...p, package_name: 'Cocktails op Locatie' }));
-      const list = filtered.length > 0 ? filtered : pkgs;
-      setPackages(list);
-      // Single service → pre-select it so the visitor lands on the event-type choice.
-      if (list.length > 0) {
-        setState((s) => (s.packageId ? s : { ...s, packageId: list[0].id }));
-      }
+      setPackages(pkgs);
     }).catch((err) => {
       console.error('Failed to load featured packages', err);
       setPackages([]);
@@ -84,6 +78,56 @@ export function QuoteWizard() {
 
   const selectedPackage = packages.find((p) => p.id === state.packageId) ?? null;
 
+  // Final step submits directly (no separate summary/overview screen). The price
+  // estimate is no longer shown to the guest, but we still compute it here so the
+  // request stored server-side keeps its estimated_total.
+  async function handleSubmit() {
+    if (submitting || !selectedPackage || !availabilityCtx) return;
+
+    let estimatedTotal: number;
+    try {
+      const breakdown = computeQuote(selectedPackage, availabilityCtx.settings, {
+        cocktailCount: state.cocktailCount,
+        guestCount: state.guestCount,
+        distanceKm: state.distanceKm,
+      });
+      estimatedTotal = breakdown.total;
+    } catch (err) {
+      if (err instanceof QuoteValidationError) {
+        setSubmitError(err.message);
+        return;
+      }
+      throw err;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await submitQuoteRequest({
+        full_name: state.fullName,
+        email: state.email,
+        phone: state.phone,
+        event_type: state.eventType,
+        guest_count: state.guestCount,
+        cocktail_count: state.cocktailCount,
+        package_id: selectedPackage.id,
+        event_date: state.eventDate,
+        event_time: state.eventTime || null,
+        event_city: state.eventCity,
+        event_postcode: state.eventPostcode,
+        distance_km: state.distanceKm,
+        estimated_total: estimatedTotal,
+        special_requests: state.specialRequests || null,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Failed to submit quote request', err);
+      setSubmitError('Er ging iets mis bij het versturen. Probeer het opnieuw.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <section id="offerte" className="py-8 md:py-28 px-5 md:px-10">
       <div className="max-w-4xl mx-auto">
@@ -92,7 +136,7 @@ export function QuoteWizard() {
 
         <StepIndicator current={state.step} />
 
-        <div className="rounded-2xl bg-surface-elevated border border-white/5 p-5 md:p-10 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.6)]">
+        <div className="rounded-2xl bg-surface border border-white/10 p-5 md:p-10 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.6)]">
           {state.step === 1 && (
             <Step1Package
               packages={packages}
@@ -131,7 +175,7 @@ export function QuoteWizard() {
               onBack={() => setState((s) => ({ ...s, step: 2 }))}
             />
           )}
-          {state.step === 4 && (
+          {state.step === 4 && !submitted && (
             <Step4Contact
               fullName={state.fullName}
               email={state.email}
@@ -141,27 +185,18 @@ export function QuoteWizard() {
               onEmailChange={(v) => setState((s) => ({ ...s, email: v }))}
               onPhoneChange={(v) => setState((s) => ({ ...s, phone: v }))}
               onSpecialRequestsChange={(v) => setState((s) => ({ ...s, specialRequests: v }))}
-              onNext={() => setState((s) => ({ ...s, step: 5 }))}
+              onSubmit={handleSubmit}
               onBack={() => setState((s) => ({ ...s, step: 3 }))}
+              submitting={submitting}
+              ready={selectedPackage !== null && availabilityCtx !== null}
+              submitError={submitError}
             />
-          )}
-          {state.step === 5 && selectedPackage && availabilityCtx && !submitted && (
-            <Step5Summary
-              state={state}
-              pkg={selectedPackage}
-              settings={availabilityCtx.settings}
-              onBack={() => setState((s) => ({ ...s, step: 4 }))}
-              onSubmitted={() => setSubmitted(true)}
-            />
-          )}
-          {state.step === 5 && (!availabilityCtx || !selectedPackage) && !submitted && (
-            <div className="text-center py-10 text-muted">Bezig met laden...</div>
           )}
           {submitted && (
             <div className="text-center py-10">
-              <h3 className="font-heading text-3xl text-gold-light mb-4">Offerte aangevraagd!</h3>
-              <p className="text-prose text-lg max-w-md mx-auto leading-[1.7]">
-                Bedankt, {state.fullName}. We nemen binnen enkele werkdagen contact met je op over jouw {state.eventType.toLowerCase()} op {state.eventDate}.
+              <h3 className="font-heading text-3xl text-gold-light mb-4">Je aanvraag is binnen</h3>
+              <p className="text-white text-lg max-w-md mx-auto leading-[1.7]">
+                Bedankt, {state.fullName}. We hebben je aanvraag ontvangen en nemen zo snel mogelijk contact met je op.
               </p>
             </div>
           )}
