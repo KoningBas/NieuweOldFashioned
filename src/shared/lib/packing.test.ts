@@ -72,6 +72,14 @@ describe('buildPackingItems', () => {
     expect(items[0].quantity).toBe(60); // 10 vast + 50 uit cocktails
   });
 
+  it('takes the largest count when base and package template overlap', () => {
+    const base = templateItem({ name: 'Snijplank + mes', category: 'barmateriaal' as const, unit: 'st', scale_basis: 'fixed' as const, scale_factor: 1, sort_order: 60 });
+    const pkg = templateItem({ name: 'Snijplank + mes', category: 'barmateriaal' as const, unit: 'st', scale_basis: 'fixed' as const, scale_factor: 2, sort_order: 12 });
+    const items = buildPackingItems([base, pkg], [], [], 80, 200);
+    expect(items).toHaveLength(1);
+    expect(items[0].quantity).toBe(2); // niet 3 — je hebt er twee, geen drie
+  });
+
   it('keeps distinct units apart', () => {
     const template = [templateItem({ name: 'IJsblokjes', unit: 'kg', scale_basis: 'per_cocktail' as const, scale_factor: 0.25, category: 'ijs' as const })];
     const zak = ingredient({ name: 'IJsblokjes', amount: 0.2, unit: 'g', pack_size: null, pack_unit: null, category: 'ijs' });

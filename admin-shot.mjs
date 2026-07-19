@@ -12,11 +12,21 @@ const PROJECT = 'C:/Users/jbfok/Desktop/NieuweOld';
 const REF = 'qbfieohnyzjzelbaxbrz';
 const CHROME = 'C:/Users/jbfok/.cache/puppeteer/chrome/win64-131.0.6778.204/chrome-win64/chrome.exe';
 
-const route = process.argv[2] || 'Overzicht';
-const label = process.argv[3] || 'admin';
-const theme = process.argv[4] || 'dark';
-const expand = process.argv[5] === 'expand';
-const width = Number(process.argv[6]) || 1440;
+const args = process.argv.slice(2);
+const flags = new Set(args.filter((a) => a.startsWith('--')));
+const positional = args.filter((a) => !a.startsWith('--'));
+const tabFlag = args.find((a) => a.startsWith('--tab='))?.slice('--tab='.length);
+
+const route = positional[0] || 'Overzicht';
+const label = positional[1] || 'admin';
+const theme = positional[2] || 'dark';
+const expand = positional[3] === 'expand';
+const width = Number(positional[4]) || 1440;
+
+// --open-first  click the first row of the list, then screenshot the detail
+// --tab=Label   click the tab with that label once the screen is up
+// --no-list     answer packing_lists empty, for the "nothing generated" state
+// --stale       cocktail choice newer than the generated packing list
 
 const USER_ID = '00000000-0000-4000-8000-000000000001';
 
@@ -65,6 +75,65 @@ const TEMPLATE_ITEMS = [
   id: `tpi-${i}`, template_id: 'tpl-1', name, category, perishability, unit, scale_basis, scale_factor, sort_order,
 }));
 
+// The base kit every on-location job takes along (packing_templates.package_id null).
+const BASE_TEMPLATE = { id: 'tpl-base', package_id: null, name: 'Basisuitrusting op locatie', created_at: '2026-01-01T00:00:00Z' };
+
+const BASE_TEMPLATE_ITEMS = [
+  ['Mobiele bar', 'techniek', 'houdbaar', 'st', 'fixed', 1, 50],
+  ['Barverlichting', 'techniek', 'houdbaar', 'st', 'fixed', 1, 51],
+  ['Verlengsnoeren', 'techniek', 'houdbaar', 'st', 'fixed', 2, 52],
+  ['Koelboxen', 'barmateriaal', 'houdbaar', 'st', 'fixed', 2, 53],
+  ['Snijplank + mes', 'barmateriaal', 'houdbaar', 'st', 'fixed', 1, 54],
+  ['Bardoeken', 'verbruik', 'houdbaar', 'st', 'fixed', 6, 55],
+  ['Emmer', 'barmateriaal', 'houdbaar', 'st', 'fixed', 1, 60],
+  ['Sopje: afwasmiddel', 'verbruik', 'houdbaar', 'st', 'fixed', 1, 61],
+  ['Sponzen', 'verbruik', 'houdbaar', 'st', 'fixed', 3, 62],
+  ['Theedoeken', 'verbruik', 'houdbaar', 'st', 'fixed', 4, 63],
+  ['Afvalzakken', 'verbruik', 'houdbaar', 'st', 'fixed', 10, 66],
+  ['EHBO-koffer', 'barmateriaal', 'houdbaar', 'st', 'fixed', 1, 70],
+].map(([name, category, perishability, unit, scale_basis, scale_factor, sort_order], i) => ({
+  id: `btpi-${i}`, template_id: 'tpl-base', name, category, perishability, unit, scale_basis, scale_factor, sort_order,
+}));
+
+const GENERATED_AT = '2026-07-14T09:00:00Z';
+const REQUEST = {
+  id: 'req-1', full_name: 'Marieke de Vries', email: 'marieke@voorbeeld.nl', phone: '06 24 88 13 09',
+  event_type: 'Bedrijfsborrel', guest_count: 80, cocktail_count: 200, package_id: 'pkg-1',
+  event_date: '2026-09-12', event_time: '17:00:00', event_city: 'Rijssen', event_postcode: '7461 BZ',
+  distance_km: 4, estimated_total: 1600, status: 'booked', special_requests: 'Graag twee alcoholvrije opties.',
+  created_at: '2026-07-01T10:00:00Z', source: 'wizard_locatie', event_address: 'Grotestraat 12',
+  arrangement: 'Bites', internal_notes: null,
+  cocktails_updated_at: flags.has('--stale') ? '2026-07-18T14:00:00Z' : '2026-07-14T08:00:00Z',
+};
+
+const REQUEST_COCKTAILS = [
+  { id: 'rc-1', request_id: 'req-1', cocktail_id: 'ck-1', planned_count: 80, cocktail_menu: { name: 'The Old Fashioned' } },
+  { id: 'rc-2', request_id: 'req-1', cocktail_id: 'ck-2', planned_count: 60, cocktail_menu: { name: 'Smoked Negroni' } },
+  { id: 'rc-3', request_id: 'req-1', cocktail_id: 'ck-3', planned_count: 60, cocktail_menu: { name: 'Espresso Martini' } },
+];
+
+const PACKING_LIST = { id: 'pl-1', request_id: 'req-1', notes: null, generated_at: GENERATED_AT, created_at: GENERATED_AT };
+
+const PACKING_LIST_ITEMS = [
+  ['Bourbon', 'sterke_drank', 'houdbaar', 7, 'fles', true, 'cocktails', 100],
+  ['Suikersiroop', 'mixers', 'houdbaar', 2, 'fles', true, 'cocktails', 101],
+  ['Sinaasappel', 'vers', 'vers', 16, 'st', false, 'cocktails', 102],
+  ['IJsblokken', 'ijs', 'diepvries', 5, 'zak', false, 'cocktails', 103],
+  ['Highball glazen', 'glaswerk', 'houdbaar', 120, 'st', true, 'scaling', 20],
+  ['Coupe glazen', 'glaswerk', 'houdbaar', 60, 'st', false, 'scaling', 21],
+  ['Shakers', 'barmateriaal', 'houdbaar', 4, 'st', true, 'template', 10],
+  ['Snijplank + mes', 'barmateriaal', 'houdbaar', 1, 'st', false, 'template', 54],
+  ['Koelboxen', 'barmateriaal', 'houdbaar', 2, 'st', false, 'template', 53],
+  ['EHBO-koffer', 'barmateriaal', 'houdbaar', 1, 'st', false, 'template', 70],
+  ['Bardoeken', 'verbruik', 'houdbaar', 6, 'st', true, 'template', 55],
+  ['Sponzen', 'verbruik', 'houdbaar', 3, 'st', false, 'template', 62],
+  ['Afvalzakken', 'verbruik', 'houdbaar', 10, 'st', false, 'template', 66],
+  ['Mobiele bar', 'techniek', 'houdbaar', 1, 'st', true, 'template', 50],
+  ['Verlengsnoeren', 'techniek', 'houdbaar', 2, 'st', false, 'template', 52],
+].map(([name, category, perishability, quantity, unit, is_checked, origin, sort_order], i) => ({
+  id: `pli-${i}`, list_id: 'pl-1', name, category, perishability, quantity, unit, is_checked, origin, sort_order,
+}));
+
 /** Table name -> rows. Anything unlisted answers with an empty set. */
 const TABLES = {
   admin_users: [{ id: 'adm-1', user_id: USER_ID, created_at: '2026-01-01T00:00:00Z' }],
@@ -72,8 +141,15 @@ const TABLES = {
   service_packages: PACKAGES,
   cocktail_menu: COCKTAILS,
   cocktail_ingredients: INGREDIENTS,
-  packing_templates: [TEMPLATE],
-  packing_template_items: TEMPLATE_ITEMS,
+  // Order matters: a limit=1 query takes the first row, so put the template the
+  // screen under test is asking for in front.
+  packing_templates: tabFlag === 'Basisuitrusting' ? [BASE_TEMPLATE, TEMPLATE] : [TEMPLATE, BASE_TEMPLATE],
+  // The fixture responder ignores filters, so pick the set the screen expects.
+  packing_template_items: tabFlag === 'Basisuitrusting' ? BASE_TEMPLATE_ITEMS : TEMPLATE_ITEMS,
+  quote_requests: [REQUEST],
+  request_cocktails: REQUEST_COCKTAILS,
+  packing_lists: flags.has('--no-list') ? [] : [PACKING_LIST],
+  packing_list_items: flags.has('--no-list') ? [] : PACKING_LIST_ITEMS,
 };
 
 const browser = await puppeteer.launch({
@@ -92,6 +168,12 @@ await page.evaluateOnNewDocument((ref, userId, themeName) => {
   }));
   localStorage.setItem('admin-theme', themeName);
 }, REF, USER_ID, theme);
+
+if (flags.has('--debug')) {
+  page.on('console', (msg) => console.log(`[console.${msg.type()}]`, msg.text()));
+  page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+  page.on('requestfailed', (req) => console.log('[requestfailed]', req.url(), req.failure()?.errorText));
+}
 
 await page.setRequestInterception(true);
 page.on('request', (req) => {
@@ -121,7 +203,13 @@ page.on('request', (req) => {
   }
 
   const table = url.match(/\/rest\/v1\/([^?]+)/)?.[1];
-  const rows = TABLES[table] ?? [];
+  // Filters are ignored, but limit is not: maybeSingle() rejects a two-row
+  // answer, so a fixture table with more rows than the query asked for breaks
+  // the screen under test rather than the screenshot.
+  const limit = Number(url.match(/[?&]limit=(\d+)/)?.[1]);
+  const all = TABLES[table] ?? [];
+  const rows = limit ? all.slice(0, limit) : all;
+  if (flags.has('--debug')) console.log('[fixture]', req.method(), url.replace(/.*\/rest\/v1\//, ''), `-> ${rows.length} rows`, wantsObject ? '(object)' : '');
   return json(wantsObject ? (rows[0] ?? null) : rows);
 });
 
@@ -138,6 +226,28 @@ const navigated = await page.evaluate((navLabel) => {
 }, route);
 if (!navigated) throw new Error(`Geen navigatielink gevonden met label "${route}"`);
 await new Promise((r) => setTimeout(r, 1200));
+
+if (flags.has('--open-first')) {
+  const opened = await page.evaluate(() => {
+    const row = (document.querySelector('main') ?? document.body).querySelector('ul a[href]');
+    if (!row) return false;
+    row.click();
+    return true;
+  });
+  if (!opened) throw new Error('Geen rij gevonden om te openen');
+  await new Promise((r) => setTimeout(r, 1200));
+}
+
+if (tabFlag) {
+  const switched = await page.evaluate((tabLabel) => {
+    const tab = [...document.querySelectorAll('[role="tab"]')].find((t) => t.textContent.trim() === tabLabel);
+    if (!tab) return false;
+    tab.click();
+    return true;
+  }, tabFlag);
+  if (!switched) throw new Error(`Geen tab gevonden met label "${tabFlag}"`);
+  await new Promise((r) => setTimeout(r, 1200));
+}
 
 if (expand) {
   // Scoped to the content column: the mobile nav also carries aria-expanded,

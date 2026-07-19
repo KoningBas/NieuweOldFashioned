@@ -24,11 +24,14 @@ const SCALE_LABELS: Record<ScaleBasis, string> = {
 const SCALE_ORDER: ScaleBasis[] = ['fixed', 'per_guest', 'per_cocktail'];
 
 interface Props {
-  packageId: string;
+  /** Null addresses the base kit: the one template every on-location job uses. */
+  packageId: string | null;
   packageName: string;
 }
 
 export function PackingTemplateEditor({ packageId, packageName }: Props) {
+  const isBase = packageId === null;
+
   const [template, setTemplate] = useState<PackingTemplate | null>(null);
   const [rows, setRows] = useState<PackingTemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,10 +45,13 @@ export function PackingTemplateEditor({ packageId, packageName }: Props) {
   useEffect(() => {
     let alive = true;
     async function load() {
-      const { data: tpl, error: err } = await supabase
-        .from('packing_templates').select('*').eq('package_id', packageId).limit(1).maybeSingle();
+      const query = supabase.from('packing_templates').select('*');
+      const { data: tpl, error: err } = await (packageId === null
+        ? query.is('package_id', null)
+        : query.eq('package_id', packageId)
+      ).limit(1).maybeSingle();
       if (!alive) return;
-      if (err) { setError('Sjablonen niet beschikbaar. Voer migratie 0005_packing.sql uit.'); setLoading(false); return; }
+      if (err) { setError('Sjablonen niet beschikbaar. Voer migratie 0005_packing.sql en 0008_base_packing_template.sql uit.'); setLoading(false); return; }
       if (tpl) {
         setTemplate(tpl);
         const { data: items } = await supabase
@@ -61,7 +67,7 @@ export function PackingTemplateEditor({ packageId, packageName }: Props) {
   async function createTemplate() {
     setBusy(true);
     const { data, error: err } = await supabase.from('packing_templates')
-      .insert({ package_id: packageId, name: `Basislijst ${packageName}` })
+      .insert({ package_id: packageId, name: isBase ? packageName : `Basislijst ${packageName}` })
       .select().single();
     setBusy(false);
     if (err || !data) { setError(`Aanmaken mislukt: ${err?.message ?? 'onbekende fout'}`); return; }
@@ -119,7 +125,9 @@ export function PackingTemplateEditor({ packageId, packageName }: Props) {
     return (
       <div className="flex flex-col items-start gap-3">
         <p className="text-sm text-muted">
-          Dit pakket heeft nog geen sjabloon. Zonder sjabloon begint elke paklijst leeg.
+          {isBase
+            ? 'Er is nog geen basisuitrusting. Zonder basis krijgt elke klus alleen het pakketsjabloon.'
+            : 'Dit pakket heeft nog geen sjabloon. Zonder sjabloon begint elke paklijst leeg.'}
         </p>
         <button
           type="button"
@@ -127,7 +135,7 @@ export function PackingTemplateEditor({ packageId, packageName }: Props) {
           disabled={busy}
           className="h-11 rounded-lg bg-gold px-5 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
         >
-          Sjabloon aanmaken
+          {isBase ? 'Basisuitrusting aanmaken' : 'Sjabloon aanmaken'}
         </button>
       </div>
     );
@@ -137,23 +145,26 @@ export function PackingTemplateEditor({ packageId, packageName }: Props) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end gap-4">
         <p className="mr-auto max-w-prose text-sm text-muted">
-          Deze regels vormen het startpunt van elke paklijst voor dit pakket. Cocktailingrediënten komen daar
-          bovenop vanuit de cocktailkaart. De kolom Voorbeeld rekent de regels door voor de klus hiernaast.
+          {isBase
+            ? 'Deze regels gaan mee naar elke klus op locatie, welk pakket het ook is. Het pakketsjabloon en de cocktailingrediënten komen er bovenop. Staat een onderdeel in beide lijsten, dan telt het hoogste aantal.'
+            : 'Deze regels vormen het startpunt van elke paklijst voor dit pakket. Cocktailingrediënten komen daar bovenop vanuit de cocktailkaart. De kolom Voorbeeld rekent de regels door voor de klus hiernaast.'}
         </p>
-        <label className="flex flex-col gap-1.5">
+        {/* Width sits on the label: INPUT_CLS carries w-full, which beats a
+            w-24 tacked onto the input. */}
+        <label className="flex w-24 flex-col gap-1.5">
           <span className="text-xs text-muted">Gasten</span>
           <input
             type="number" min={0} inputMode="numeric" value={guests}
             onChange={(e) => setGuests(Number(e.target.value))}
-            className={`${INPUT_CLS} w-24 text-right`}
+            className={`${INPUT_CLS} text-right`}
           />
         </label>
-        <label className="flex flex-col gap-1.5">
+        <label className="flex w-24 flex-col gap-1.5">
           <span className="text-xs text-muted">Cocktails</span>
           <input
             type="number" min={0} inputMode="numeric" value={cocktails}
             onChange={(e) => setCocktails(Number(e.target.value))}
-            className={`${INPUT_CLS} w-24 text-right`}
+            className={`${INPUT_CLS} text-right`}
           />
         </label>
       </div>

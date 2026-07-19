@@ -6,6 +6,7 @@ import { StatusControl } from '../components/StatusControl';
 import { SkeletonBlock } from '../components/Skeleton';
 import { TimelineTab } from './tabs/TimelineTab';
 import { QuoteTab } from './tabs/QuoteTab';
+import { CocktailsTab } from './tabs/CocktailsTab';
 import { PackingTab } from './tabs/PackingTab';
 import { InvoiceTab } from './tabs/InvoiceTab';
 import { formatDateLongNL, formatEuro } from '../../shared/lib/format';
@@ -13,10 +14,11 @@ import { normalizeStatus } from '../../shared/lib/workflow';
 import { IconMail, IconMapPin, IconPhone, IconUsers } from '../components/icons';
 import type { QuoteRequest, QuoteStatus } from '../../shared/types/db';
 
-type TabId = 'tijdlijn' | 'offerte' | 'paklijst' | 'factuur';
+type TabId = 'tijdlijn' | 'offerte' | 'cocktails' | 'paklijst' | 'factuur';
 const TABS: { id: TabId; label: string }[] = [
   { id: 'tijdlijn', label: 'Tijdlijn' },
   { id: 'offerte', label: 'Offerte' },
+  { id: 'cocktails', label: 'Cocktails' },
   { id: 'paklijst', label: 'Paklijst' },
   { id: 'factuur', label: 'Factuur' },
 ];
@@ -148,7 +150,9 @@ export function RequestDetail() {
       </section>
 
       {/* Tabs */}
-      <div role="tablist" aria-label="Aanvraagonderdelen" className="mb-6 flex gap-1 border-b border-white/10">
+      {/* Five tabs no longer fit a 375px phone; scroll horizontally rather than
+          cram the labels or hide one behind a menu. */}
+      <div role="tablist" aria-label="Aanvraagonderdelen" className="mb-6 flex gap-1 overflow-x-auto border-b border-white/10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map((t) => {
           const disabled = t.id === 'factuur' && !invoiceReady;
           const active = tab === t.id;
@@ -160,7 +164,7 @@ export function RequestDetail() {
               disabled={disabled}
               title={disabled ? 'Beschikbaar zodra de klus op Uitgevoerd staat' : undefined}
               onClick={() => selectTab(t.id)}
-              className={`relative -mb-px h-12 px-4 text-[0.9375rem] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 ${
+              className={`relative -mb-px h-12 shrink-0 px-4 text-[0.9375rem] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 ${
                 active ? 'border-b-2 border-gold text-gold-light' : 'border-b-2 border-transparent text-muted hover:text-white'
               }`}
             >
@@ -172,6 +176,7 @@ export function RequestDetail() {
 
       {tab === 'tijdlijn' && <TimelineTab requestId={request.id} reloadKey={reloadKey} />}
       {tab === 'offerte' && <QuoteTab request={request} packageName={packageName} onLogged={() => setReloadKey((k) => k + 1)} onStatusChanged={(s) => setRequest({ ...request, status: s })} />}
+      {tab === 'cocktails' && <CocktailsTab request={request} onCocktailsChanged={(stampedAt) => setRequest({ ...request, cocktails_updated_at: stampedAt })} />}
       {tab === 'paklijst' && <PackingTab request={request} />}
       {tab === 'factuur' && invoiceReady && <InvoiceTab request={request} onLogged={() => setReloadKey((k) => k + 1)} onStatusChanged={(s) => setRequest({ ...request, status: s })} />}
     </AdminLayout>

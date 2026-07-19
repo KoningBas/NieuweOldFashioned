@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabase';
 import { logActivity } from '../../lib/activity';
 import { SkeletonBlock } from '../../components/Skeleton';
@@ -8,8 +9,8 @@ import {
   PERISHABILITY_LABELS, PERISHABILITY_ORDER,
 } from '../../../shared/lib/packing';
 import type {
-  CocktailIngredient, CocktailMenuItem, PackingCategory, PackingList, PackingListItem,
-  Perishability, QuoteRequest,
+  CocktailIngredient, PackingCategory, PackingList, PackingListItem,
+  PackingTemplateItem, Perishability, QuoteRequest,
 } from '../../../shared/types/db';
 
 type SortMode = 'categorie' | 'houdbaarheid';
@@ -27,28 +28,33 @@ export function PackingTab({ request }: Props) {
   const [busy, setBusy] = useState(false);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
 
-  // Cocktail picker state (pre-generation)
-  const [cocktails, setCocktails] = useState<CocktailMenuItem[]>([]);
-  const [planned, setPlanned] = useState<Record<string, number>>({});
+  // Read-only summary of the choice made on the Cocktails tab.
+  const [chosenSummary, setChosenSummary] = useState<{ name: string; count: number }[]>([]);
 
   useEffect(() => {
     let alive = true;
     async function load() {
-      const { data: pl, error } = await supabase.from('packing_lists').select('*').eq('request_id', request.id).maybeSingle();
+      const [listRes, chosenRes] = await Promise.all([
+        supabase.from('packing_lists').select('*').eq('request_id', request.id).maybeSingle(),
+        supabase.from('request_cocktails').select('planned_count, cocktail_menu(name)').eq('request_id', request.id),
+      ]);
       if (!alive) return;
-      if (error) { setUnavailable(true); setLoading(false); return; }
-      if (pl) {
-        setList(pl);
-        const { data: pli } = await supabase.from('packing_list_items').select('*').eq('list_id', pl.id).order('sort_order');
+      if (listRes.error) { setUnavailable(true); setLoading(false); return; }
+
+      // PostgREST types an embedded row as an array; one cocktail per row here.
+      setChosenSummary(
+        (chosenRes.data ?? [])
+          .map((row) => ({
+            name: [row.cocktail_menu].flat()[0]?.name ?? 'Onbekende cocktail',
+            count: row.planned_count as number,
+          }))
+          .sort((a, b) => b.count - a.count),
+      );
+
+      if (listRes.data) {
+        setList(listRes.data);
+        const { data: pli } = await supabase.from('packing_list_items').select('*').eq('list_id', listRes.data.id).order('sort_order');
         if (alive) setItems(pli ?? []);
-      } else {
-        const [cockRes, plannedRes] = await Promise.all([
-          supabase.from('cocktail_menu').select('*').eq('is_active', true).order('name'),
-          supabase.from('request_cocktails').select('*').eq('request_id', request.id),
-        ]);
-        if (!alive) return;
-        setCocktails(cockRes.data ?? []);
-        setPlanned(Object.fromEntries((plannedRes.data ?? []).map((rc) => [rc.cocktail_id, rc.planned_count])));
       }
       setLoading(false);
     }
@@ -56,34 +62,31 @@ export function PackingTab({ request }: Props) {
     return () => { alive = false; };
   }, [request.id]);
 
-  const plannedTotal = useMemo(() => Object.values(planned).reduce((s, n) => s + (n || 0), 0), [planned]);
   const checkedCount = items.filter((i) => i.is_checked).length;
+  const plannedTotal = chosenSummary.reduce((sum, c) => sum + c.count, 0);
+  // The cocktail choice moved on after this list was built.
+  const stale = Boolean(
+    list?.generated_at && request.cocktails_updated_at &&
+    new Date(request.cocktails_updated_at) > new Date(list.generated_at),
+  );
 
   async function generate() {
     setBusy(true);
     try {
-      // First generation persists the picker choice; a regenerate reuses the
-      // cocktail counts already stored for this request.
-      let chosen: [string, number][];
-      if (!list) {
-        await supabase.from('request_cocktails').delete().eq('request_id', request.id);
-        chosen = Object.entries(planned).filter(([, n]) => n > 0);
-        if (chosen.length) {
-          await supabase.from('request_cocktails').insert(
-            chosen.map(([cocktail_id, planned_count]) => ({ request_id: request.id, cocktail_id, planned_count })),
-          );
-        }
-      } else {
-        const { data: rc } = await supabase.from('request_cocktails').select('*').eq('request_id', request.id);
-        chosen = (rc ?? []).map((row) => [row.cocktail_id, row.planned_count]);
-      }
+      // The cocktail choice lives on its own tab; always read what is stored.
+      const { data: rc } = await supabase.from('request_cocktails').select('*').eq('request_id', request.id);
+      const chosen: [string, number][] = (rc ?? []).map((row) => [row.cocktail_id, row.planned_count]);
 
       const [tplRes, ingRes] = await Promise.all([
-        supabase.from('packing_templates').select('id, packing_template_items(*)').eq('package_id', request.package_id).limit(1).maybeSingle(),
+        // Base kit (package_id null) plus this package's own template.
+        supabase.from('packing_templates')
+          .select('id, package_id, packing_template_items(*)')
+          .or(`package_id.eq.${request.package_id},package_id.is.null`),
         supabase.from('cocktail_ingredients').select('*').in('cocktail_id', chosen.map(([id]) => id)),
       ]);
 
-      const templateItems = (tplRes.data?.packing_template_items ?? []) as never[];
+      const templateItems = (tplRes.data ?? [])
+        .flatMap((t) => (t as { packing_template_items?: PackingTemplateItem[] }).packing_template_items ?? []);
       const ingredients = (ingRes.data ?? []) as CocktailIngredient[];
       const drafts = buildPackingItems(
         templateItems,
@@ -93,13 +96,16 @@ export function PackingTab({ request }: Props) {
         request.cocktail_count,
       );
 
+      const generatedAt = new Date().toISOString();
       let currentList = list;
       if (currentList) {
         await supabase.from('packing_list_items').delete().eq('list_id', currentList.id);
-        await supabase.from('packing_lists').update({ generated_at: new Date().toISOString() }).eq('id', currentList.id);
+        await supabase.from('packing_lists').update({ generated_at: generatedAt }).eq('id', currentList.id);
+        // Keep the local copy in step, otherwise the list keeps reading as stale.
+        currentList = { ...currentList, generated_at: generatedAt };
       } else {
         const { data: pl, error } = await supabase.from('packing_lists')
-          .insert({ request_id: request.id, generated_at: new Date().toISOString() })
+          .insert({ request_id: request.id, generated_at: generatedAt })
           .select().single();
         if (error || !pl) throw error;
         currentList = pl;
@@ -173,50 +179,48 @@ export function PackingTab({ request }: Props) {
     );
   }
 
-  // --- Pre-generation: pick cocktails, then generate --------------------
+  const cocktailsLink = `/aanvragen/${request.id}?tab=cocktails`;
+
+  const chosenLine = chosenSummary.length
+    ? chosenSummary.map((c) => `${c.name} ${c.count}×`).join(' · ')
+    : 'Nog geen cocktails gekozen';
+
+  // --- Nothing generated yet --------------------------------------------
   if (!list) {
     return (
-      <div className="flex flex-col gap-5">
-        <div className="rounded-xl border border-white/5 bg-surface-elevated p-6">
-          <h2 className="mb-1 text-lg font-medium text-white">Welke cocktails schenk je?</h2>
-          <p className="mb-5 text-sm text-muted">
-            De boodschappenlijst telt de ingrediënten van je keuze op. Aanvraag: {request.cocktail_count} cocktails, {request.guest_count} gasten.
-          </p>
-          {cocktails.length === 0 ? (
-            <p className="text-muted">Geen actieve cocktails op de kaart.</p>
-          ) : (
-            <ul className="flex flex-col divide-y divide-white/5">
-              {cocktails.map((c) => (
-                <li key={c.id} className="flex min-h-[3.5rem] items-center gap-4 py-2">
-                  <label htmlFor={`plan-${c.id}`} className="min-w-0 flex-1">
-                    <span className="block truncate text-[0.9375rem] text-white">{c.name}</span>
-                    <span className="block truncate text-sm text-muted">{c.category}</span>
-                  </label>
-                  <input
-                    id={`plan-${c.id}`}
-                    type="number" min="0" step="10" inputMode="numeric"
-                    value={planned[c.id] ?? ''}
-                    placeholder="0"
-                    onChange={(e) => setPlanned((p) => ({ ...p, [c.id]: Math.max(0, Number(e.target.value)) }))}
-                    className="h-11 w-24 rounded-lg border border-white/10 bg-surface px-3 text-right text-[0.9375rem] text-white transition-colors focus:border-gold/50 focus:outline-none"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4">
-            <span className={`text-sm ${plannedTotal === request.cocktail_count ? 'text-ok' : 'text-muted'}`}>
-              Gepland: {plannedTotal} van {request.cocktail_count} cocktails
-            </span>
-            <button
-              onClick={generate}
-              disabled={busy}
-              className="h-12 rounded-lg bg-gold px-6 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+      <div className="rounded-xl border border-white/5 bg-surface-elevated p-6">
+        <h2 className="text-lg font-medium text-white">Nog geen paklijst</h2>
+        <p className="mb-5 mt-1 max-w-prose text-sm leading-relaxed text-muted">
+          Genereren zet de basisuitrusting, het pakketsjabloon en de ingrediënten van de gekozen
+          cocktails onder elkaar. Daarna kun je regels aanpassen en afvinken.
+        </p>
+
+        <div className="mb-5 rounded-lg bg-white/[0.03] px-4 py-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <span className="text-sm text-muted">Gekozen cocktails</span>
+            <Link
+              to={cocktailsLink}
+              replace
+              className="rounded text-sm text-gold-light underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
             >
-              {busy ? 'Genereren…' : 'Paklijst genereren'}
-            </button>
+              {chosenSummary.length ? 'Aanpassen' : 'Kies cocktails'}
+            </Link>
           </div>
+          <p className={`mt-1 text-[0.9375rem] ${chosenSummary.length ? 'text-white/85' : 'text-muted'}`}>{chosenLine}</p>
+          {chosenSummary.length > 0 && (
+            <p className={`mt-1 text-sm ${plannedTotal === request.cocktail_count ? 'text-ok' : 'text-muted'}`}>
+              {plannedTotal} van {request.cocktail_count} cocktails verdeeld
+            </p>
+          )}
         </div>
+
+        <button
+          onClick={generate}
+          disabled={busy}
+          className="h-12 rounded-lg bg-gold px-6 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        >
+          {busy ? 'Genereren…' : 'Paklijst genereren'}
+        </button>
       </div>
     );
   }
@@ -228,6 +232,51 @@ export function PackingTab({ request }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
+      {stale && (
+        <div role="status" className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-gold/30 bg-gold/10 px-4 py-3">
+          <p className="min-w-0 flex-1 text-[0.9375rem] text-gold-light">
+            {confirmRegenerate
+              ? 'Bijwerken bouwt de lijst opnieuw op. Handmatige regels en vinkjes gaan verloren.'
+              : 'De cocktailkeuze is gewijzigd na het genereren. Deze paklijst loopt achter.'}
+          </p>
+          {confirmRegenerate ? (
+            <span className="flex shrink-0 items-center gap-2">
+              <button
+                onClick={generate}
+                disabled={busy}
+                className="h-10 rounded-lg bg-gold px-4 text-sm font-medium text-surface transition-colors duration-150 hover:bg-gold-light disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+              >
+                {busy ? 'Bezig…' : 'Ja, bijwerken'}
+              </button>
+              <button
+                onClick={() => setConfirmRegenerate(false)}
+                className="h-10 rounded-lg px-3 text-sm text-muted transition-colors duration-150 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+              >
+                Annuleer
+              </button>
+            </span>
+          ) : (
+            <button
+              onClick={() => setConfirmRegenerate(true)}
+              className="h-10 shrink-0 rounded-lg border border-gold/40 px-4 text-sm font-medium text-gold-light transition-colors duration-150 hover:bg-gold/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+            >
+              Bijwerken
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <p className="min-w-0 text-sm text-white/85">{chosenLine}</p>
+        <Link
+          to={cocktailsLink}
+          replace
+          className="shrink-0 rounded text-sm text-gold-light underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        >
+          Cocktails aanpassen
+        </Link>
+      </div>
+
       {/* Progress — sticky so it stays visible while checking off */}
       <div className="sticky top-0 z-20 -mx-1 rounded-xl border border-white/10 bg-surface-elevated/95 px-4 py-3 backdrop-blur">
         <div className="flex flex-wrap items-center gap-3">
@@ -370,7 +419,9 @@ export function PackingTab({ request }: Props) {
           <IconPlus size={16} /> Regel toevoegen
         </button>
         <div className="ml-auto">
-          {confirmRegenerate ? (
+          {/* When the stale banner is up it owns the confirmation, so only one
+              set of yes/no buttons is ever on screen. */}
+          {confirmRegenerate && !stale ? (
             <span className="inline-flex flex-wrap items-center gap-2">
               <span className="text-sm text-danger">Handmatige regels en vinkjes gaan verloren.</span>
               <button onClick={generate} disabled={busy} className="h-11 rounded-lg border border-danger/40 bg-danger/15 px-4 text-sm font-medium text-danger transition-colors duration-150 hover:bg-danger/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-danger focus-visible:outline-offset-2">

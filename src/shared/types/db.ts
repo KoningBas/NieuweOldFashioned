@@ -62,6 +62,9 @@ export interface QuoteRequest {
   event_address: string;
   arrangement: 'Bites' | 'Streetfood' | null;
   internal_notes: string | null;
+  /** Set every time the cocktail selection is saved. Compared against
+   *  packing_lists.generated_at to spot a packing list that has fallen behind. */
+  cocktails_updated_at: string | null;
 }
 
 export type ActivityKind = 'system' | 'call' | 'email' | 'whatsapp' | 'note';

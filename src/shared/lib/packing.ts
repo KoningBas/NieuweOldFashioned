@@ -120,7 +120,14 @@ export function aggregateIngredients(
   });
 }
 
-/** Template items + cocktail totals, merged where name and unit coincide. */
+/**
+ * Template items + cocktail totals, merged where name and unit coincide.
+ *
+ * The two merges differ on purpose. Template rows overlap because the base kit
+ * and a package both claim a snijplank; you own one, so the larger number wins.
+ * Cocktail rows are consumption on top of what the template already asks for,
+ * so those add up.
+ */
 export function buildPackingItems(
   templateItems: Pick<PackingTemplateItem, 'name' | 'category' | 'perishability' | 'unit' | 'scale_basis' | 'scale_factor' | 'sort_order'>[],
   planned: PlannedCocktail[],
@@ -128,15 +135,21 @@ export function buildPackingItems(
   guests: number,
   cocktails: number,
 ): DraftItem[] {
-  const items = templateItems.map((t) => scaleTemplateItem(t, guests, cocktails));
-  const fromCocktails = aggregateIngredients(planned, ingredients);
-
   const byKey = new Map<string, DraftItem>();
-  for (const item of [...items, ...fromCocktails]) {
-    const key = `${item.name.toLowerCase()}|${item.unit}`;
-    const existing = byKey.get(key);
-    if (existing) existing.quantity = roundQuantity(existing.quantity + item.quantity, item.unit);
-    else byKey.set(key, { ...item });
+  const keyOf = (item: DraftItem) => `${item.name.toLowerCase()}|${item.unit}`;
+
+  for (const raw of templateItems) {
+    const item = scaleTemplateItem(raw, guests, cocktails);
+    const existing = byKey.get(keyOf(item));
+    if (existing) existing.quantity = Math.max(existing.quantity, item.quantity);
+    else byKey.set(keyOf(item), { ...item });
   }
+
+  for (const item of aggregateIngredients(planned, ingredients)) {
+    const existing = byKey.get(keyOf(item));
+    if (existing) existing.quantity = roundQuantity(existing.quantity + item.quantity, item.unit);
+    else byKey.set(keyOf(item), { ...item });
+  }
+
   return [...byKey.values()].sort((a, b) => a.sort_order - b.sort_order);
 }

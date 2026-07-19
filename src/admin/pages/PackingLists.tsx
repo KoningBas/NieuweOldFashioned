@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../shared/lib/supabase';
 import { AdminLayout } from '../layout/AdminLayout';
+import { PackingTemplateEditor } from '../components/PackingTemplateEditor';
 import { SkeletonRows } from '../components/Skeleton';
 import { IconChevronRight } from '../components/icons';
 import { formatDateNL, toDateOnly } from '../../shared/lib/format';
@@ -15,12 +16,21 @@ interface JobRow {
   hasList: boolean;
 }
 
+type PaneId = 'klussen' | 'basis';
+const PANES: { id: PaneId; label: string }[] = [
+  { id: 'klussen', label: 'Klussen' },
+  { id: 'basis', label: 'Basisuitrusting' },
+];
+
 /** Upcoming booked jobs with the state of their packing list. Built for the
  *  phone first — this is the screen you open next to the van. */
 export function PackingLists() {
   const [rows, setRows] = useState<JobRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawPane = searchParams.get('tab');
+  const pane: PaneId = (PANES.some((p) => p.id === rawPane) ? rawPane : 'klussen') as PaneId;
 
   useEffect(() => {
     let alive = true;
@@ -75,7 +85,30 @@ export function PackingLists() {
 
   return (
     <AdminLayout title="Paklijsten">
-      {loading ? (
+      <div role="tablist" aria-label="Paklijstweergave" className="mb-6 flex gap-1 border-b border-white/10">
+        {PANES.map((p) => {
+          const active = pane === p.id;
+          return (
+            <button
+              key={p.id}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setSearchParams(p.id === 'klussen' ? {} : { tab: p.id }, { replace: true })}
+              className={`relative -mb-px h-12 shrink-0 px-4 text-[0.9375rem] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:-outline-offset-2 ${
+                active ? 'border-b-2 border-gold text-gold-light' : 'border-b-2 border-transparent text-muted hover:text-white'
+              }`}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {pane === 'basis' ? (
+        <section aria-label="Basisuitrusting" className="rounded-xl border border-white/5 bg-surface-elevated p-5 sm:p-6">
+          <PackingTemplateEditor packageId={null} packageName="Basisuitrusting op locatie" />
+        </section>
+      ) : loading ? (
         <SkeletonRows rows={3} height="h-20" />
       ) : unavailable ? (
         <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
