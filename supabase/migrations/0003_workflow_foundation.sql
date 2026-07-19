@@ -6,7 +6,25 @@
 -- 1. Status chain -----------------------------------------------------------
 -- 'confirmed' becomes 'booked'; the chain now runs through to 'paid'.
 
-alter table quote_requests drop constraint quote_requests_status_check;
+-- The old constraint was declared inline, so its name is whatever Postgres
+-- generated. Drop every check constraint that touches `status` instead of
+-- guessing the name; leaving one behind would reject 'booked' after the update.
+do $$
+declare c record;
+begin
+  for c in
+    select con.conname
+    from pg_constraint con
+    join pg_attribute att
+      on att.attrelid = con.conrelid and att.attnum = any (con.conkey)
+    where con.conrelid = 'quote_requests'::regclass
+      and con.contype = 'c'
+      and att.attname = 'status'
+  loop
+    execute format('alter table quote_requests drop constraint %I', c.conname);
+  end loop;
+end $$;
+
 update quote_requests set status = 'booked' where status = 'confirmed';
 alter table quote_requests add constraint quote_requests_status_check
   check (status in ('new','reviewed','quoted','booked','completed','invoiced','paid','declined','cancelled'));
@@ -14,7 +32,7 @@ alter table quote_requests add constraint quote_requests_status_check
 -- The public wizard checks availability through this view. It must follow the
 -- rename or every existing booking disappears from the date check and the
 -- site double-books. A booked date stays taken through completion/invoicing.
-drop view public_confirmed_event_dates;
+drop view if exists public_confirmed_event_dates;
 create view public_confirmed_event_dates as
   select event_date from quote_requests
   where status in ('booked','completed','invoiced','paid');
