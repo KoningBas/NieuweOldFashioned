@@ -12,6 +12,9 @@ const settings: ServiceSettings = {
   cocktail_price: 8, min_cocktails: 50, workshop_price_per_person: 32,
   travel_fee_near: 50, travel_fee_far: 75, travel_near_km_limit: 10,
   booking_notice_hours: 72, max_guests: 200, created_at: '2026-01-01',
+  kvk_number: '', vat_number: '', iban: '',
+  quote_valid_days: 14, invoice_due_days: 14, vat_rate: 21,
+  nudge_new_days: 3, nudge_quote_days: 7,
 };
 
 const availability: Availability[] = [
@@ -91,6 +94,7 @@ describe('isDateSelectable', () => {
       id: 'q1', full_name: '', email: '', phone: '', event_type: '', guest_count: 10, cocktail_count: 50,
       package_id: 'p1', event_date: dateStr, event_time: null, event_city: '', event_postcode: '', distance_km: 5,
       estimated_total: 0, status: 'confirmed', special_requests: null, created_at: '2026-01-01',
+      source: 'wizard_locatie', event_address: '', arrangement: null, internal_notes: null,
     }];
     expect(isDateSelectable(friday, { availability, blockedDates: [], settings, confirmedRequests })).toBe(false);
   });
@@ -151,6 +155,7 @@ describe('isDateSelectable', () => {
       id: 'q2', full_name: '', email: '', phone: '', event_type: '', guest_count: 10, cocktail_count: 50,
       package_id: 'p1', event_date: dateStr, event_time: null, event_city: '', event_postcode: '', distance_km: 5,
       estimated_total: 0, status: 'new', special_requests: null, created_at: '2026-01-01',
+      source: 'wizard_locatie', event_address: '', arrangement: null, internal_notes: null,
     }];
     expect(
       isDateSelectable(friday, { availability, blockedDates: [], settings, confirmedRequests: nonConfirmedRequests })

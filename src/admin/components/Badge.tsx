@@ -1,21 +1,24 @@
 import type { QuoteStatus } from '../../shared/types/db';
+import { normalizeStatus, STATUS_LABELS, type CanonicalStatus } from '../../shared/lib/workflow';
 
-const STYLES: Record<QuoteStatus, string> = {
+// Colour never carries the meaning alone — every status also has its word.
+const STYLES: Record<CanonicalStatus, string> = {
   new: 'bg-gold/15 text-gold-light border-gold/30',
-  reviewed: 'bg-white/10 text-white border-white/20',
-  quoted: 'bg-gold-light/15 text-gold-light border-gold-light/30',
-  confirmed: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  declined: 'bg-red-500/10 text-red-300 border-red-500/30',
-};
-
-const LABELS: Record<QuoteStatus, string> = {
-  new: 'Nieuw',
-  reviewed: 'Bekeken',
-  quoted: 'Offerte verstuurd',
-  confirmed: 'Bevestigd',
-  declined: 'Afgewezen',
+  reviewed: 'bg-white/10 text-white/80 border-white/20',
+  quoted: 'bg-gold-light/10 text-gold-light border-gold-light/40',
+  booked: 'bg-ok/15 text-ok border-ok/30',
+  completed: 'bg-white/15 text-white border-white/25',
+  invoiced: 'bg-ok/10 text-ok/90 border-ok/20',
+  paid: 'bg-ok/20 text-ok border-ok/40',
+  declined: 'bg-danger/10 text-danger border-danger/30',
+  cancelled: 'bg-white/5 text-muted border-white/15',
 };
 
 export function Badge({ status }: { status: QuoteStatus }) {
-  return <span className={`inline-block rounded-full border px-3 py-1.5 text-sm uppercase tracking-wide ${STYLES[status]}`}>{LABELS[status]}</span>;
+  const s = normalizeStatus(status);
+  return (
+    <span className={`inline-block whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium uppercase tracking-wide ${STYLES[s]}`}>
+      {STATUS_LABELS[s]}
+    </span>
+  );
 }

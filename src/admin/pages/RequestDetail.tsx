@@ -1,0 +1,179 @@
+import { useEffect, useState } from 'react';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { supabase } from '../../shared/lib/supabase';
+import { AdminLayout } from '../layout/AdminLayout';
+import { StatusControl } from '../components/StatusControl';
+import { SkeletonBlock } from '../components/Skeleton';
+import { TimelineTab } from './tabs/TimelineTab';
+import { QuoteTab } from './tabs/QuoteTab';
+import { PackingTab } from './tabs/PackingTab';
+import { InvoiceTab } from './tabs/InvoiceTab';
+import { formatDateLongNL, formatEuro } from '../../shared/lib/format';
+import { normalizeStatus } from '../../shared/lib/workflow';
+import { IconMail, IconMapPin, IconPhone, IconUsers } from '../components/icons';
+import type { QuoteRequest, QuoteStatus } from '../../shared/types/db';
+
+type TabId = 'tijdlijn' | 'offerte' | 'paklijst' | 'factuur';
+const TABS: { id: TabId; label: string }[] = [
+  { id: 'tijdlijn', label: 'Tijdlijn' },
+  { id: 'offerte', label: 'Offerte' },
+  { id: 'paklijst', label: 'Paklijst' },
+  { id: 'factuur', label: 'Factuur' },
+];
+
+export function RequestDetail() {
+  const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const tab: TabId = (TABS.some((t) => t.id === rawTab) ? rawTab : 'tijdlijn') as TabId;
+
+  const [request, setRequest] = useState<QuoteRequest | null>(null);
+  const [packageName, setPackageName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [notes, setNotes] = useState('');
+  const [notesSaved, setNotesSaved] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    let alive = true;
+    async function load() {
+      const { data, error } = await supabase.from('quote_requests').select('*').eq('id', id).maybeSingle();
+      if (!alive) return;
+      if (error || !data) { setLoading(false); return; }
+      setRequest(data);
+      setNotes(data.internal_notes ?? '');
+      setLoading(false);
+      const { data: pkg } = await supabase.from('service_packages').select('package_name').eq('id', data.package_id).maybeSingle();
+      if (alive && pkg) setPackageName(pkg.package_name);
+    }
+    load();
+    return () => { alive = false; };
+  }, [id]);
+
+  async function saveNotes() {
+    if (!request || notes === (request.internal_notes ?? '')) return;
+    const { error } = await supabase.from('quote_requests').update({ internal_notes: notes || null }).eq('id', request.id);
+    if (error) { console.error('Failed to save notes', error); return; }
+    setRequest({ ...request, internal_notes: notes || null });
+    setNotesSaved(true);
+    setTimeout(() => setNotesSaved(false), 2000);
+  }
+
+  function selectTab(next: TabId) {
+    // replace: switching tabs should not pile up history — back returns to the list.
+    setSearchParams(next === 'tijdlijn' ? {} : { tab: next }, { replace: true });
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout title="Aanvraag" back={{ to: '/aanvragen', label: 'Aanvragen' }}>
+        <SkeletonBlock className="h-48" />
+      </AdminLayout>
+    );
+  }
+
+  if (!request) {
+    return (
+      <AdminLayout title="Aanvraag niet gevonden" back={{ to: '/aanvragen', label: 'Aanvragen' }}>
+        <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted">
+          Deze aanvraag bestaat niet (meer). <Link to="/aanvragen" className="text-gold-light underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light rounded">Terug naar de lijst</Link>.
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const status = normalizeStatus(request.status);
+  const invoiceReady = ['completed', 'invoiced', 'paid'].includes(status);
+
+  return (
+    <AdminLayout
+      title={request.full_name}
+      back={{ to: '/aanvragen', label: 'Aanvragen' }}
+      actions={<StatusControl request={request} onChanged={(s: QuoteStatus) => setRequest({ ...request, status: s })} onLogged={() => setReloadKey((k) => k + 1)} />}
+    >
+      {/* Core facts — stays put while tabs switch below */}
+      <section aria-label="Kerngegevens" className="mb-6 rounded-xl border border-white/5 bg-surface-elevated p-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex flex-col gap-3">
+            <a href={`tel:${request.phone}`} className="inline-flex w-fit items-center gap-2.5 rounded text-[0.9375rem] text-white transition-colors hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+              <IconPhone size={16} className="text-muted" /> {request.phone || '—'}
+            </a>
+            <a href={`mailto:${request.email}`} className="inline-flex w-fit items-center gap-2.5 rounded text-[0.9375rem] text-white transition-colors hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+              <IconMail size={16} className="text-muted" /> {request.email}
+            </a>
+            <span className="inline-flex items-center gap-2.5 text-[0.9375rem] text-white/85">
+              <IconMapPin size={16} className="text-muted" />
+              {request.event_address ? `${request.event_address}, ` : ''}{request.event_city}, {request.event_postcode} · {request.distance_km} km
+            </span>
+            <span className="inline-flex items-center gap-2.5 text-[0.9375rem] text-white/85">
+              <IconUsers size={16} className="text-muted" />
+              {request.guest_count} gasten · {request.cocktail_count} cocktails
+            </span>
+          </div>
+          <div className="flex flex-col gap-1.5 md:text-right">
+            <span className="text-lg font-medium text-white">{request.event_type}</span>
+            <span className="text-[0.9375rem] text-white/85">
+              {formatDateLongNL(request.event_date)}{request.event_time ? `, ${request.event_time.slice(0, 5)} uur` : ''}
+            </span>
+            <span className="text-[0.9375rem] text-muted">
+              {packageName || 'Pakket onbekend'}{request.arrangement ? ` · ${request.arrangement}` : ''}
+            </span>
+            <span className="mt-1 font-heading text-2xl text-gold-light">{formatEuro(request.estimated_total)}</span>
+            <span className="text-xs uppercase tracking-wider text-muted">Geschat via wizard</span>
+          </div>
+        </div>
+
+        {request.special_requests && (
+          <p className="mt-5 rounded-lg bg-white/[0.03] px-4 py-3 text-[0.9375rem] leading-relaxed text-white/85">
+            <span className="text-muted">Bijzondere verzoeken: </span>{request.special_requests}
+          </p>
+        )}
+
+        <div className="mt-5">
+          <label htmlFor="internal-notes" className="mb-1.5 flex items-center gap-2 text-sm text-muted">
+            Interne notitie
+            <span aria-live="polite" className={`text-ok transition-opacity duration-200 ${notesSaved ? 'opacity-100' : 'opacity-0'}`}>Opgeslagen</span>
+          </label>
+          <textarea
+            id="internal-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={saveNotes}
+            rows={2}
+            placeholder="Alleen voor jou zichtbaar…"
+            className="w-full rounded-lg border border-white/10 bg-surface px-3 py-2.5 text-[0.9375rem] text-white placeholder:text-muted transition-colors focus:border-gold/50 focus:outline-none"
+          />
+        </div>
+      </section>
+
+      {/* Tabs */}
+      <div role="tablist" aria-label="Aanvraagonderdelen" className="mb-6 flex gap-1 border-b border-white/10">
+        {TABS.map((t) => {
+          const disabled = t.id === 'factuur' && !invoiceReady;
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={active}
+              disabled={disabled}
+              title={disabled ? 'Beschikbaar zodra de klus op Uitgevoerd staat' : undefined}
+              onClick={() => selectTab(t.id)}
+              className={`relative -mb-px h-12 px-4 text-[0.9375rem] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 ${
+                active ? 'border-b-2 border-gold text-gold-light' : 'border-b-2 border-transparent text-muted hover:text-white'
+              }`}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {tab === 'tijdlijn' && <TimelineTab requestId={request.id} reloadKey={reloadKey} />}
+      {tab === 'offerte' && <QuoteTab request={request} packageName={packageName} onLogged={() => setReloadKey((k) => k + 1)} onStatusChanged={(s) => setRequest({ ...request, status: s })} />}
+      {tab === 'paklijst' && <PackingTab request={request} />}
+      {tab === 'factuur' && invoiceReady && <InvoiceTab request={request} onLogged={() => setReloadKey((k) => k + 1)} onStatusChanged={(s) => setRequest({ ...request, status: s })} />}
+    </AdminLayout>
+  );
+}

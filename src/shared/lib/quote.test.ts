@@ -17,6 +17,9 @@ const settings: ServiceSettings = {
   booking_notice_hours: 72,
   max_guests: 200,
   created_at: '2026-01-01',
+  kvk_number: '', vat_number: '', iban: '',
+  quote_valid_days: 14, invoice_due_days: 14, vat_rate: 21,
+  nudge_new_days: 3, nudge_quote_days: 7,
 };
 
 const bartendingPkg: ServicePackage = {

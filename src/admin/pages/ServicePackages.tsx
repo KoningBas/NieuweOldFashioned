@@ -1,7 +1,13 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import { supabase } from '../../shared/lib/supabase';
 import { AdminLayout } from '../layout/AdminLayout';
 import { Drawer } from '../components/Drawer';
+import { Disclosure } from '../components/Disclosure';
+import { PackingTemplateEditor } from '../components/PackingTemplateEditor';
+import { SkeletonRows } from '../components/Skeleton';
+import { Field, INPUT_CLS } from '../components/Form';
+import { IconPlus } from '../components/icons';
+import { formatEuro } from '../../shared/lib/format';
 import type { PriceUnit, ServicePackage } from '../../shared/types/db';
 
 type FormState = Omit<ServicePackage, 'id' | 'created_at'>;
@@ -16,10 +22,18 @@ export function ServicePackages() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const nameId = useId();
+  const descId = useId();
+  const catId = useId();
+  const unitId = useId();
+  const priceId = useId();
+  const minId = useId();
 
   async function load() {
-    const { data, error } = await supabase.from('service_packages').select('*').order('created_at', { ascending: true });
-    if (error) { console.error('Failed to load service packages', error); return; }
+    const { data, error: err } = await supabase.from('service_packages').select('*').order('created_at', { ascending: true });
+    if (err) { setError('Pakketten konden niet geladen worden.'); setLoading(false); return; }
     setPackages(data ?? []);
     setLoading(false);
   }
@@ -31,11 +45,6 @@ export function ServicePackages() {
     setForm({ package_name: pkg.package_name, description: pkg.description, price: pkg.price, price_unit: pkg.price_unit, min_quantity: pkg.min_quantity, category: pkg.category, is_featured: pkg.is_featured, is_active: pkg.is_active });
   }
 
-  function openCreate() {
-    setCreating(true);
-    setForm(EMPTY_FORM);
-  }
-
   function close() {
     setEditing(null);
     setCreating(false);
@@ -43,93 +52,117 @@ export function ServicePackages() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const { error } = editing
+    const { error: err } = editing
       ? await supabase.from('service_packages').update(form).eq('id', editing.id)
       : await supabase.from('service_packages').insert(form);
-    if (error) { console.error('Failed to save service package', error); return; }
+    if (err) { setError(`Opslaan mislukt: ${err.message}`); return; }
     close();
     load();
   }
 
-  async function toggle(pkg: ServicePackage, field: 'is_active' | 'is_featured') {
-    const { error } = await supabase.from('service_packages').update({ [field]: !pkg[field] }).eq('id', pkg.id);
-    if (error) { console.error('Failed to toggle service package field', error); return; }
-    load();
-  }
-
   return (
-    <AdminLayout title="Servicepakketten">
-      <button onClick={openCreate} className="mb-6 rounded-full px-6 py-3 text-base bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
-        Nieuw pakket
-      </button>
+    <AdminLayout title="Pakketten">
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <p className="mr-auto max-w-prose text-sm text-muted">
+          Klap een pakket open voor zijn paklijstsjabloon: wat er standaard mee moet, en hoe dat meeschaalt met
+          gasten en cocktails.
+        </p>
+        <button
+          onClick={() => { setCreating(true); setForm(EMPTY_FORM); }}
+          className="inline-flex h-11 items-center gap-2 rounded-lg bg-gold px-5 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        >
+          <IconPlus size={16} aria-hidden="true" />
+          Nieuw pakket
+        </button>
+      </div>
+
+      {error && <p role="alert" className="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
 
       {loading ? (
-        <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted text-lg">Laden...</div>
+        <SkeletonRows rows={3} />
+      ) : packages.length === 0 ? (
+        <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted">
+          Nog geen pakketten.
+        </div>
       ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {packages.map((pkg) => (
-          <div key={pkg.id} className="rounded-xl bg-surface-elevated border border-white/5 p-6">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-heading text-xl">{pkg.package_name}</h3>
-              <button onClick={() => openEdit(pkg)} className="text-base text-gold-light hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 rounded">Bewerken</button>
-            </div>
-            <p className="text-muted text-base mb-4">{pkg.description}</p>
-            <div className="text-gold-light text-lg mb-4">&euro;{pkg.price} {pkg.price_unit === 'per_cocktail' ? 'per cocktail' : 'per persoon'} &middot; min. {pkg.min_quantity}</div>
-            <div className="flex gap-2">
-              <button onClick={() => toggle(pkg, 'is_active')} className={`rounded-full px-3 py-1.5 text-sm border focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${pkg.is_active ? 'border-emerald-500/40 text-emerald-300' : 'border-white/15 text-muted'}`}>
-                {pkg.is_active ? 'Actief' : 'Inactief'}
-              </button>
-              <button onClick={() => toggle(pkg, 'is_featured')} className={`rounded-full px-3 py-1.5 text-sm border focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${pkg.is_featured ? 'border-gold/40 text-gold-light' : 'border-white/15 text-muted'}`}>
-                {pkg.is_featured ? 'Uitgelicht' : 'Niet uitgelicht'}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+        <ul className="overflow-hidden rounded-xl border border-white/5 bg-surface-elevated">
+          {packages.map((pkg) => (
+            <li key={pkg.id} className="border-b border-white/5 last:border-b-0">
+              <Disclosure
+                summary={
+                  <>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-white">{pkg.package_name}</span>
+                      {!pkg.is_active && <Tag tone="muted">Inactief</Tag>}
+                      {pkg.is_featured && <Tag tone="gold">Uitgelicht</Tag>}
+                    </span>
+                    <span className="mt-0.5 block text-sm text-muted">
+                      {formatEuro(pkg.price)} {pkg.price_unit === 'per_cocktail' ? 'per cocktail' : 'per persoon'} · min. {pkg.min_quantity}
+                    </span>
+                  </>
+                }
+                actions={
+                  <button
+                    onClick={() => openEdit(pkg)}
+                    className="h-11 shrink-0 rounded-lg px-3 text-[0.9375rem] text-gold-light transition-colors duration-150 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+                  >
+                    Bewerken
+                  </button>
+                }
+              >
+                <PackingTemplateEditor packageId={pkg.id} packageName={pkg.package_name} />
+              </Disclosure>
+            </li>
+          ))}
+        </ul>
       )}
 
       <Drawer open={editing !== null || creating} title={editing ? 'Pakket bewerken' : 'Nieuw pakket'} onClose={close}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Naam</span>
-            <input required value={form.package_name} onChange={(e) => setForm((f) => ({ ...f, package_name: e.target.value }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
-          </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Omschrijving</span>
-            <textarea rows={3} required value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
-          </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Categorie</span>
-            <input required value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
-          </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Prijseenheid</span>
-            <select value={form.price_unit} onChange={(e) => setForm((f) => ({ ...f, price_unit: e.target.value as PriceUnit }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light">
+          <Field label="Naam" htmlFor={nameId}>
+            <input id={nameId} required value={form.package_name} onChange={(e) => setForm((f) => ({ ...f, package_name: e.target.value }))} className={INPUT_CLS} />
+          </Field>
+          <Field label="Omschrijving" htmlFor={descId}>
+            <textarea id={descId} rows={3} required value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className={`${INPUT_CLS} h-auto py-2.5`} />
+          </Field>
+          <Field label="Categorie" htmlFor={catId}>
+            <input id={catId} required value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className={INPUT_CLS} />
+          </Field>
+          <Field label="Prijseenheid" htmlFor={unitId}>
+            <select id={unitId} value={form.price_unit} onChange={(e) => setForm((f) => ({ ...f, price_unit: e.target.value as PriceUnit }))} className={INPUT_CLS}>
               <option value="per_cocktail">Per cocktail</option>
               <option value="per_person">Per persoon</option>
             </select>
+          </Field>
+          <Field label="Prijs (€)" htmlFor={priceId}>
+            <input id={priceId} type="number" step="0.01" inputMode="decimal" required value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))} className={INPUT_CLS} />
+          </Field>
+          <Field label="Minimale afname" htmlFor={minId}>
+            <input id={minId} type="number" inputMode="numeric" required value={form.min_quantity} onChange={(e) => setForm((f) => ({ ...f, min_quantity: Number(e.target.value) }))} className={INPUT_CLS} />
+          </Field>
+          <label className="flex min-h-[2.75rem] items-center gap-3">
+            <input type="checkbox" className="h-4 w-4 accent-gold" checked={form.is_active} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))} />
+            <span className="text-[0.9375rem]">Actief</span>
           </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Prijs (&euro;)</span>
-            <input type="number" step="0.01" required value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+          <label className="flex min-h-[2.75rem] items-center gap-3">
+            <input type="checkbox" className="h-4 w-4 accent-gold" checked={form.is_featured} onChange={(e) => setForm((f) => ({ ...f, is_featured: e.target.checked }))} />
+            <span className="text-[0.9375rem]">Uitgelicht</span>
           </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Minimale afname</span>
-            <input type="number" required value={form.min_quantity} onChange={(e) => setForm((f) => ({ ...f, min_quantity: Number(e.target.value) }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
-          </label>
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))} />
-            <span className="text-base">Actief</span>
-          </label>
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={form.is_featured} onChange={(e) => setForm((f) => ({ ...f, is_featured: e.target.checked }))} />
-            <span className="text-base">Uitgelicht</span>
-          </label>
-          <button type="submit" className="rounded-full px-6 py-3 text-base bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+          <button type="submit" className="h-11 rounded-lg bg-gold px-6 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
             Opslaan
           </button>
         </form>
       </Drawer>
     </AdminLayout>
+  );
+}
+
+function Tag({ tone, children }: { tone: 'gold' | 'muted'; children: string }) {
+  return (
+    <span className={`rounded-full border px-2 py-0.5 text-xs ${
+      tone === 'gold' ? 'border-gold/40 text-gold-light' : 'border-white/15 text-muted'
+    }`}>
+      {children}
+    </span>
   );
 }
