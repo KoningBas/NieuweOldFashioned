@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
-import type { Availability, BlockedDate, CocktailMenuItem, ServicePackage, ServiceSettings } from '../types/db';
+import type {
+  Availability, BlockedDate, CocktailMenuItem, RequestSource, ServicePackage, ServiceSettings,
+} from '../types/db';
 
 export async function fetchFeaturedPackages(): Promise<ServicePackage[]> {
   const { data, error } = await supabase
@@ -80,6 +82,22 @@ export interface NewQuoteRequest {
   distance_km: number;
   estimated_total: number;
   special_requests: string | null;
+  /** Which form the request came from. Omitted for the locatie wizard, whose
+   *  database default already says `wizard_locatie`. */
+  source?: RequestSource;
+  event_address?: string;
+  arrangement?: 'Bites' | 'Streetfood' | null;
+}
+
+/** Every workshop package: the two bar arrangements plus the on-location one. */
+export async function fetchWorkshopPackages(): Promise<ServicePackage[]> {
+  const { data, error } = await supabase
+    .from('service_packages')
+    .select('*')
+    .eq('is_active', true)
+    .eq('category', 'workshop');
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function submitQuoteRequest(payload: NewQuoteRequest): Promise<void> {

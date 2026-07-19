@@ -1,13 +1,16 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { Login } from './auth/Login';
 import { Overview } from './pages/Overview';
-import { QuoteRequests } from './pages/QuoteRequests';
+import { Requests } from './pages/Requests';
+import { RequestDetail } from './pages/RequestDetail';
 import { Agenda } from './pages/Agenda';
+import { PackingLists } from './pages/PackingLists';
+import { Invoices } from './pages/Invoices';
+import { PrintDocument } from './pages/PrintDocument';
 import { ServicePackages } from './pages/ServicePackages';
 import { CocktailMenu } from './pages/CocktailMenu';
 import { Availability } from './pages/Availability';
-import { BlockedDates } from './pages/BlockedDates';
 import { ServiceSettings } from './pages/ServiceSettings';
 
 function Gate() {
@@ -32,12 +35,20 @@ function Gate() {
     <BrowserRouter basename="/admin">
       <Routes>
         <Route path="/" element={<Overview />} />
-        <Route path="/quotes" element={<QuoteRequests />} />
+        <Route path="/aanvragen" element={<Requests />} />
+        <Route path="/aanvragen/:id" element={<RequestDetail />} />
+        {/* Old bookmarks keep working */}
+        <Route path="/quotes" element={<Navigate to="/aanvragen" replace />} />
         <Route path="/agenda" element={<Agenda />} />
+        <Route path="/paklijsten" element={<PackingLists />} />
+        <Route path="/facturen" element={<Invoices />} />
+        <Route path="/print/offerte/:id" element={<PrintDocument kind="quote" />} />
+        <Route path="/print/factuur/:id" element={<PrintDocument kind="invoice" />} />
         <Route path="/packages" element={<ServicePackages />} />
         <Route path="/cocktails" element={<CocktailMenu />} />
         <Route path="/openingstijden" element={<Availability />} />
-        <Route path="/blocked-dates" element={<BlockedDates />} />
+        {/* Blocking dates now happens inside the agenda */}
+        <Route path="/blocked-dates" element={<Navigate to="/agenda" replace />} />
         <Route path="/settings" element={<ServiceSettings />} />
       </Routes>
     </BrowserRouter>

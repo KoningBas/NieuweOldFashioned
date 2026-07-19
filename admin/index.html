@@ -6,24 +6,38 @@
   <title>Beheer | The Old Fashioned</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    // Set the theme before first paint so there is no flash of the wrong one.
+    document.documentElement.dataset.theme = localStorage.getItem('admin-theme') === 'light' ? 'light' : 'dark';
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: '#C8922A',
-            'primary-dark': '#A57520',
-            surface: '#0D0D0D',
-            'surface-elevated': '#1A1410',
-            gold: '#C8922A',
-            'gold-light': '#E8B86D',
-            muted: '#8A7A6A',
+            // All colours resolve through CSS variables so the light/dark
+            // switch is one attribute flip on <html>. Values are RGB triplets
+            // to keep Tailwind's alpha modifiers (bg-gold/15) working.
+            surface: 'rgb(var(--c-bg) / <alpha-value>)',
+            'surface-elevated': 'rgb(var(--c-panel) / <alpha-value>)',
+            'surface-raised': 'rgb(var(--c-panel-2) / <alpha-value>)',
+            gold: 'rgb(var(--c-accent) / <alpha-value>)',
+            'gold-light': 'rgb(var(--c-accent-2) / <alpha-value>)',
+            muted: 'rgb(var(--c-ink-mute) / <alpha-value>)',
+            ok: 'rgb(var(--c-ok) / <alpha-value>)',
+            danger: 'rgb(var(--c-danger) / <alpha-value>)',
+            // Existing screens colour text and borders with white/*. Remapping
+            // white onto the ink variable makes every one of those flip
+            // correctly when the light theme swaps ink to near-black.
+            white: 'rgb(var(--c-ink) / <alpha-value>)',
+            primary: 'rgb(var(--c-accent) / <alpha-value>)',
+            'primary-dark': 'rgb(var(--c-accent-2) / <alpha-value>)',
           },
           fontFamily: {
             heading: ['"Bodoni Moda"', 'Georgia', 'serif'],
-            body: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            body: ['Inter', 'system-ui', 'sans-serif'],
           },
         },
       },
@@ -31,9 +45,49 @@
   </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    html { font-size: 112.5%; }
-    body { font-family: 'Cormorant Garamond', Georgia, serif; background: #0D0D0D; color: #fff; margin: 0; }
+
+    :root, [data-theme="dark"] {
+      --c-bg: 13 13 13;          /* #0D0D0D */
+      --c-panel: 26 20 16;       /* #1A1410 */
+      --c-panel-2: 38 30 23;     /* hover / raised */
+      --c-ink: 244 239 231;      /* warm near-white */
+      --c-ink-mute: 163 148 128; /* >=4.5:1 on both bg and panel */
+      --c-accent: 200 146 42;    /* #C8922A */
+      --c-accent-2: 232 184 109; /* #E8B86D */
+      --c-ok: 111 199 149;
+      --c-danger: 229 123 123;
+      color-scheme: dark;
+    }
+    [data-theme="light"] {
+      --c-bg: 247 243 236;       /* warm paper, tinted toward the brand gold */
+      --c-panel: 255 253 250;
+      --c-panel-2: 240 234 224;
+      --c-ink: 32 26 18;
+      --c-ink-mute: 107 95 79;
+      --c-accent: 138 97 20;     /* darker gold: readable fills on light */
+      --c-accent-2: 122 85 20;   /* text-accent, >=6:1 on paper */
+      --c-ok: 26 122 77;
+      --c-danger: 176 58 58;
+      color-scheme: light;
+    }
+
+    html { font-size: 100%; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: rgb(var(--c-bg));
+      color: rgb(var(--c-ink));
+      margin: 0;
+      /* Admin is full of amounts and counts; keep digits aligned everywhere. */
+      font-variant-numeric: tabular-nums;
+    }
     .font-heading { font-family: 'Bodoni Moda', Georgia, serif; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>

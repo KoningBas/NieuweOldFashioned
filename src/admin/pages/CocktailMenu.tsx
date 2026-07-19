@@ -1,7 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import { supabase } from '../../shared/lib/supabase';
 import { AdminLayout } from '../layout/AdminLayout';
 import { Drawer } from '../components/Drawer';
+import { Disclosure } from '../components/Disclosure';
+import { IngredientEditor } from '../components/IngredientEditor';
+import { SkeletonRows } from '../components/Skeleton';
+import { Field, INPUT_CLS } from '../components/Form';
+import { IconPlus } from '../components/icons';
 import type { CocktailMenuItem } from '../../shared/types/db';
 
 type FormState = Omit<CocktailMenuItem, 'id' | 'created_at'>;
@@ -14,10 +19,15 @@ export function CocktailMenu() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const nameId = useId();
+  const descId = useId();
+  const catId = useId();
 
   async function load() {
-    const { data, error } = await supabase.from('cocktail_menu').select('*').order('created_at', { ascending: true });
-    if (error) { console.error('Failed to load cocktail menu', error); return; }
+    const { data, error: err } = await supabase.from('cocktail_menu').select('*').order('name');
+    if (err) { setError('Cocktailkaart kon niet geladen worden.'); setLoading(false); return; }
     setCocktails(data ?? []);
     setLoading(false);
   }
@@ -29,11 +39,6 @@ export function CocktailMenu() {
     setForm({ name: item.name, description: item.description, category: item.category, is_featured: item.is_featured, is_active: item.is_active });
   }
 
-  function openCreate() {
-    setCreating(true);
-    setForm(EMPTY_FORM);
-  }
-
   function close() {
     setEditing(null);
     setCreating(false);
@@ -41,78 +46,104 @@ export function CocktailMenu() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const { error } = editing
+    const { error: err } = editing
       ? await supabase.from('cocktail_menu').update(form).eq('id', editing.id)
       : await supabase.from('cocktail_menu').insert(form);
-    if (error) { console.error('Failed to save cocktail', error); return; }
+    if (err) { setError(`Opslaan mislukt: ${err.message}`); return; }
     close();
-    load();
-  }
-
-  async function toggle(item: CocktailMenuItem, field: 'is_active' | 'is_featured') {
-    const { error } = await supabase.from('cocktail_menu').update({ [field]: !item[field] }).eq('id', item.id);
-    if (error) { console.error('Failed to toggle cocktail field', error); return; }
     load();
   }
 
   return (
     <AdminLayout title="Cocktailkaart">
-      <button onClick={openCreate} className="mb-6 rounded-full px-6 py-3 text-base bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
-        Nieuwe cocktail
-      </button>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <p className="mr-auto max-w-prose text-sm text-muted">
+          Klap een cocktail open om het recept vast te leggen. De paklijst rekent daarmee uit hoeveel je moet inkopen.
+        </p>
+        <button
+          onClick={() => { setCreating(true); setForm(EMPTY_FORM); }}
+          className="inline-flex h-11 items-center gap-2 rounded-lg bg-gold px-5 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+        >
+          <IconPlus size={16} aria-hidden="true" />
+          Nieuwe cocktail
+        </button>
+      </div>
+
+      {error && <p role="alert" className="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
 
       {loading ? (
-        <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted text-lg">Laden...</div>
+        <SkeletonRows rows={5} />
+      ) : cocktails.length === 0 ? (
+        <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted">
+          Nog geen cocktails op de kaart.
+        </div>
       ) : (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cocktails.map((item) => (
-          <div key={item.id} className="rounded-xl bg-surface-elevated border border-white/5 p-6">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-heading text-xl">{item.name}</h3>
-              <button onClick={() => openEdit(item)} className="text-base text-gold-light hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 rounded">Bewerken</button>
-            </div>
-            <span className="uppercase tracking-widest text-sm text-muted">{item.category}</span>
-            <p className="text-muted text-base my-3">{item.description}</p>
-            <div className="flex gap-2">
-              <button onClick={() => toggle(item, 'is_active')} className={`rounded-full px-3 py-1.5 text-sm border focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${item.is_active ? 'border-emerald-500/40 text-emerald-300' : 'border-white/15 text-muted'}`}>
-                {item.is_active ? 'Actief' : 'Inactief'}
-              </button>
-              <button onClick={() => toggle(item, 'is_featured')} className={`rounded-full px-3 py-1.5 text-sm border focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 ${item.is_featured ? 'border-gold/40 text-gold-light' : 'border-white/15 text-muted'}`}>
-                {item.is_featured ? 'Uitgelicht' : 'Niet uitgelicht'}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+        <ul className="overflow-hidden rounded-xl border border-white/5 bg-surface-elevated">
+          {cocktails.map((item) => (
+            <li key={item.id} className="border-b border-white/5 last:border-b-0">
+              <Disclosure
+                summary={
+                  <>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-white">{item.name}</span>
+                      {!item.is_active && <Tag tone="muted">Inactief</Tag>}
+                      {item.is_featured && <Tag tone="gold">Uitgelicht</Tag>}
+                    </span>
+                    <span className="mt-0.5 block truncate text-sm text-muted">
+                      {item.category}{item.description ? ` · ${item.description}` : ''}
+                    </span>
+                  </>
+                }
+                actions={
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="h-11 shrink-0 rounded-lg px-3 text-[0.9375rem] text-gold-light transition-colors duration-150 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+                  >
+                    Bewerken
+                  </button>
+                }
+              >
+                <IngredientEditor cocktailId={item.id} />
+              </Disclosure>
+            </li>
+          ))}
+        </ul>
       )}
 
       <Drawer open={editing !== null || creating} title={editing ? 'Cocktail bewerken' : 'Nieuwe cocktail'} onClose={close}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Naam</span>
-            <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+          <Field label="Naam" htmlFor={nameId}>
+            <input id={nameId} required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={INPUT_CLS} />
+          </Field>
+          <Field label="Omschrijving" htmlFor={descId}>
+            <textarea id={descId} rows={3} required value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className={`${INPUT_CLS} h-auto py-2.5`} />
+          </Field>
+          <Field label="Categorie" htmlFor={catId}>
+            <input id={catId} required value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className={INPUT_CLS} />
+          </Field>
+          <label className="flex min-h-[2.75rem] items-center gap-3">
+            <input type="checkbox" className="h-4 w-4 accent-gold" checked={form.is_active} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))} />
+            <span className="text-[0.9375rem]">Actief op de kaart</span>
           </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Omschrijving</span>
-            <textarea rows={3} required value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
+          <label className="flex min-h-[2.75rem] items-center gap-3">
+            <input type="checkbox" className="h-4 w-4 accent-gold" checked={form.is_featured} onChange={(e) => setForm((f) => ({ ...f, is_featured: e.target.checked }))} />
+            <span className="text-[0.9375rem]">Uitgelicht</span>
           </label>
-          <label className="block">
-            <span className="block text-base text-muted mb-2">Categorie</span>
-            <input required value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className="w-full rounded-lg bg-surface border border-white/15 px-4 py-2.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light" />
-          </label>
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))} />
-            <span className="text-base">Actief</span>
-          </label>
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={form.is_featured} onChange={(e) => setForm((f) => ({ ...f, is_featured: e.target.checked }))} />
-            <span className="text-base">Uitgelicht</span>
-          </label>
-          <button type="submit" className="rounded-full px-6 py-3 text-base bg-gradient-to-b from-gold-light to-primary-dark text-surface font-medium hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
+          <button type="submit" className="h-11 rounded-lg bg-gold px-6 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2">
             Opslaan
           </button>
         </form>
       </Drawer>
     </AdminLayout>
+  );
+}
+
+function Tag({ tone, children }: { tone: 'gold' | 'muted'; children: string }) {
+  return (
+    <span className={`rounded-full border px-2 py-0.5 text-xs ${
+      tone === 'gold' ? 'border-gold/40 text-gold-light' : 'border-white/15 text-muted'
+    }`}>
+      {children}
+    </span>
   );
 }
