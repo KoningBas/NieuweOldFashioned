@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabase';
 import { logActivity } from '../../lib/activity';
 import { SkeletonBlock } from '../../components/Skeleton';
+import { UndoToast } from '../../components/UndoToast';
+import { useRowSaver } from '../../lib/saveState';
+import { useUndoable } from '../../lib/undo';
 import { IconPlus, IconTrash } from '../../components/icons';
 import {
   buildPackingItems, CATEGORY_LABELS, CATEGORY_ORDER,
@@ -30,6 +33,24 @@ export function PackingTab({ request }: Props) {
 
   // Read-only summary of the choice made on the Cocktails tab.
   const [chosenSummary, setChosenSummary] = useState<{ name: string; count: number }[]>([]);
+
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  const undo = useUndoable();
+
+  const saver = useRowSaver({
+    key: 'paklijstregels',
+    save: async (id) => {
+      const item = itemsRef.current.find((i) => i.id === id);
+      if (!item) return null;
+      const { error } = await supabase.from('packing_list_items').update({
+        name: item.name, quantity: item.quantity, unit: item.unit,
+        category: item.category, perishability: item.perishability,
+      }).eq('id', id);
+      return error ? `Regel opslaan mislukt: ${error.message}` : null;
+    },
+  });
 
   useEffect(() => {
     let alive = true;
@@ -151,22 +172,25 @@ export function PackingTab({ request }: Props) {
 
   function patchItem(id: string, patch: Partial<PackingListItem>) {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+    saver.touch(id);
   }
 
-  async function saveItem(id: string) {
-    const item = items.find((i) => i.id === id);
-    if (!item) return;
-    const { error } = await supabase.from('packing_list_items').update({
-      name: item.name, quantity: item.quantity, unit: item.unit,
-      category: item.category, perishability: item.perishability,
-    }).eq('id', id);
-    if (error) console.error('Failed to save item', error);
-  }
+  async function removeItem(item: PackingListItem) {
+    saver.forget(item.id);
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
 
-  async function removeItem(id: string) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    const { error } = await supabase.from('packing_list_items').delete().eq('id', id);
-    if (error) console.error('Failed to delete item', error);
+    const { error } = await supabase.from('packing_list_items').delete().eq('id', item.id);
+    if (error) {
+      console.error('Failed to delete item', error);
+      setItems((prev) => [...prev, item].sort((a, b) => a.sort_order - b.sort_order));
+      return;
+    }
+
+    undo.offer(`${item.name || 'Regel'} verwijderd`, async () => {
+      const { data, error: backErr } = await supabase.from('packing_list_items').insert(item).select().single();
+      if (backErr || !data) { console.error('Failed to restore item', backErr); return; }
+      setItems((prev) => [...prev, data].sort((a, b) => a.sort_order - b.sort_order));
+    });
   }
 
   if (loading) return <SkeletonBlock className="h-40" />;
@@ -349,7 +373,6 @@ export function PackingTab({ request }: Props) {
                       <input
                         value={item.name}
                         onChange={(e) => patchItem(item.id, { name: e.target.value })}
-                        onBlur={() => saveItem(item.id)}
                         className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-surface px-2.5 text-[0.9375rem] text-white focus:border-gold/50 focus:outline-none"
                       />
                     </label>
@@ -359,7 +382,6 @@ export function PackingTab({ request }: Props) {
                         <input
                           type="number" min="0" step="0.5" value={item.quantity}
                           onChange={(e) => patchItem(item.id, { quantity: Number(e.target.value) })}
-                          onBlur={() => saveItem(item.id)}
                           className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-surface px-2.5 text-right text-[0.9375rem] text-white focus:border-gold/50 focus:outline-none"
                         />
                       </label>
@@ -368,7 +390,6 @@ export function PackingTab({ request }: Props) {
                         <input
                           value={item.unit}
                           onChange={(e) => patchItem(item.id, { unit: e.target.value })}
-                          onBlur={() => saveItem(item.id)}
                           className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-surface px-2.5 text-[0.9375rem] text-white focus:border-gold/50 focus:outline-none"
                         />
                       </label>
@@ -379,7 +400,6 @@ export function PackingTab({ request }: Props) {
                         <select
                           value={item.category}
                           onChange={(e) => { patchItem(item.id, { category: e.target.value as PackingCategory }); }}
-                          onBlur={() => saveItem(item.id)}
                           className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-surface px-2 text-sm text-white focus:border-gold/50 focus:outline-none"
                         >
                           {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
@@ -390,7 +410,6 @@ export function PackingTab({ request }: Props) {
                         <select
                           value={item.perishability}
                           onChange={(e) => { patchItem(item.id, { perishability: e.target.value as Perishability }); }}
-                          onBlur={() => saveItem(item.id)}
                           className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-surface px-2 text-sm text-white focus:border-gold/50 focus:outline-none"
                         >
                           {PERISHABILITY_ORDER.map((p) => <option key={p} value={p}>{PERISHABILITY_LABELS[p]}</option>)}
@@ -398,7 +417,7 @@ export function PackingTab({ request }: Props) {
                       </label>
                     </div>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item)}
                       className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-danger/30 text-sm text-danger transition-colors duration-150 hover:bg-danger/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-danger focus-visible:outline-offset-2"
                     >
                       <IconTrash size={14} /> Verwijder regel
@@ -441,6 +460,8 @@ export function PackingTab({ request }: Props) {
           )}
         </div>
       </div>
+
+      <UndoToast pending={undo.pending} onUndo={() => { void undo.run(); }} onDismiss={undo.dismiss} />
     </div>
   );
 }

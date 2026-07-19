@@ -1,11 +1,18 @@
 // Recipe rows behind a cocktail. The packing generator multiplies `amount` by
 // the planned number of cocktails, then divides by `pack_size` to land on
 // bottles or crates instead of millilitres.
+//
+// Rows write themselves back shortly after you stop typing, one row per write.
+// Deleting is immediate — the undo toast puts the row back by its own id rather
+// than holding a delete in limbo, so the table always matches the database.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../shared/lib/supabase';
 import { SkeletonBlock } from './Skeleton';
 import { CELL_INPUT_CLS } from './Form';
+import { UndoToast } from './UndoToast';
+import { useRowSaver } from '../lib/saveState';
+import { useUndoable } from '../lib/undo';
 import { IconPlus, IconTrash } from './icons';
 import { CATEGORY_LABELS, CATEGORY_ORDER, PERISHABILITY_LABELS, PERISHABILITY_ORDER } from '../../shared/lib/packing';
 import type { CocktailIngredient, PackingCategory, Perishability } from '../../shared/types/db';
@@ -16,6 +23,24 @@ export function IngredientEditor({ cocktailId }: { cocktailId: string }) {
   const [rows, setRows] = useState<CocktailIngredient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+
+  const undo = useUndoable();
+
+  const saver = useRowSaver({
+    key: `ingredienten-${cocktailId}`,
+    save: async (id) => {
+      const row = rowsRef.current.find((r) => r.id === id);
+      if (!row) return null;
+      const { error: err } = await supabase.from('cocktail_ingredients').update({
+        name: row.name, amount: row.amount, unit: row.unit, category: row.category,
+        perishability: row.perishability, pack_size: row.pack_size, pack_unit: row.pack_unit,
+      }).eq('id', row.id);
+      return err ? `Opslaan mislukt: ${err.message}` : null;
+    },
+  });
 
   useEffect(() => {
     let alive = true;
@@ -29,32 +54,10 @@ export function IngredientEditor({ cocktailId }: { cocktailId: string }) {
     return () => { alive = false; };
   }, [cocktailId]);
 
+  /** Edit locally and put the row in the queue; the saver decides when. */
   function patch(id: string, values: Partial<CocktailIngredient>) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...values } : r)));
-  }
-
-  async function persist(row: CocktailIngredient) {
-    const { error: err } = await supabase.from('cocktail_ingredients').update({
-      name: row.name, amount: row.amount, unit: row.unit, category: row.category,
-      perishability: row.perishability, pack_size: row.pack_size, pack_unit: row.pack_unit,
-    }).eq('id', row.id);
-    if (err) setError(`Opslaan mislukt: ${err.message}`);
-  }
-
-  /** Free text saves when you leave the field, so typing stays quiet. */
-  function save(id: string) {
-    const row = rows.find((r) => r.id === id);
-    if (row) void persist(row);
-  }
-
-  /** A dropdown choice is final the moment it is made; waiting for blur would
-   *  lose the change when the user closes the panel straight after. */
-  function commit(id: string, values: Partial<CocktailIngredient>) {
-    const current = rows.find((r) => r.id === id);
-    if (!current) return;
-    const merged = { ...current, ...values };
-    setRows((prev) => prev.map((r) => (r.id === id ? merged : r)));
-    void persist(merged);
+    saver.touch(id);
   }
 
   async function addRow() {
@@ -67,10 +70,22 @@ export function IngredientEditor({ cocktailId }: { cocktailId: string }) {
     setRows((prev) => [...prev, data]);
   }
 
-  async function removeRow(id: string) {
-    setRows((prev) => prev.filter((r) => r.id !== id));
-    const { error: err } = await supabase.from('cocktail_ingredients').delete().eq('id', id);
-    if (err) setError(`Verwijderen mislukt: ${err.message}`);
+  async function removeRow(row: CocktailIngredient) {
+    saver.forget(row.id);
+    setRows((prev) => prev.filter((r) => r.id !== row.id));
+
+    const { error: err } = await supabase.from('cocktail_ingredients').delete().eq('id', row.id);
+    if (err) {
+      setError(`Verwijderen mislukt: ${err.message}`);
+      setRows((prev) => [...prev, row].sort((a, b) => a.sort_order - b.sort_order));
+      return;
+    }
+
+    undo.offer(`${row.name || 'Ingrediënt'} verwijderd`, async () => {
+      const { data, error: backErr } = await supabase.from('cocktail_ingredients').insert(row).select().single();
+      if (backErr || !data) { setError(`Terugzetten mislukt: ${backErr?.message ?? 'onbekende fout'}`); return; }
+      setRows((prev) => [...prev, data].sort((a, b) => a.sort_order - b.sort_order));
+    });
   }
 
   if (loading) return <SkeletonBlock className="h-24" />;
@@ -106,36 +121,36 @@ export function IngredientEditor({ cocktailId }: { cocktailId: string }) {
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-white/5 last:border-b-0">
                   <td className="px-2 py-1">
-                    <input aria-label="Naam" value={row.name} onChange={(e) => patch(row.id, { name: e.target.value })} onBlur={() => save(row.id)} className={CELL_INPUT_CLS} placeholder="Bourbon" />
+                    <input aria-label="Naam" value={row.name} onChange={(e) => patch(row.id, { name: e.target.value })} className={CELL_INPUT_CLS} placeholder="Bourbon" />
                   </td>
                   <td className="px-2 py-1">
-                    <input aria-label="Hoeveelheid per cocktail" type="number" step="0.01" inputMode="decimal" value={row.amount} onChange={(e) => patch(row.id, { amount: Number(e.target.value) })} onBlur={() => save(row.id)} className={`${CELL_INPUT_CLS} text-right`} />
+                    <input aria-label="Hoeveelheid per cocktail" type="number" step="0.01" inputMode="decimal" value={row.amount} onChange={(e) => patch(row.id, { amount: Number(e.target.value) })} className={`${CELL_INPUT_CLS} text-right`} />
                   </td>
                   <td className="px-2 py-1">
-                    <select aria-label="Eenheid" value={row.unit} onChange={(e) => commit(row.id, { unit: e.target.value as CocktailIngredient['unit'] })} className={CELL_INPUT_CLS}>
+                    <select aria-label="Eenheid" value={row.unit} onChange={(e) => patch(row.id, { unit: e.target.value as CocktailIngredient['unit'] })} className={CELL_INPUT_CLS}>
                       {AMOUNT_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                     </select>
                   </td>
                   <td className="px-2 py-1">
-                    <select aria-label="Categorie" value={row.category} onChange={(e) => commit(row.id, { category: e.target.value as PackingCategory })} className={CELL_INPUT_CLS}>
+                    <select aria-label="Categorie" value={row.category} onChange={(e) => patch(row.id, { category: e.target.value as PackingCategory })} className={CELL_INPUT_CLS}>
                       {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
                     </select>
                   </td>
                   <td className="px-2 py-1">
-                    <select aria-label="Houdbaarheid" value={row.perishability} onChange={(e) => commit(row.id, { perishability: e.target.value as Perishability })} className={CELL_INPUT_CLS}>
+                    <select aria-label="Houdbaarheid" value={row.perishability} onChange={(e) => patch(row.id, { perishability: e.target.value as Perishability })} className={CELL_INPUT_CLS}>
                       {PERISHABILITY_ORDER.map((p) => <option key={p} value={p}>{PERISHABILITY_LABELS[p]}</option>)}
                     </select>
                   </td>
                   <td className="px-2 py-1">
-                    <input aria-label="Verpakkingsinhoud" type="number" step="0.01" inputMode="decimal" value={row.pack_size ?? ''} placeholder="–" onChange={(e) => patch(row.id, { pack_size: e.target.value === '' ? null : Number(e.target.value) })} onBlur={() => save(row.id)} className={`${CELL_INPUT_CLS} text-right`} />
+                    <input aria-label="Verpakkingsinhoud" type="number" step="0.01" inputMode="decimal" value={row.pack_size ?? ''} placeholder="–" onChange={(e) => patch(row.id, { pack_size: e.target.value === '' ? null : Number(e.target.value) })} className={`${CELL_INPUT_CLS} text-right`} />
                   </td>
                   <td className="px-2 py-1">
-                    <input aria-label="Inkoopeenheid" value={row.pack_unit ?? ''} placeholder="–" onChange={(e) => patch(row.id, { pack_unit: e.target.value || null })} onBlur={() => save(row.id)} className={CELL_INPUT_CLS} />
+                    <input aria-label="Inkoopeenheid" value={row.pack_unit ?? ''} placeholder="–" onChange={(e) => patch(row.id, { pack_unit: e.target.value || null })} className={CELL_INPUT_CLS} />
                   </td>
                   <td className="px-2 py-1 text-center">
                     <button
                       type="button"
-                      onClick={() => removeRow(row.id)}
+                      onClick={() => removeRow(row)}
                       aria-label={`Verwijder ${row.name || 'ingrediënt'}`}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-danger/10 hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-danger focus-visible:outline-offset-2"
                     >
@@ -149,7 +164,7 @@ export function IngredientEditor({ cocktailId }: { cocktailId: string }) {
         </div>
       )}
 
-      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+      {(error || saver.error) && <p role="alert" className="text-sm text-danger">{saver.error ?? error}</p>}
 
       <div>
         <button
@@ -161,6 +176,8 @@ export function IngredientEditor({ cocktailId }: { cocktailId: string }) {
           Ingrediënt toevoegen
         </button>
       </div>
+
+      <UndoToast pending={undo.pending} onUndo={() => { void undo.run(); }} onDismiss={undo.dismiss} />
     </div>
   );
 }

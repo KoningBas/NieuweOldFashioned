@@ -1,8 +1,10 @@
-import { useEffect, useId, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { supabase } from '../../shared/lib/supabase';
 import { AdminLayout } from '../layout/AdminLayout';
 import { SkeletonRows } from '../components/Skeleton';
 import { Field, Fieldset, INPUT_CLS } from '../components/Form';
+import { SaveBar } from '../components/SaveBar';
+import { SaveStatusProvider, useAutosave } from '../lib/saveState';
 import type { ServiceSettings as Settings } from '../../shared/types/db';
 
 /** Everything the form may write. `id` and `created_at` stay out of the update
@@ -21,41 +23,43 @@ type EditableKey = (typeof EDITABLE)[number];
 type InputKind = 'text' | 'email' | 'tel' | 'number';
 
 export function ServiceSettings() {
+  return (
+    <SaveStatusProvider>
+      <SettingsScreen />
+    </SaveStatusProvider>
+  );
+}
+
+function SettingsScreen() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { reset } = useAutosave({
+    key: 'instellingen',
+    value: settings,
+    enabled: settings !== null,
+    save: async (s) => {
+      if (!s) return null;
+      const patch = Object.fromEntries(EDITABLE.map((k) => [k, s[k]]));
+      const { error: err } = await supabase.from('service_settings').update(patch).eq('id', s.id);
+      if (!err) return null;
+      return err.message.includes('column')
+        ? 'De nieuwe kolommen bestaan nog niet. Voer migratie 0003_workflow_foundation.sql uit.'
+        : `Opslaan mislukt: ${err.message}`;
+    },
+  });
 
   useEffect(() => {
     supabase.from('service_settings').select('*').limit(1).single().then(({ data, error: err }) => {
       if (err) { setError('Instellingen konden niet geladen worden.'); setLoading(false); return; }
+      // Arriving data is not an edit; move the baseline with it or the page
+      // opens claiming unsaved changes.
+      reset(data);
       setSettings(data);
       setLoading(false);
     });
-  }, []);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!settings) return;
-    setSaving(true);
-    setError(null);
-
-    const patch = Object.fromEntries(EDITABLE.map((k) => [k, settings[k]]));
-    const { error: err } = await supabase.from('service_settings').update(patch).eq('id', settings.id);
-    setSaving(false);
-
-    if (err) {
-      setError(
-        err.message.includes('column')
-          ? 'Opslaan mislukt: de nieuwe kolommen bestaan nog niet. Voer migratie 0003_workflow_foundation.sql uit.'
-          : `Opslaan mislukt: ${err.message}`,
-      );
-      return;
-    }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  }
+  }, [reset]);
 
   function set(key: EditableKey, value: string | number) {
     setSettings((s) => (s ? { ...s, [key]: value } : s));
@@ -78,7 +82,7 @@ export function ServiceSettings() {
 
   return (
     <AdminLayout title="Instellingen">
-      <form onSubmit={handleSubmit} className="flex max-w-4xl flex-col gap-6 pb-4">
+      <div className="flex max-w-4xl flex-col gap-6 pb-4">
         <Fieldset legend="Bedrijfsgegevens" description="Deze regels staan bovenaan elke offerte en factuur.">
           <Input label="Bedrijfsnaam" value={s.business_name} onChange={(v) => set('business_name', v)} />
           <Input label="E-mailadres" kind="email" value={s.business_email} onChange={(v) => set('business_email', v)} />
@@ -115,20 +119,8 @@ export function ServiceSettings() {
           <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>
         )}
 
-        {/* The form is long; the save button follows you down it. */}
-        <div className="sticky bottom-0 flex items-center gap-4 rounded-xl border border-white/10 bg-surface-elevated/95 px-4 py-3 backdrop-blur">
-          <button
-            type="submit"
-            disabled={saving}
-            className="h-11 rounded-lg bg-gold px-6 text-[0.9375rem] font-medium text-surface transition-colors duration-200 hover:bg-gold-light disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
-          >
-            {saving ? 'Opslaan...' : 'Opslaan'}
-          </button>
-          <span role="status" className={`text-sm text-ok transition-opacity duration-200 ${saved ? 'opacity-100' : 'opacity-0'}`}>
-            Opgeslagen
-          </span>
-        </div>
-      </form>
+        <SaveBar />
+      </div>
     </AdminLayout>
   );
 }

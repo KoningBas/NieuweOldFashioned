@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../../shared/lib/supabase';
 import { logActivity } from '../../lib/activity';
 import { SkeletonBlock } from '../../components/Skeleton';
 import { CELL_INPUT_CLS } from '../../components/Form';
+import { UndoToast } from '../../components/UndoToast';
+import { useAutosave, useRowSaver } from '../../lib/saveState';
+import { useUndoable } from '../../lib/undo';
 import { IconPlus, IconPrinter, IconTrash } from '../../components/icons';
 import { formatDateNL, formatEuro, toDateOnly } from '../../../shared/lib/format';
 import { documentTotals, lineTotalIncl, round2 } from '../../../shared/lib/money';
@@ -31,6 +34,40 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
   const editable = quote?.status === 'draft';
   const totals = useMemo(() => documentTotals(lines), [lines]);
 
+  const linesRef = useRef(lines);
+  linesRef.current = lines;
+
+  const undo = useUndoable();
+
+  const saver = useRowSaver({
+    key: 'offerteregels',
+    save: async (id) => {
+      const line = linesRef.current.find((l) => l.id === id);
+      if (!line) return null;
+      const { error: err } = await supabase.from('quote_lines').update({
+        description: line.description,
+        quantity: line.quantity,
+        unit: line.unit,
+        unit_price_incl: line.unit_price_incl,
+      }).eq('id', id);
+      return err ? `Regel opslaan mislukt: ${err.message}` : null;
+    },
+  });
+
+  // The document total is derived, so it follows the lines rather than being
+  // written by whoever happened to edit last.
+  const { reset: resetTotal } = useAutosave({
+    key: 'offertetotaal',
+    value: totals.totalIncl,
+    enabled: Boolean(quote) && editable,
+    save: async (total) => {
+      if (!quote) return null;
+      setQuote((q) => (q ? { ...q, total_incl: total } : q));
+      const { error: err } = await supabase.from('quotes').update({ total_incl: total }).eq('id', quote.id);
+      return err ? `Totaal opslaan mislukt: ${err.message}` : null;
+    },
+  });
+
   useEffect(() => {
     let alive = true;
     async function load() {
@@ -44,19 +81,16 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
       if (q) {
         setQuote(q);
         const { data: l } = await supabase.from('quote_lines').select('*').eq('quote_id', q.id).order('sort_order');
-        if (alive) setLines(l ?? []);
+        if (alive) {
+          resetTotal(documentTotals(l ?? []).totalIncl);
+          setLines(l ?? []);
+        }
       }
       setLoading(false);
     }
     load();
     return () => { alive = false; };
-  }, [request.id]);
-
-  async function syncTotal(quoteId: string, nextLines: QuoteLine[]) {
-    const t = documentTotals(nextLines).totalIncl;
-    setQuote((q) => (q ? { ...q, total_incl: t } : q));
-    await supabase.from('quotes').update({ total_incl: t }).eq('id', quoteId);
-  }
+  }, [request.id, resetTotal]);
 
   async function createQuote() {
     setBusy(true);
@@ -101,20 +135,7 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
 
   function patchLine(id: string, patch: Partial<QuoteLine>) {
     setLines((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
-  }
-
-  async function saveLine(id: string) {
-    if (!quote) return;
-    const line = lines.find((l) => l.id === id);
-    if (!line) return;
-    const { error: err } = await supabase.from('quote_lines').update({
-      description: line.description,
-      quantity: line.quantity,
-      unit: line.unit,
-      unit_price_incl: line.unit_price_incl,
-    }).eq('id', id);
-    if (err) { console.error('Failed to save line', err); return; }
-    await syncTotal(quote.id, lines);
+    saver.touch(id);
   }
 
   async function addLine() {
@@ -128,13 +149,22 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
     setLines((prev) => [...prev, data]);
   }
 
-  async function removeLine(id: string) {
-    if (!quote) return;
-    const next = lines.filter((l) => l.id !== id);
-    setLines(next);
-    const { error: err } = await supabase.from('quote_lines').delete().eq('id', id);
-    if (err) { console.error('Failed to delete line', err); return; }
-    await syncTotal(quote.id, next);
+  async function removeLine(line: QuoteLine) {
+    saver.forget(line.id);
+    setLines((prev) => prev.filter((l) => l.id !== line.id));
+
+    const { error: err } = await supabase.from('quote_lines').delete().eq('id', line.id);
+    if (err) {
+      setError(`Regel verwijderen mislukt: ${err.message}`);
+      setLines((prev) => [...prev, line].sort((a, b) => a.sort_order - b.sort_order));
+      return;
+    }
+
+    undo.offer(`${line.description || 'Regel'} verwijderd`, async () => {
+      const { data, error: backErr } = await supabase.from('quote_lines').insert(line).select().single();
+      if (backErr || !data) { setError(`Terugzetten mislukt: ${backErr?.message ?? 'onbekende fout'}`); return; }
+      setLines((prev) => [...prev, data].sort((a, b) => a.sort_order - b.sort_order));
+    });
   }
 
   async function markSent() {
@@ -297,7 +327,7 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
                   <input
                     aria-label="Omschrijving" disabled={!editable} value={l.description}
                     onChange={(e) => patchLine(l.id, { description: e.target.value })}
-                    onBlur={() => saveLine(l.id)} placeholder="Omschrijving…"
+                    placeholder="Omschrijving…"
                     className={inputCls}
                   />
                 </td>
@@ -305,7 +335,6 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
                   <input
                     aria-label="Aantal" type="number" min="0" step="1" disabled={!editable} value={l.quantity}
                     onChange={(e) => patchLine(l.id, { quantity: Number(e.target.value) })}
-                    onBlur={() => saveLine(l.id)}
                     className={`${inputCls} text-right`}
                   />
                 </td>
@@ -313,7 +342,6 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
                   <input
                     aria-label="Eenheid" disabled={!editable} value={l.unit}
                     onChange={(e) => patchLine(l.id, { unit: e.target.value })}
-                    onBlur={() => saveLine(l.id)}
                     className={inputCls}
                   />
                 </td>
@@ -321,7 +349,6 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
                   <input
                     aria-label="Prijs per stuk inclusief btw" type="number" min="0" step="0.01" disabled={!editable} value={l.unit_price_incl}
                     onChange={(e) => patchLine(l.id, { unit_price_incl: Number(e.target.value) })}
-                    onBlur={() => saveLine(l.id)}
                     className={`${inputCls} text-right`}
                   />
                 </td>
@@ -329,7 +356,7 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
                 {editable && (
                   <td className="px-2 py-1.5 text-center">
                     <button
-                      onClick={() => removeLine(l.id)}
+                      onClick={() => removeLine(l)}
                       aria-label={`Verwijder regel ${l.description || 'zonder omschrijving'}`}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-danger/10 hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-danger focus-visible:outline-offset-2"
                     >
@@ -370,6 +397,10 @@ export function QuoteTab({ request, packageName, onLogged, onStatusChanged }: Pr
           </div>
         </dl>
       </div>
+
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+
+      <UndoToast pending={undo.pending} onUndo={() => { void undo.run(); }} onDismiss={undo.dismiss} />
     </div>
   );
 }

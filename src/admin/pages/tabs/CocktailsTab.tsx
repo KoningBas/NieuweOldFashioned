@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../../shared/lib/supabase';
 import { SkeletonBlock } from '../../components/Skeleton';
+import { useAutosave } from '../../lib/saveState';
 import { aggregateIngredients, CATEGORY_LABELS, CATEGORY_ORDER } from '../../../shared/lib/packing';
 import type {
   CocktailIngredient, CocktailMenuItem, PackingCategory, QuoteRequest,
@@ -23,7 +24,35 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
   const [planned, setPlanned] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // The whole choice is one value: rows are replaced wholesale, so there is no
+  // per-row write to schedule.
+  const { reset } = useAutosave({
+    key: 'cocktailkeuze',
+    value: planned,
+    enabled: !loading && !unavailable,
+    save: async (next) => {
+      const rows = Object.entries(next)
+        .filter(([, n]) => n > 0)
+        .map(([cocktail_id, planned_count]) => ({ request_id: request.id, cocktail_id, planned_count }));
+      const stampedAt = new Date().toISOString();
+
+      const { error: delErr } = await supabase.from('request_cocktails').delete().eq('request_id', request.id);
+      if (delErr) return `Opslaan mislukt: ${delErr.message}`;
+      if (rows.length) {
+        const { error: insErr } = await supabase.from('request_cocktails').insert(rows);
+        if (insErr) return `Opslaan mislukt: ${insErr.message}`;
+      }
+
+      // The choice itself is saved by now. A failing stamp only costs the
+      // "packing list is behind" warning, so it must not read as a lost edit.
+      const { error: stampErr } = await supabase
+        .from('quote_requests').update({ cocktails_updated_at: stampedAt }).eq('id', request.id);
+      if (stampErr) console.error('Failed to stamp request (run migration 0008)', stampErr);
+      else onCocktailsChanged(stampedAt);
+      return null;
+    },
+  });
 
   useEffect(() => {
     let alive = true;
@@ -36,8 +65,10 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
       if (chosenRes.error) { setUnavailable(true); setLoading(false); return; }
 
       const menu = menuRes.data ?? [];
+      const chosenCounts = Object.fromEntries((chosenRes.data ?? []).map((rc) => [rc.cocktail_id, rc.planned_count]));
       setCocktails(menu);
-      setPlanned(Object.fromEntries((chosenRes.data ?? []).map((rc) => [rc.cocktail_id, rc.planned_count])));
+      reset(chosenCounts);
+      setPlanned(chosenCounts);
 
       if (menu.length) {
         const { data: ing } = await supabase
@@ -48,7 +79,7 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
     }
     load();
     return () => { alive = false; };
-  }, [request.id]);
+  }, [request.id, reset]);
 
   const chosen = useMemo(
     () => Object.entries(planned).filter(([, n]) => n > 0).map(([cocktail_id, planned_count]) => ({ cocktail_id, planned_count })),
@@ -65,29 +96,6 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
     [shopping],
   );
 
-  async function save(next: Record<string, number>) {
-    setSaveState('saving');
-    const rows = Object.entries(next)
-      .filter(([, n]) => n > 0)
-      .map(([cocktail_id, planned_count]) => ({ request_id: request.id, cocktail_id, planned_count }));
-    const stampedAt = new Date().toISOString();
-
-    const { error: delErr } = await supabase.from('request_cocktails').delete().eq('request_id', request.id);
-    if (delErr) { console.error('Failed to clear cocktails', delErr); setSaveState('error'); return; }
-    if (rows.length) {
-      const { error: insErr } = await supabase.from('request_cocktails').insert(rows);
-      if (insErr) { console.error('Failed to save cocktails', insErr); setSaveState('error'); return; }
-    }
-    // The choice itself is saved by now. A failing stamp only costs the
-    // "packing list is behind" warning, so it must not read as a lost edit.
-    const { error: stampErr } = await supabase
-      .from('quote_requests').update({ cocktails_updated_at: stampedAt }).eq('id', request.id);
-    if (stampErr) console.error('Failed to stamp request (run migration 0008)', stampErr);
-    else onCocktailsChanged(stampedAt);
-    setSaveState('saved');
-    setTimeout(() => setSaveState((s) => (s === 'saved' ? 'idle' : s)), 2000);
-  }
-
   function setCount(id: string, value: number) {
     setPlanned((prev) => ({ ...prev, [id]: Math.max(0, Math.round(value)) }));
   }
@@ -103,7 +111,6 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
     for (const id of targets) next[id] = 0;
     targets.forEach((id, index) => { next[id] = each + (index < remainder ? 1 : 0); });
     setPlanned(next);
-    void save(next);
   }
 
   if (loading) return <SkeletonBlock className="h-64" />;
@@ -119,12 +126,7 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
   return (
     <div className="flex flex-col gap-5">
       <section aria-labelledby="cocktail-keuze" className="rounded-xl border border-white/5 bg-surface-elevated p-6">
-        <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id="cocktail-keuze" className="text-lg font-medium text-white">Welke cocktails schenk je?</h2>
-          <span aria-live="polite" className={`text-sm transition-opacity duration-200 ${saveState === 'idle' ? 'opacity-0' : 'opacity-100'} ${saveState === 'error' ? 'text-danger' : 'text-ok'}`}>
-            {saveState === 'saving' ? 'Opslaan…' : saveState === 'error' ? 'Opslaan mislukt' : 'Opgeslagen'}
-          </span>
-        </div>
+        <h2 id="cocktail-keuze" className="mb-5 text-lg font-medium text-white">Welke cocktails schenk je?</h2>
         <p className="mb-5 max-w-prose text-sm leading-relaxed text-muted">
           Deze aanvraag gaat over {request.cocktail_count} cocktails voor {request.guest_count} gasten.
           Verdeel dat aantal over de kaart; de boodschappenlijst hieronder rekent live mee.
@@ -150,7 +152,6 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
                     value={planned[c.id] ?? ''}
                     placeholder="0"
                     onChange={(e) => setCount(c.id, e.target.value === '' ? 0 : Number(e.target.value))}
-                    onBlur={() => save(planned)}
                     className={`h-11 w-24 rounded-lg border bg-surface px-3 text-right text-[0.9375rem] text-white transition-colors duration-150 focus:border-gold/50 focus:outline-none ${
                       count > 0 ? 'border-gold/40' : 'border-white/10'
                     }`}

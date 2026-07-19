@@ -82,6 +82,37 @@
     }
     .font-heading { font-family: 'Bodoni Moda', Georgia, serif; }
 
+    /* The save bar follows the page down. On phones it has to clear the tab bar
+       and the gesture area; from md up that bar is gone. Kept in CSS because
+       env() inside a Tailwind arbitrary value is not worth the gamble. */
+    .save-bar {
+      position: sticky;
+      bottom: calc(3.5rem + env(safe-area-inset-bottom) + 0.5rem);
+      z-index: 30;
+    }
+    @media (min-width: 768px) {
+      .save-bar { bottom: 1rem; }
+    }
+
+    /* Backdrop for the confirm dialog; ::backdrop cannot be reached from a
+       Tailwind class. */
+    dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+
+    /* Undo toast: clears the tab bar the same way the save bar does, and stays
+       out of the way of the save button on the right. */
+    .undo-toast {
+      position: fixed;
+      left: 1rem;
+      right: 1rem;
+      bottom: calc(3.5rem + env(safe-area-inset-bottom) + 0.5rem);
+      z-index: 45;
+      display: flex;
+      justify-content: center;
+    }
+    @media (min-width: 768px) {
+      .undo-toast { left: 16rem; right: auto; bottom: 1rem; justify-content: flex-start; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;

@@ -9,6 +9,8 @@ import { QuoteTab } from './tabs/QuoteTab';
 import { CocktailsTab } from './tabs/CocktailsTab';
 import { PackingTab } from './tabs/PackingTab';
 import { InvoiceTab } from './tabs/InvoiceTab';
+import { SaveBar } from '../components/SaveBar';
+import { SaveStatusProvider, useAutosave } from '../lib/saveState';
 import { formatDateLongNL, formatEuro } from '../../shared/lib/format';
 import { normalizeStatus } from '../../shared/lib/workflow';
 import { IconMail, IconMapPin, IconPhone, IconUsers } from '../components/icons';
@@ -24,6 +26,14 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 export function RequestDetail() {
+  return (
+    <SaveStatusProvider>
+      <RequestDetailScreen />
+    </SaveStatusProvider>
+  );
+}
+
+function RequestDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get('tab');
@@ -34,7 +44,20 @@ export function RequestDetail() {
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   const [notes, setNotes] = useState('');
-  const [notesSaved, setNotesSaved] = useState(false);
+
+  const { reset: resetNotes } = useAutosave({
+    key: 'notitie',
+    value: notes,
+    enabled: request !== null,
+    save: async (text) => {
+      if (!request) return null;
+      const value = text || null;
+      const { error } = await supabase.from('quote_requests').update({ internal_notes: value }).eq('id', request.id);
+      if (error) return `Notitie opslaan mislukt: ${error.message}`;
+      setRequest((r) => (r ? { ...r, internal_notes: value } : r));
+      return null;
+    },
+  });
 
   useEffect(() => {
     if (!id) return;
@@ -44,6 +67,7 @@ export function RequestDetail() {
       if (!alive) return;
       if (error || !data) { setLoading(false); return; }
       setRequest(data);
+      resetNotes(data.internal_notes ?? '');
       setNotes(data.internal_notes ?? '');
       setLoading(false);
       const { data: pkg } = await supabase.from('service_packages').select('package_name').eq('id', data.package_id).maybeSingle();
@@ -51,16 +75,7 @@ export function RequestDetail() {
     }
     load();
     return () => { alive = false; };
-  }, [id]);
-
-  async function saveNotes() {
-    if (!request || notes === (request.internal_notes ?? '')) return;
-    const { error } = await supabase.from('quote_requests').update({ internal_notes: notes || null }).eq('id', request.id);
-    if (error) { console.error('Failed to save notes', error); return; }
-    setRequest({ ...request, internal_notes: notes || null });
-    setNotesSaved(true);
-    setTimeout(() => setNotesSaved(false), 2000);
-  }
+  }, [id, resetNotes]);
 
   function selectTab(next: TabId) {
     // replace: switching tabs should not pile up history — back returns to the list.
@@ -133,15 +148,13 @@ export function RequestDetail() {
         )}
 
         <div className="mt-5">
-          <label htmlFor="internal-notes" className="mb-1.5 flex items-center gap-2 text-sm text-muted">
+          <label htmlFor="internal-notes" className="mb-1.5 block text-sm text-muted">
             Interne notitie
-            <span aria-live="polite" className={`text-ok transition-opacity duration-200 ${notesSaved ? 'opacity-100' : 'opacity-0'}`}>Opgeslagen</span>
           </label>
           <textarea
             id="internal-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            onBlur={saveNotes}
             rows={2}
             placeholder="Alleen voor jou zichtbaar…"
             className="w-full rounded-lg border border-white/10 bg-surface px-3 py-2.5 text-[0.9375rem] text-white placeholder:text-muted transition-colors focus:border-gold/50 focus:outline-none"
@@ -179,6 +192,8 @@ export function RequestDetail() {
       {tab === 'cocktails' && <CocktailsTab request={request} onCocktailsChanged={(stampedAt) => setRequest({ ...request, cocktails_updated_at: stampedAt })} />}
       {tab === 'paklijst' && <PackingTab request={request} />}
       {tab === 'factuur' && invoiceReady && <InvoiceTab request={request} onLogged={() => setReloadKey((k) => k + 1)} onStatusChanged={(s) => setRequest({ ...request, status: s })} />}
+
+      <SaveBar />
     </AdminLayout>
   );
 }

@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../shared/lib/supabase';
 import { AdminLayout } from '../layout/AdminLayout';
+import { SaveBar } from '../components/SaveBar';
+import { SaveStatusProvider, useRowSaver } from '../lib/saveState';
 import type { Availability as AvailabilityRow } from '../../shared/types/db';
 
 const WEEKDAY_LABELS = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
@@ -8,23 +10,45 @@ const WEEKDAY_LABELS = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag',
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export function Availability() {
+  return (
+    <SaveStatusProvider>
+      <AvailabilityScreen />
+    </SaveStatusProvider>
+  );
+}
+
+function AvailabilityScreen() {
   const [rows, setRows] = useState<AvailabilityRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+
+  const saver = useRowSaver({
+    key: 'openingstijden',
+    save: async (id) => {
+      const row = rowsRef.current.find((r) => r.id === id);
+      if (!row) return null;
+      const { error: err } = await supabase.from('availability').update({
+        is_available: row.is_available, start_time: row.start_time, end_time: row.end_time,
+      }).eq('id', row.id);
+      return err ? `Opslaan mislukt: ${err.message}` : null;
+    },
+  });
 
   async function load() {
-    const { data, error } = await supabase.from('availability').select('*').order('weekday', { ascending: true });
-    if (error) { console.error('Failed to load availability', error); setLoading(false); return; }
+    const { data, error: err } = await supabase.from('availability').select('*').order('weekday', { ascending: true });
+    if (err) { setError('Openingstijden konden niet geladen worden.'); setLoading(false); return; }
     setRows(data ?? []);
     setLoading(false);
   }
 
   useEffect(() => { load(); }, []);
 
-  async function update(row: AvailabilityRow, patch: Partial<AvailabilityRow>) {
-    const previous = rows;
+  function update(row: AvailabilityRow, patch: Partial<AvailabilityRow>) {
     setRows((current) => current.map((r) => (r.id === row.id ? { ...r, ...patch } : r)));
-    const { error } = await supabase.from('availability').update(patch).eq('id', row.id);
-    if (error) { console.error('Failed to update availability', error); setRows(previous); }
+    saver.touch(row.id);
   }
 
   const ordered = DISPLAY_ORDER
@@ -37,6 +61,10 @@ export function Availability() {
         Zet dagen open of gesloten en stel per open dag de starttijd in. Wijzigingen zijn direct
         zichtbaar op de website.
       </p>
+
+      {error && (
+        <p role="alert" className="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>
+      )}
 
       {loading ? (
         <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted text-lg">Laden...</div>
@@ -79,6 +107,10 @@ export function Availability() {
           })}
         </div>
       )}
+
+      <div className="max-w-3xl">
+        <SaveBar />
+      </div>
     </AdminLayout>
   );
 }

@@ -106,6 +106,17 @@ const REQUEST = {
   cocktails_updated_at: flags.has('--stale') ? '2026-07-18T14:00:00Z' : '2026-07-14T08:00:00Z',
 };
 
+const QUOTE = {
+  id: 'q-1', request_id: 'req-1', quote_number: '2026-0042', version: 1, status: 'draft',
+  valid_until: '2026-08-15', total_incl: 1645, sent_at: null, accepted_at: null,
+  created_at: '2026-07-02T09:00:00Z',
+};
+
+const QUOTE_LINES = [
+  { id: 'ql-1', quote_id: 'q-1', description: 'Bartending op Locatie', quantity: 200, unit: 'cocktail', unit_price_incl: 8, vat_rate: 21, sort_order: 0 },
+  { id: 'ql-2', quote_id: 'q-1', description: 'Voorrijkosten Rijssen', quantity: 1, unit: 'rit', unit_price_incl: 45, vat_rate: 21, sort_order: 1 },
+];
+
 const REQUEST_COCKTAILS = [
   { id: 'rc-1', request_id: 'req-1', cocktail_id: 'ck-1', planned_count: 80, cocktail_menu: { name: 'The Old Fashioned' } },
   { id: 'rc-2', request_id: 'req-1', cocktail_id: 'ck-2', planned_count: 60, cocktail_menu: { name: 'Smoked Negroni' } },
@@ -135,9 +146,20 @@ const PACKING_LIST_ITEMS = [
 }));
 
 /** Table name -> rows. Anything unlisted answers with an empty set. */
+// Monday-Thursday closed, Friday-Sunday open: enough variety to show both row
+// states on the Openingstijden screen.
+const AVAILABILITY = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
+  id: `av-${weekday}`,
+  weekday,
+  is_available: weekday === 0 || weekday >= 5,
+  start_time: weekday === 0 ? '14:00:00' : '16:00:00',
+  end_time: weekday === 0 ? '22:00:00' : '01:00:00',
+}));
+
 const TABLES = {
   admin_users: [{ id: 'adm-1', user_id: USER_ID, created_at: '2026-01-01T00:00:00Z' }],
   service_settings: [SETTINGS],
+  availability: AVAILABILITY,
   service_packages: PACKAGES,
   cocktail_menu: COCKTAILS,
   cocktail_ingredients: INGREDIENTS,
@@ -147,6 +169,8 @@ const TABLES = {
   // The fixture responder ignores filters, so pick the set the screen expects.
   packing_template_items: tabFlag === 'Basisuitrusting' ? BASE_TEMPLATE_ITEMS : TEMPLATE_ITEMS,
   quote_requests: [REQUEST],
+  quotes: [QUOTE],
+  quote_lines: QUOTE_LINES,
   request_cocktails: REQUEST_COCKTAILS,
   packing_lists: flags.has('--no-list') ? [] : [PACKING_LIST],
   packing_list_items: flags.has('--no-list') ? [] : PACKING_LIST_ITEMS,
@@ -261,6 +285,34 @@ if (expand) {
   });
   if (!opened) throw new Error('Geen uitklapknop gevonden in de contentkolom');
   await new Promise((r) => setTimeout(r, 900));
+}
+
+if (flags.has('--delete-first')) {
+  const clicked = await page.evaluate(() => {
+    const scope = document.querySelector('main') ?? document.body;
+    const button = [...scope.querySelectorAll('button[aria-label]')]
+      .find((b) => b.getAttribute('aria-label').startsWith('Verwijder'));
+    if (!button) return false;
+    button.click();
+    return true;
+  });
+  if (!clicked) throw new Error('Geen verwijderknop gevonden in de contentkolom');
+  await new Promise((r) => setTimeout(r, 700));
+}
+
+if (flags.has('--dirty')) {
+  // Type into the first editable field and shoot before the ~800ms autosave
+  // fires, so the save bar is caught mid-edit rather than at rest.
+  const typed = await page.evaluate(() => {
+    const scope = document.querySelector('main') ?? document.body;
+    const field = scope.querySelector('input[type="text"], input:not([type]), textarea');
+    if (!field) return false;
+    field.focus();
+    return true;
+  });
+  if (!typed) throw new Error('Geen invoerveld gevonden om in te typen');
+  await page.keyboard.type(' bewerkt');
+  await new Promise((r) => setTimeout(r, 250));
 }
 
 const out = path.join(PROJECT, 'temporary screenshots', `admin-${label}-${theme}.png`);

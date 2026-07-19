@@ -4,6 +4,8 @@ import { supabase } from '../../shared/lib/supabase';
 import { AdminLayout } from '../layout/AdminLayout';
 import { PackingTemplateEditor } from '../components/PackingTemplateEditor';
 import { SkeletonRows } from '../components/Skeleton';
+import { SaveBar } from '../components/SaveBar';
+import { SaveStatusProvider } from '../lib/saveState';
 import { IconChevronRight } from '../components/icons';
 import { formatDateNL, toDateOnly } from '../../shared/lib/format';
 import { normalizeStatus } from '../../shared/lib/workflow';
@@ -105,9 +107,12 @@ export function PackingLists() {
       </div>
 
       {pane === 'basis' ? (
-        <section aria-label="Basisuitrusting" className="rounded-xl border border-white/5 bg-surface-elevated p-5 sm:p-6">
-          <PackingTemplateEditor packageId={null} packageName="Basisuitrusting op locatie" />
-        </section>
+        <SaveStatusProvider>
+          <section aria-label="Basisuitrusting" className="rounded-xl border border-white/5 bg-surface-elevated p-5 sm:p-6">
+            <PackingTemplateEditor packageId={null} packageName="Basisuitrusting op locatie" />
+          </section>
+          <SaveBar />
+        </SaveStatusProvider>
       ) : loading ? (
         <SkeletonRows rows={3} height="h-20" />
       ) : unavailable ? (
