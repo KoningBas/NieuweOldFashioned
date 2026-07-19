@@ -10,8 +10,10 @@ import {
   foutenVanStap,
   maakContext,
   normaliseerTijd,
+  bouwQuoteRequest,
   valideerReservering,
   type ReserveringForm,
+  type WorkshopPakket,
 } from './reservering';
 
 // A Saturday well past any notice window, used as the happy-path date throughout.
@@ -315,5 +317,68 @@ describe('mailto', () => {
     // A raw '&' would end the body parameter and silently truncate the mail.
     expect(href).toContain('%26');
     expect(href).not.toMatch(/body=[^&]*&(?!$)/);
+  });
+});
+
+describe('bouwQuoteRequest', () => {
+  const pakketten: WorkshopPakket[] = [
+    { id: 'pkg-bites', package_name: 'Workshop in de Bar (Bites)', price: 32 },
+    { id: 'pkg-street', package_name: 'Workshop in de Bar (Streetfood)', price: 42 },
+    { id: 'pkg-locatie', package_name: 'Workshop op Locatie', price: 32 },
+  ];
+
+  it('maps a bar reservation onto the chosen arrangement package', () => {
+    const req = bouwQuoteRequest(form({ personen: '6', arrangement: 'Bites' }), pakketten);
+    expect(req).not.toBeNull();
+    expect(req).toMatchObject({
+      full_name: 'Jan Jansen',
+      email: 'jan@example.com',
+      package_id: 'pkg-bites',
+      source: 'workshop_bar',
+      arrangement: 'Bites',
+      guest_count: 6,
+      estimated_total: 192, // 6 x 32
+      event_city: 'Rijssen',
+      event_address: '',
+    });
+  });
+
+  it('prices Streetfood from its own package', () => {
+    const req = bouwQuoteRequest(form({ personen: '10', arrangement: 'Streetfood' }), pakketten);
+    expect(req?.package_id).toBe('pkg-street');
+    expect(req?.estimated_total).toBe(420); // 10 x 42
+  });
+
+  it('maps an on-location reservation with address and its own source', () => {
+    const req = bouwQuoteRequest(
+      form({ waar: 'locatie', personen: '20', arrangement: null, plaats: 'Rijssen', adres: 'Grotestraat 12' }),
+      pakketten,
+    );
+    expect(req).toMatchObject({
+      package_id: 'pkg-locatie',
+      source: 'wizard_workshop_locatie',
+      arrangement: null,
+      event_city: 'Rijssen',
+      event_address: 'Grotestraat 12',
+      estimated_total: 640, // 20 x 32
+    });
+  });
+
+  it('counts two cocktails per guest, because that is what a workshop makes', () => {
+    expect(bouwQuoteRequest(form({ personen: '8' }), pakketten)?.cocktail_count).toBe(16);
+  });
+
+  it('normalises a loosely typed time', () => {
+    expect(bouwQuoteRequest(form({ tijd: '19u30' }), pakketten)?.event_time).toBe('19:30');
+  });
+
+  it('keeps an empty message out of special_requests', () => {
+    expect(bouwQuoteRequest(form({ bericht: '  ' }), pakketten)?.special_requests).toBeNull();
+    expect(bouwQuoteRequest(form({ bericht: 'Geen noten' }), pakketten)?.special_requests).toBe('Geen noten');
+  });
+
+  it('returns null when the matching package is missing, so the caller can fall back to mail', () => {
+    expect(bouwQuoteRequest(form({ arrangement: 'Bites' }), [])).toBeNull();
+    expect(bouwQuoteRequest(form({ waar: 'locatie', arrangement: null }), [pakketten[0]])).toBeNull();
   });
 });

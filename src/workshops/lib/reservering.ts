@@ -1,5 +1,6 @@
 import type { Availability, BlockedDate, ServiceSettings } from '../../shared/types/db';
 import type { AvailabilityContext, ConfirmedRequestLike } from '../../shared/lib/availability';
+import type { NewQuoteRequest } from '../../shared/lib/data';
 import { isDateSelectable } from '../../shared/lib/availability';
 import { formatDateLongNL, parseDateOnly } from '../../shared/lib/format';
 
@@ -303,4 +304,78 @@ export function bouwMailtoHref(form: ReserveringForm): string {
   const onderwerp = encodeURIComponent(bouwOnderwerp(form));
   const bericht = encodeURIComponent(bouwBericht(form));
   return `mailto:${RESERVERING_EMAIL}?subject=${onderwerp}&body=${bericht}`;
+}
+
+// --- Reservering naar de adminstroom ---------------------------------------
+// A reservation lands in `quote_requests` like every other lead, so the admin
+// panel can quote, plan and invoice it. The mail to the bar stays: it is the
+// notification, the database row is the record.
+
+/** The subset of `service_packages` this mapping needs. */
+export interface WorkshopPakket {
+  id: string;
+  package_name: string;
+  price: number;
+}
+
+/** Package names as seeded by migrations 0001 and 0006. */
+export const PAKKET_NAAM: { bar: Record<Arrangement, string>; locatie: string } = {
+  bar: {
+    Bites: 'Workshop in de Bar (Bites)',
+    Streetfood: 'Workshop in de Bar (Streetfood)',
+  },
+  locatie: 'Workshop op Locatie',
+};
+
+/** The bar is in Rijssen; a bar reservation has no address of its own. */
+const BAR_PLAATS = 'Rijssen';
+
+/** A workshop makes two cocktails per guest — the number the packing list scales on. */
+const COCKTAILS_PER_GAST = 2;
+
+export function kiesPakket(form: ReserveringForm, pakketten: WorkshopPakket[]): WorkshopPakket | null {
+  const naam =
+    form.waar === 'bar'
+      ? (form.arrangement === null ? null : PAKKET_NAAM.bar[form.arrangement])
+      : PAKKET_NAAM.locatie;
+  if (naam === null) return null;
+  return pakketten.find((p) => p.package_name === naam) ?? null;
+}
+
+/**
+ * Turn a filled-in reservation into a quote request row. Returns null when the
+ * matching package is missing from the database — the caller then falls back to
+ * the mail alone rather than inventing a package_id.
+ */
+export function bouwQuoteRequest(
+  form: ReserveringForm,
+  pakketten: WorkshopPakket[],
+): NewQuoteRequest | null {
+  const pakket = kiesPakket(form, pakketten);
+  if (pakket === null) return null;
+
+  const personen = Number(form.personen);
+  const bericht = form.bericht.trim();
+  const opLocatie = form.waar === 'locatie';
+
+  return {
+    full_name: form.naam.trim(),
+    email: form.email.trim(),
+    phone: form.telefoon.trim(),
+    event_type: opLocatie ? 'Workshop op locatie' : 'Workshop in de bar',
+    guest_count: personen,
+    cocktail_count: personen * COCKTAILS_PER_GAST,
+    package_id: pakket.id,
+    event_date: form.datum,
+    event_time: normaliseerTijd(form.tijd),
+    event_city: opLocatie ? form.plaats.trim() : BAR_PLAATS,
+    // The form never asks for these two; the wizard on the locatie page does.
+    event_postcode: '',
+    distance_km: 0,
+    estimated_total: personen * pakket.price,
+    special_requests: bericht === '' ? null : bericht,
+    source: opLocatie ? 'wizard_workshop_locatie' : 'workshop_bar',
+    event_address: opLocatie ? form.adres.trim() : '',
+    arrangement: opLocatie ? null : form.arrangement,
+  };
 }

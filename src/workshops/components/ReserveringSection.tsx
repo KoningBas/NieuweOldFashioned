@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Calendar } from '../../shared/components/Calendar';
-import { fetchAvailabilityContext, fetchServiceSettings } from '../../shared/lib/data';
+import {
+  fetchAvailabilityContext, fetchServiceSettings, fetchWorkshopPackages, submitQuoteRequest,
+} from '../../shared/lib/data';
 import type { AvailabilityContext } from '../../shared/lib/availability';
 import { formatDateLongNL } from '../../shared/lib/format';
 import {
@@ -12,6 +14,7 @@ import {
   barTijdvenster,
   bouwBericht,
   bouwMailtoHref,
+  bouwQuoteRequest,
   foutenVanStap,
   maakContext,
   normaliseerTijd,
@@ -19,6 +22,7 @@ import {
   type Arrangement,
   type ReserveringForm,
   type Stap,
+  type WorkshopPakket,
 } from '../lib/reservering';
 
 const veldClass =
@@ -38,14 +42,24 @@ export function ReserveringSection() {
   const [ctx, setCtx] = useState<AvailabilityContext | null>(null);
   const [laadt, setLaadt] = useState(true);
   const [verstuurd, setVerstuurd] = useState(false);
+  const [bezig, setBezig] = useState(false);
   const [gekopieerd, setGekopieerd] = useState(false);
+  const [pakketten, setPakketten] = useState<WorkshopPakket[]>([]);
   const kopieerTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     let afgebroken = false;
-    Promise.all([fetchAvailabilityContext(), fetchServiceSettings().catch(() => null)])
-      .then(([data, settings]) => {
-        if (!afgebroken) setCtx(maakContext(data, settings));
+    Promise.all([
+      fetchAvailabilityContext(),
+      fetchServiceSettings().catch(() => null),
+      // Missing packages only cost us the admin record, not the reservation
+      // itself, so this one never blocks the form.
+      fetchWorkshopPackages().catch(() => []),
+    ])
+      .then(([data, settings, packages]) => {
+        if (afgebroken) return;
+        setCtx(maakContext(data, settings));
+        setPakketten(packages);
       })
       .catch((err) => {
         // Leave ctx null: the form falls back to "any day, three days out" so a
@@ -90,10 +104,25 @@ export function ReserveringSection() {
     return aangeraakt.has(veld) ? fouten[veld] : undefined;
   }
 
-  function verstuur() {
-    if (!stapCompleet || stap !== 2) return;
+  /** The row in the admin panel is the record, the mail is the notification.
+   *  A failed insert must never cost the guest their reservation, so the mail
+   *  opens either way. */
+  async function verstuur() {
+    if (!stapCompleet || stap !== 2 || bezig) return;
+    setBezig(true);
+
+    const aanvraag = bouwQuoteRequest(form, pakketten);
+    if (aanvraag !== null) {
+      try {
+        await submitQuoteRequest(aanvraag);
+      } catch (err) {
+        console.error('Reservering opslaan mislukt, mail blijft over', err);
+      }
+    }
+
     window.location.href = bouwMailtoHref(form);
     setVerstuurd(true);
+    setBezig(false);
   }
 
   async function kopieer() {
@@ -344,8 +373,13 @@ export function ReserveringSection() {
                       </button>
                     }
                     rechts={
-                      <button type="button" disabled={!stapCompleet} onClick={verstuur} className={primairKnopClass}>
-                        Verstuur aanvraag
+                      <button
+                        type="button"
+                        disabled={!stapCompleet || bezig}
+                        onClick={verstuur}
+                        className={primairKnopClass}
+                      >
+                        {bezig ? 'Bezig...' : 'Verstuur aanvraag'}
                       </button>
                     }
                   />
