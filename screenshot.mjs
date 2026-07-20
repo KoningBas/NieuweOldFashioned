@@ -21,7 +21,8 @@ const filename = label ? `screenshot-${next}-${label}.png` : `screenshot-${next}
 const outPath = path.join(screenshotDir, filename);
 
 const browser = await puppeteer.launch({
-  executablePath: 'C:/Users/jbfok/.cache/puppeteer/chrome/win64-131.0.6778.204/chrome-win64/chrome.exe',
+  // Laat puppeteer zelf de gedownloade Chrome vinden; CHROME_PATH overschrijft dat.
+  ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
   args: ['--no-sandbox', '--disable-setuid-sandbox'],
 });
 

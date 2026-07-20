@@ -1,14 +1,15 @@
 import puppeteer from 'puppeteer';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const outDir = 'C:/Users/jbfok/Desktop/NieuweOld/temporary screenshots';
+const outDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'temporary screenshots');
 const url = process.argv[2];
 const selector = process.argv[3];
 const label = process.argv[4];
 const width = parseInt(process.argv[5]) || 1440;
 
 const browser = await puppeteer.launch({
-  executablePath: 'C:/Users/jbfok/.cache/puppeteer/chrome/win64-131.0.6778.204/chrome-win64/chrome.exe',
+  ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
   args: ['--no-sandbox', '--disable-setuid-sandbox'],
 });
 const page = await browser.newPage();
