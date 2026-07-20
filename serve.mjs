@@ -1,9 +1,15 @@
 import { createServer } from 'vite';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { execFileSync } from 'child_process';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
+
+execFileSync(process.execPath, [path.join(root, 'scripts/check-env.mjs')], {
+  cwd: root,
+  stdio: 'inherit',
+});
 
 // locatie/ and admin/ are Vite apps whose entry is a .tsx module. A plain static
 // file server hands the browser raw TSX with the wrong MIME type, the module is

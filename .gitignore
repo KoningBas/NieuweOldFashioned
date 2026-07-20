@@ -5,3 +5,5 @@ screenshot-section.mjs
 memory/
 .env.local
 dist/
+_devserver.log
+_devserver.err.log
