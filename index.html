@@ -430,7 +430,9 @@
     <!-- Text overlay -->
     <div class="pointer-events-none absolute inset-0 flex max-w-4xl mx-auto flex-col gap-4 px-6 sm:px-8 items-center text-center justify-end lg:justify-center pt-32 lg:pt-0 pb-16 lg:pb-0 z-30">
       <p class="font-body text-sm sm:text-base text-gold-light uppercase tracking-[0.28em]" style="text-shadow: 0 1px 12px rgba(0,0,0,0.95), 0 4px 24px rgba(0,0,0,0.7);">Cocktailbar Rijssen</p>
-      <h1 class="font-heading text-5xl sm:text-6xl lg:text-7xl leading-tight text-white text-balance" style="letter-spacing: -0.02em; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 8px 48px rgba(0,0,0,0.85), 0 20px 80px rgba(0,0,0,0.6);">
+      <!-- font-optical-sizing:none houdt Bodoni Moda op zijn standaard opsz, zoals /workshops/.
+           Zonder dit schaalt de browser op deze grootte naar de display-snit met haarlijndunne schreven. -->
+      <h1 class="font-heading text-5xl sm:text-6xl lg:text-7xl leading-tight text-white text-balance" style="letter-spacing: -0.02em; font-optical-sizing: none; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 8px 48px rgba(0,0,0,0.85), 0 20px 80px rgba(0,0,0,0.6);">
         The Old Fashioned
       </h1>
       <p class="font-body text-base sm:text-lg leading-relaxed mt-1 max-w-xl text-balance" style="color: rgba(255,255,255,0.92); text-shadow: 0 1px 8px rgba(0,0,0,0.95), 0 4px 24px rgba(0,0,0,0.75), 0 12px 48px rgba(0,0,0,0.5);">
@@ -545,7 +547,7 @@
         <h2 class="font-heading text-3xl md:text-5xl tracking-[-0.02em] mb-4 md:mb-6 text-balance md:[text-wrap:normal]">Workshops in de Bar</h2>
 
         <p class="font-body text-prose text-base leading-[1.6] md:text-xl md:leading-[1.7] mb-4 md:mb-5 text-pretty">
-          Je staat achter onze bar, met een bartender naast je. Twee cocktails maak je zelf: shaken, proeven, bijstellen tot het klopt. Daarna drink je ze op.
+          Je zit aan tafel met alle spullen voor je. Twee cocktails ga je maken: shaken, proeven, bijstellen tot het klopt. Daarna drink je ze op.
         </p>
         <p class="font-body text-prose text-base leading-[1.6] md:text-xl md:leading-[1.7] text-pretty">
           Vanaf vier personen, en er hoort eten bij: een hapjesplank naast je shaker, of een streetfood plateau als je er langer voor gaat zitten. Wij zorgen voor de rest.
@@ -597,7 +599,7 @@
         Wij komen naar jou toe. Onze bartender neemt shakers, ijs, glaswerk en verse ingrediënten mee, en bouwt een bar op waar jij wilt: thuis, op kantoor of in een zaal.
       </p>
       <p class="font-body text-base sm:text-lg max-w-md leading-relaxed text-pretty mb-2" style="color:rgba(255,255,255,0.78);">
-        Je maakt twee cocktails onder begeleiding, shots inbegrepen. Drinkt er iemand niet? Die maakt dezelfde cocktails alcoholvrij.
+        Je maakt twee cocktails onder begeleiding. Drinkt er iemand niet? Die maakt dezelfde cocktails alcoholvrij.
       </p>
       <!-- Wijst naar /workshops/; die pagina moet nog gebouwd worden. -->
       <a href="/workshops/" class="btn-primary pointer-events-auto rounded-md px-8 py-4 text-base sm:text-lg font-body no-underline mt-1 w-full sm:w-auto text-center">Meer over workshops op locatie</a>
@@ -621,23 +623,23 @@
         <div id="oh-hours" class="flex flex-col gap-0">
           <div class="flex justify-between items-center py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.07);">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Dinsdag</span>
-            <span class="font-body text-base text-white">16:00 – sluit</span>
+            <span class="font-body text-base text-white">16:00 – 23:00</span>
           </div>
           <div class="flex justify-between items-center py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.07);">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Woensdag</span>
-            <span class="font-body text-base text-white">16:00 – sluit</span>
+            <span class="font-body text-base text-white">16:00 – 00:00</span>
           </div>
           <div class="flex justify-between items-center py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.07);">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Donderdag</span>
-            <span class="font-body text-base text-white">15:00 – sluit</span>
+            <span class="font-body text-base text-white">15:00 – 01:00</span>
           </div>
           <div class="flex justify-between items-center py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.07);">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Vrijdag</span>
-            <span class="font-body text-base text-white">14:00 – sluit</span>
+            <span class="font-body text-base text-white">14:00 – 02:00</span>
           </div>
           <div class="flex justify-between items-center py-2.5" style="border-bottom:1px solid rgba(255,255,255,0.07);">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Zaterdag</span>
-            <span class="font-body text-base text-white">13:00 – sluit</span>
+            <span class="font-body text-base text-white">14:00 – 02:00</span>
           </div>
           <div class="flex justify-between items-center py-2.5">
             <span class="font-body text-base" style="color:rgba(255,255,255,0.78);">Zondag &amp; Maandag</span>
@@ -702,10 +704,10 @@
     <div class="flex flex-col gap-4">
       <h3 class="font-heading text-lg text-white">Openingstijden</h3>
       <div id="oh-hours-footer" class="flex flex-col gap-1.5">
-        <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Di – Wo</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">16:00</span></div>
-        <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Donderdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">15:00</span></div>
-        <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Vrijdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">14:00</span></div>
-        <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Zaterdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">13:00</span></div>
+        <div class="flex justify-between gap-3"><span class="font-body text-base" style="color:#8A7A6A;">Dinsdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">16:00 – 23:00</span></div>
+        <div class="flex justify-between gap-3"><span class="font-body text-base" style="color:#8A7A6A;">Woensdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">16:00 – 00:00</span></div>
+        <div class="flex justify-between gap-3"><span class="font-body text-base" style="color:#8A7A6A;">Donderdag</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">15:00 – 01:00</span></div>
+        <div class="flex justify-between gap-3"><span class="font-body text-base" style="color:#8A7A6A;">Vr – Za</span><span class="font-body text-base" style="color:rgba(255,255,255,0.78);">14:00 – 02:00</span></div>
         <div class="flex justify-between"><span class="font-body text-base" style="color:#8A7A6A;">Zo – Ma</span><span class="font-body text-base" style="color:#8A7A6A;">Gesloten</span></div>
       </div>
       <a href="mailto:Theqingzakelijk@gmail.com" class="font-body text-base no-underline transition-colors hover:text-gold-light mt-1" style="color:#C8922A;">Theqingzakelijk@gmail.com</a>
@@ -816,7 +818,7 @@
       const wd = ORDER[i];
       const r = byDay[wd];
       if (r.is_available) {
-        rows.push({ label: FULL[wd], open: true, value: `${hhmm(r.start_time)} – sluit` });
+        rows.push({ label: FULL[wd], open: true, value: `${hhmm(r.start_time)} – ${hhmm(r.end_time)}` });
         i++;
       } else {
         const run = [];
@@ -845,23 +847,23 @@
     let i = 0;
     while (i < ORDER.length) {
       const r = byDay[ORDER[i]];
-      const key = r.is_available ? `o${hhmm(r.start_time)}` : 'c';
+      const key = r.is_available ? `o${hhmm(r.start_time)}-${hhmm(r.end_time)}` : 'c';
       const run = [ORDER[i]];
       i++;
       while (i < ORDER.length) {
         const nr = byDay[ORDER[i]];
-        const nkey = nr.is_available ? `o${hhmm(nr.start_time)}` : 'c';
+        const nkey = nr.is_available ? `o${hhmm(nr.start_time)}-${hhmm(nr.end_time)}` : 'c';
         if (nkey !== key) break;
         run.push(ORDER[i]);
         i++;
       }
-      groups.push({ run, open: r.is_available, value: hhmm(r.start_time) });
+      groups.push({ run, open: r.is_available, value: `${hhmm(r.start_time)} – ${hhmm(r.end_time)}` });
     }
     const html = groups.map((g) => {
       const val = g.open
         ? `<span class="font-body text-base" style="color:rgba(255,255,255,0.78);">${esc(g.value)}</span>`
         : `<span class="font-body text-base" style="color:${MUTED};">Gesloten</span>`;
-      return `<div class="flex justify-between"><span class="font-body text-base" style="color:${MUTED};">${esc(footerLabel(g.run))}</span>${val}</div>`;
+      return `<div class="flex justify-between gap-3"><span class="font-body text-base" style="color:${MUTED};">${esc(footerLabel(g.run))}</span>${val}</div>`;
     }).join('');
     const el = document.getElementById('oh-hours-footer');
     if (el) el.innerHTML = html;

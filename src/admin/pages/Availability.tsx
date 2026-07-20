@@ -58,7 +58,7 @@ function AvailabilityScreen() {
   return (
     <AdminLayout title="Openingstijden">
       <p className="mb-6 max-w-2xl text-base text-muted">
-        Zet dagen open of gesloten en stel per open dag de starttijd in. Wijzigingen zijn direct
+        Zet dagen open of gesloten en stel per open dag de start- en eindtijd in. Wijzigingen zijn direct
         zichtbaar op de website.
       </p>
 
