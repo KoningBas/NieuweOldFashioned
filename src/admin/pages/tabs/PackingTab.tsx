@@ -8,7 +8,7 @@ import { useRowSaver } from '../../lib/saveState';
 import { useUndoable } from '../../lib/undo';
 import { IconPlus, IconTrash } from '../../components/icons';
 import {
-  buildPackingItems, CATEGORY_LABELS, CATEGORY_ORDER,
+  buildPackingItems, CATEGORY_LABELS, CATEGORY_ORDER, formatAmount, formatQuantity,
   PERISHABILITY_LABELS, PERISHABILITY_ORDER,
 } from '../../../shared/lib/packing';
 import type {
@@ -26,7 +26,8 @@ export function PackingTab({ request }: Props) {
   const [list, setList] = useState<PackingList | null>(null);
   const [items, setItems] = useState<PackingListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [unavailable, setUnavailable] = useState(false);
+  /** Which migration is missing, when the tables are not there yet. */
+  const [unavailable, setUnavailable] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('categorie');
   const [busy, setBusy] = useState(false);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
@@ -46,6 +47,7 @@ export function PackingTab({ request }: Props) {
       if (!item) return null;
       const { error } = await supabase.from('packing_list_items').update({
         name: item.name, quantity: item.quantity, unit: item.unit,
+        base_amount: item.base_amount, base_unit: item.base_unit,
         category: item.category, perishability: item.perishability,
       }).eq('id', id);
       return error ? `Regel opslaan mislukt: ${error.message}` : null;
@@ -60,7 +62,7 @@ export function PackingTab({ request }: Props) {
         supabase.from('request_cocktails').select('planned_count, cocktail_menu(name)').eq('request_id', request.id),
       ]);
       if (!alive) return;
-      if (listRes.error) { setUnavailable(true); setLoading(false); return; }
+      if (listRes.error) { setUnavailable('0005_packing.sql'); setLoading(false); return; }
 
       // PostgREST types an embedded row as an array; one cocktail per row here.
       setChosenSummary(
@@ -143,7 +145,14 @@ export function PackingTab({ request }: Props) {
       await logActivity(request.id, 'system', `Paklijst gegenereerd (${drafts.length} regels)`);
     } catch (e) {
       console.error('Failed to generate packing list', e);
-      setUnavailable(true);
+      // PostgREST reports an unknown column by name; that is the one failure
+      // here with a fix the user can actually carry out.
+      // Supabase throws a plain PostgrestError, not an Error instance.
+      const message = typeof e === 'object' && e !== null && 'message' in e
+        ? String((e as { message: unknown }).message) : String(e);
+      setUnavailable(message.includes('base_amount') || message.includes('base_unit')
+        ? '0010_packing_base_amount.sql'
+        : '0005_packing.sql');
     } finally {
       setBusy(false);
     }
@@ -171,7 +180,12 @@ export function PackingTab({ request }: Props) {
   }
 
   function patchItem(id: string, patch: Partial<PackingListItem>) {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+    // Correcting the count by hand breaks the tie with the recipe total, so the
+    // bracketed amount goes rather than sit there quietly lying.
+    const breaksDerivation = 'quantity' in patch || 'unit' in patch;
+    setItems((prev) => prev.map((i) => (
+      i.id === id ? { ...i, ...patch, ...(breaksDerivation ? { base_amount: null, base_unit: null } : null) } : i
+    )));
     saver.touch(id);
   }
 
@@ -198,7 +212,7 @@ export function PackingTab({ request }: Props) {
   if (unavailable) {
     return (
       <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-        Paklijsten niet beschikbaar. Voer migratie <code className="font-mono">0005_packing.sql</code> uit in de Supabase SQL-editor.
+        Paklijsten niet beschikbaar. Voer migratie <code className="font-mono">{unavailable}</code> uit in de Supabase SQL-editor.
       </p>
     );
   }
@@ -343,7 +357,7 @@ export function PackingTab({ request }: Props) {
                   onClick={() => toggleItem(item)}
                   role="checkbox"
                   aria-checked={item.is_checked}
-                  aria-label={`${item.name || 'Naamloos artikel'}, ${item.quantity} ${item.unit}`}
+                  aria-label={`${item.name || 'Naamloos artikel'}, ${formatQuantity(item)}`}
                   className="flex min-h-[3.5rem] min-w-0 flex-1 items-center gap-3.5 px-4 text-left transition-colors duration-150 hover:bg-white/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold-light"
                 >
                   <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors duration-150 ${
@@ -356,8 +370,14 @@ export function PackingTab({ request }: Props) {
                   <span className={`min-w-0 flex-1 truncate text-[0.9375rem] transition-colors duration-150 ${item.is_checked ? 'text-muted line-through' : 'text-white'}`}>
                     {item.name || <em className="text-muted">naamloos</em>}
                   </span>
-                  <span className={`shrink-0 text-[0.9375rem] ${item.is_checked ? 'text-muted' : 'text-white/85'}`}>
-                    {item.quantity} {item.unit}
+                  {/* On a phone the poured total drops to its own line: the
+                      product name is what you read first next to the van, and
+                      it must not be truncated to make room for the brackets. */}
+                  <span className={`shrink-0 text-right text-[0.9375rem] tabular-nums ${item.is_checked ? 'text-muted' : 'text-white/85'}`}>
+                    {formatAmount(item.quantity)} {item.unit}
+                    {item.base_amount !== null && item.base_unit && (
+                      <span className={`block sm:inline ${item.is_checked ? '' : 'text-muted'}`}> ({formatAmount(item.base_amount)} {item.base_unit})</span>
+                    )}
                   </span>
                 </button>
                 <details className="relative shrink-0">

@@ -1,3 +1,6 @@
+import { SocialLinks } from '../../shared/components/SocialLinks';
+import { ADRES, EMAIL, TELEFOON, TELEFOON_WEERGAVE, mailtoHref } from '../../shared/lib/contact';
+
 export function Footer() {
   return (
     <footer className="w-full border-t border-white/8 bg-surface">
@@ -7,24 +10,9 @@ export function Footer() {
         <div className="flex flex-col gap-5">
           <span className="font-heading text-2xl text-white tracking-[-0.01em]">The Old Fashioned</span>
           <p className="font-body text-base leading-relaxed text-prose">
-            Premium cocktailbar in het centrum van Rijssen.<br />Grotestraat 12, 7461 KG Rijssen.
+            Premium cocktailbar in het centrum van Rijssen.<br />{ADRES.straat}, {ADRES.postcode} {ADRES.plaats}.
           </p>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://www.instagram.com/theoldfashioned.rijssen/"
-              className="text-white transition-colors hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-2 rounded"
-              aria-label="Instagram"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
-            </a>
-            <a
-              href="https://www.facebook.com/theoldfashioned.rijssen/"
-              className="text-white transition-colors hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-2 rounded"
-              aria-label="Facebook"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" /></svg>
-            </a>
-          </div>
+          <SocialLinks />
         </div>
 
         {/* Col 2: Navigatie */}
@@ -43,16 +31,22 @@ export function Footer() {
         <div className="flex flex-col gap-4">
           <h3 className="font-heading text-lg text-white">Contact</h3>
           <a
-            href="mailto:Theqingzakelijk@gmail.com"
+            href={mailtoHref()}
             className="font-body text-base no-underline text-gold transition-colors hover:text-gold-light"
           >
-            Theqingzakelijk@gmail.com
+            {EMAIL}
+          </a>
+          <a
+            href={`tel:${TELEFOON}`}
+            className="font-body text-base no-underline text-gold transition-colors hover:text-gold-light"
+          >
+            {TELEFOON_WEERGAVE}
           </a>
           <p className="font-body text-lg leading-relaxed text-prose">
             Vraag vrijblijvend een offerte aan &mdash; we reageren doorgaans binnen 24 uur.
           </p>
           <p className="font-body text-lg leading-relaxed text-prose">
-            Volg ons op Instagram &amp; Facebook voor sfeerbeelden en updates.
+            Volg ons op Instagram, Facebook &amp; TikTok voor sfeerbeelden en updates.
           </p>
         </div>
 

@@ -3,11 +3,12 @@ import type { AvailabilityContext, ConfirmedRequestLike } from '../../shared/lib
 import type { NewQuoteRequest } from '../../shared/lib/data';
 import { isDateSelectable } from '../../shared/lib/availability';
 import { formatDateLongNL, parseDateOnly } from '../../shared/lib/format';
+import { EMAIL } from '../../shared/lib/contact';
 
 export type Waar = 'bar' | 'locatie';
 export type Arrangement = 'Bites' | 'Streetfood';
 
-export const RESERVERING_EMAIL = 'Theqingzakelijk@gmail.com';
+export const RESERVERING_EMAIL = EMAIL;
 
 /** The FAQ promises guests can book up to three days ahead. A shorter
  *  booking_notice_hours in the admin panel must never undercut that promise,

@@ -4,7 +4,7 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 execFileSync(process.execPath, [path.join(root, 'scripts/check-env.mjs')], {
   cwd: root,

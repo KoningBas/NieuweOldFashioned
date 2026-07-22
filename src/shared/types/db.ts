@@ -179,6 +179,9 @@ export interface PackingListItem {
   perishability: Perishability;
   quantity: number;
   unit: string;
+  /** Recipe total behind a packed quantity — see DraftItem in lib/packing.ts. */
+  base_amount: number | null;
+  base_unit: string | null;
   is_checked: boolean;
   origin: PackingItemOrigin;
   sort_order: number;

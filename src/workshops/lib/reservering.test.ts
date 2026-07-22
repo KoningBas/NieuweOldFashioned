@@ -3,6 +3,7 @@ import type { Availability } from '../../shared/types/db';
 import type { AvailabilityContext } from '../../shared/lib/availability';
 import {
   LEGE_RESERVERING,
+  RESERVERING_EMAIL,
   barTijdvenster,
   bouwBericht,
   bouwMailtoHref,
@@ -313,7 +314,7 @@ describe('mailto', () => {
 
   it('builds a mailto href that survives special characters', () => {
     const href = bouwMailtoHref(form({ bericht: 'Vraag: mag het & zonder alcohol?' }));
-    expect(href.startsWith('mailto:Theqingzakelijk@gmail.com?subject=')).toBe(true);
+    expect(href.startsWith(`mailto:${RESERVERING_EMAIL}?subject=`)).toBe(true);
     // A raw '&' would end the body parameter and silently truncate the mail.
     expect(href).toContain('%26');
     expect(href).not.toMatch(/body=[^&]*&(?!$)/);

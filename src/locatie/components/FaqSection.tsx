@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EMAIL, mailtoHref } from '../../shared/lib/contact';
 
 const FAQS = [
   {
@@ -113,10 +114,10 @@ export function FaqSection() {
         <p className="mt-8 md:mt-10 text-center text-prose text-base md:text-lg leading-[1.7]">
           Staat je vraag er niet bij? Mail{' '}
           <a
-            href="mailto:Theqingzakelijk@gmail.com"
+            href={mailtoHref()}
             className="rounded text-gold-light underline underline-offset-4 decoration-gold/40 transition-colors duration-200 hover:text-white hover:decoration-white/60 active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2 motion-reduce:transition-none"
           >
-            Theqingzakelijk@gmail.com
+            {EMAIL}
           </a>
           . We reageren doorgaans binnen 24 uur.
         </p>

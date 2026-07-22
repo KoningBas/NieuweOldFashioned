@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { aggregateIngredients, buildPackingItems, scaleTemplateItem } from './packing';
+import {
+  aggregateIngredients, buildPackingItems, formatQuantity, ORDER_CATEGORY_ORDER, scaleTemplateItem,
+} from './packing';
 import type { CocktailIngredient } from '../types/db';
 
 const templateItem = (over: Partial<Parameters<typeof scaleTemplateItem>[0]> = {}) => ({
@@ -37,6 +39,20 @@ describe('aggregateIngredients', () => {
     expect(items).toHaveLength(1);
     expect(items[0].quantity).toBe(9);
     expect(items[0].unit).toBe('fles');
+  });
+
+  it('keeps the poured total behind the pack count', () => {
+    const items = aggregateIngredients([{ cocktail_id: 'c1', planned_count: 200 }], [ingredient()]);
+    // 9 flessen is 6.300 ml ingekocht; de recepten schenken er 6.000 uit.
+    expect(items[0].base_amount).toBe(6000);
+    expect(items[0].base_unit).toBe('ml');
+  });
+
+  it('leaves the bracket empty when quantity already is the amount', () => {
+    const munt = ingredient({ name: 'Munt', amount: 8, unit: 'g', pack_size: null, pack_unit: null });
+    const items = aggregateIngredients([{ cocktail_id: 'c1', planned_count: 40 }], [munt]);
+    expect(items[0].base_amount).toBeNull();
+    expect(items[0].base_unit).toBeNull();
   });
 
   it('merges the same ingredient across cocktails before packing', () => {
@@ -85,5 +101,37 @@ describe('buildPackingItems', () => {
     const zak = ingredient({ name: 'IJsblokjes', amount: 0.2, unit: 'g', pack_size: null, pack_unit: null, category: 'ijs' });
     const items = buildPackingItems(template, [{ cocktail_id: 'c1', planned_count: 100 }], [zak], 80, 100);
     expect(items).toHaveLength(2);
+  });
+
+  it('carries the poured total through a merge with a template line', () => {
+    const template = [templateItem({ name: 'Koffielikeur', category: 'sterke_drank' as const, unit: 'fles', scale_basis: 'fixed' as const, scale_factor: 1 })];
+    const items = buildPackingItems(template, [{ cocktail_id: 'c1', planned_count: 200 }], [ingredient()], 80, 200);
+    expect(items).toHaveLength(1);
+    expect(items[0].quantity).toBe(10); // 1 uit het sjabloon + 9 uit de cocktails
+    expect(items[0].base_amount).toBe(6000); // het sjabloon draagt geen ml bij
+  });
+
+  it('gives template lines no bracketed amount', () => {
+    const items = buildPackingItems([templateItem()], [], [], 80, 200);
+    expect(items[0].base_amount).toBeNull();
+  });
+});
+
+describe('formatQuantity', () => {
+  it('puts the poured total in brackets behind the packs', () => {
+    expect(formatQuantity({ quantity: 9, unit: 'fles', base_amount: 6000, base_unit: 'ml' }))
+      .toBe('9 fles (6.000 ml)');
+  });
+
+  it('says one number when there is one number', () => {
+    expect(formatQuantity({ quantity: 25, unit: 'st', base_amount: null, base_unit: null }))
+      .toBe('25 st');
+  });
+});
+
+describe('ORDER_CATEGORY_ORDER', () => {
+  it('leaves glassware off the shopping list — it rides along in the van', () => {
+    expect(ORDER_CATEGORY_ORDER).not.toContain('glaswerk');
+    expect(ORDER_CATEGORY_ORDER).toContain('sterke_drank');
   });
 });

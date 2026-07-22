@@ -10,7 +10,11 @@ import { CocktailsTab } from './tabs/CocktailsTab';
 import { PackingTab } from './tabs/PackingTab';
 import { InvoiceTab } from './tabs/InvoiceTab';
 import { SaveBar } from '../components/SaveBar';
+import { UndoToast } from '../components/UndoToast';
+import { DeleteRequestButton } from '../components/DeleteRequestButton';
 import { SaveStatusProvider, useAutosave } from '../lib/saveState';
+import { useUndoable } from '../lib/undo';
+import { restoreRequest, UNDO_WINDOW_MS, type RequestSnapshot } from '../lib/requestDeletion';
 import { formatDateLongNL, formatEuro } from '../../shared/lib/format';
 import { normalizeStatus } from '../../shared/lib/workflow';
 import { IconMail, IconMapPin, IconPhone, IconUsers } from '../components/icons';
@@ -44,6 +48,9 @@ function RequestDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   const [notes, setNotes] = useState('');
+  const [deleted, setDeleted] = useState(false);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
+  const undo = useUndoable(UNDO_WINDOW_MS);
 
   const { reset: resetNotes } = useAutosave({
     key: 'notitie',
@@ -96,6 +103,37 @@ function RequestDetailScreen() {
         <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center text-muted">
           Deze aanvraag bestaat niet (meer). <Link to="/aanvragen" className="text-gold-light underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light rounded">Terug naar de lijst</Link>.
         </div>
+      </AdminLayout>
+    );
+  }
+
+  async function undoDelete(snapshot: RequestSnapshot) {
+    const message = await restoreRequest(snapshot);
+    if (message) { setRestoreError(message); return; }
+    setDeleted(false);
+    setReloadKey((k) => k + 1);
+  }
+
+  // The page stays put after deleting rather than bouncing to the list, so the
+  // undo stays where you were looking when you pressed the button.
+  if (deleted) {
+    return (
+      <AdminLayout title="Aanvraag verwijderd" back={{ to: '/aanvragen', label: 'Aanvragen' }}>
+        <div className="rounded-xl border border-white/5 bg-surface-elevated p-10 text-center">
+          <p className="text-[0.9375rem] text-white/85">
+            {request.full_name} is uit de database gehaald.
+          </p>
+          {restoreError && (
+            <p role="alert" className="mx-auto mt-3 max-w-prose text-sm text-danger">{restoreError}</p>
+          )}
+          <Link
+            to="/aanvragen"
+            className="mt-6 inline-flex h-11 items-center rounded-lg border border-white/15 px-5 text-[0.9375rem] text-white/85 transition-colors duration-200 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-light focus-visible:outline-offset-2"
+          >
+            Terug naar aanvragen
+          </Link>
+        </div>
+        <UndoToast pending={undo.pending} onUndo={() => { void undo.run(); }} onDismiss={undo.dismiss} />
       </AdminLayout>
     );
   }
@@ -193,6 +231,23 @@ function RequestDetailScreen() {
       {tab === 'paklijst' && <PackingTab request={request} />}
       {tab === 'factuur' && invoiceReady && <InvoiceTab request={request} onLogged={() => setReloadKey((k) => k + 1)} onStatusChanged={(s) => setRequest({ ...request, status: s })} />}
 
+      {/* Set apart, below everything, past the fold: nothing you reach for by
+          accident on the way to something else. */}
+      <section aria-label="Aanvraag verwijderen" className="mt-12 flex flex-col items-start gap-x-6 gap-y-4 border-t border-white/5 pt-6 sm:flex-row sm:items-center">
+        <p className="min-w-0 text-sm leading-relaxed text-muted sm:flex-1">
+          Verwijdert deze aanvraag met alles wat eronder hangt — offertes, cocktailkeuze, paklijst en tijdlijn.
+        </p>
+        <DeleteRequestButton
+          request={request}
+          onDeleted={(snapshot) => {
+            setRestoreError(null);
+            setDeleted(true);
+            undo.offer(`${snapshot.request.full_name} verwijderd`, () => undoDelete(snapshot));
+          }}
+        />
+      </section>
+
+      <UndoToast pending={undo.pending} onUndo={() => { void undo.run(); }} onDismiss={undo.dismiss} />
       <SaveBar />
     </AdminLayout>
   );

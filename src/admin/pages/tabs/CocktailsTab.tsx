@@ -7,7 +7,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../../shared/lib/supabase';
 import { SkeletonBlock } from '../../components/Skeleton';
 import { useAutosave } from '../../lib/saveState';
-import { aggregateIngredients, CATEGORY_LABELS, CATEGORY_ORDER } from '../../../shared/lib/packing';
+import {
+  aggregateIngredients, CATEGORY_LABELS, formatAmount, ORDER_CATEGORY_ORDER,
+} from '../../../shared/lib/packing';
 import type {
   CocktailIngredient, CocktailMenuItem, PackingCategory, QuoteRequest,
 } from '../../../shared/types/db';
@@ -88,9 +90,14 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
   const plannedTotal = chosen.reduce((sum, c) => sum + c.planned_count, 0);
   const difference = plannedTotal - request.cocktail_count;
 
-  const shopping = useMemo(() => aggregateIngredients(chosen, ingredients), [chosen, ingredients]);
+  // Glaswerk drops out here: it rides along in the van from the base kit, so it
+  // belongs on the packing list but never on a shopping list.
+  const shopping = useMemo(
+    () => aggregateIngredients(chosen, ingredients).filter((row) => row.category !== 'glaswerk'),
+    [chosen, ingredients],
+  );
   const shoppingGroups = useMemo(
-    () => CATEGORY_ORDER
+    () => ORDER_CATEGORY_ORDER
       .map((category) => ({ category, rows: shopping.filter((s) => s.category === category) }))
       .filter((g) => g.rows.length > 0),
     [shopping],
@@ -183,7 +190,7 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
         <h2 id="cocktail-inkoop" className="text-lg font-medium text-white">Wat je hiervoor inkoopt</h2>
         <p className="mb-5 mt-1 max-w-prose text-sm leading-relaxed text-muted">
           Alleen de ingrediënten. Bar, glaswerk en materiaal komen uit de basisuitrusting en het pakketsjabloon
-          en staan straks in de paklijst.
+          en staan straks in de paklijst. Tussen haakjes staat wat de recepten er werkelijk uit schenken.
         </p>
 
         {shopping.length === 0 ? (
@@ -203,7 +210,13 @@ export function CocktailsTab({ request, onCocktailsChanged }: Props) {
                   {group.rows.map((row) => (
                     <li key={`${row.name}-${row.unit}`} className="flex items-baseline justify-between gap-4 py-2">
                       <span className="min-w-0 flex-1 truncate text-[0.9375rem] text-white/85">{row.name}</span>
-                      <span className="shrink-0 text-[0.9375rem] tabular-nums text-white">{row.quantity} {row.unit}</span>
+                      <span className="shrink-0 text-right text-[0.9375rem] tabular-nums text-white">
+                        {formatAmount(row.quantity)} {row.unit}
+                        {/* Own line on a phone so the ingredient name keeps its width. */}
+                        {row.base_amount !== null && row.base_unit && (
+                          <span className="block text-muted sm:inline"> ({formatAmount(row.base_amount)} {row.base_unit})</span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>

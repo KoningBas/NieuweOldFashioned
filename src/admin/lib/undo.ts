@@ -12,7 +12,9 @@ export interface Undoable {
 
 const WINDOW_MS = 6000;
 
-export function useUndoable() {
+/** @param windowMs how long the toast stays up. Longer for deletions that took
+ *  a confirmation to make — you want time to read what you just did. */
+export function useUndoable(windowMs: number = WINDOW_MS) {
   const [pending, setPending] = useState<Undoable | null>(null);
   const timer = useRef<number | null>(null);
 
@@ -23,8 +25,8 @@ export function useUndoable() {
   const offer = useCallback((label: string, undo: Undoable['undo']) => {
     stop();
     setPending({ label, undo });
-    timer.current = window.setTimeout(() => { setPending(null); timer.current = null; }, WINDOW_MS);
-  }, [stop]);
+    timer.current = window.setTimeout(() => { setPending(null); timer.current = null; }, windowMs);
+  }, [stop, windowMs]);
 
   const run = useCallback(async () => {
     stop();
